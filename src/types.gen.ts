@@ -194,16 +194,6 @@ export type BuildArtifactImage = {
     artifactRef?: string;
 };
 
-export type Calculation = {
-    op?: 'CALCULATION_OP_UNSPECIFIED' | 'CALCULATION_OP_COUNT' | 'CALCULATION_OP_SUM' | 'CALCULATION_OP_AVG' | 'CALCULATION_OP_MIN' | 'CALCULATION_OP_MAX' | 'CALCULATION_OP_P50' | 'CALCULATION_OP_P95' | 'CALCULATION_OP_P99';
-    /**
-     * The column to aggregate. Required for every op except COUNT. A name starting with `$.` is a JSON
-     * path into the event's `attributes_json` (e.g. `$.gen_ai.usage.cost`); the extracted value is
-     * textual, so only COUNT/MIN/MAX apply to it (an arithmetic op over an extracted field is rejected).
-     */
-    column?: string;
-};
-
 export type Capability = {
     key?: string;
     support?: string;
@@ -482,19 +472,6 @@ export type FileToArtifactResponse = {
     operation?: Operation;
 };
 
-export type Filter = {
-    /**
-     * A column name, or a `$.`-prefixed JSON path into `attributes_json` (e.g.
-     * `$.gen_ai.request.temperature`). Extracted JSON values are textual: EQ/NE/CONTAINS/EXISTS apply.
-     */
-    column?: string;
-    op?: 'FILTER_OP_UNSPECIFIED' | 'FILTER_OP_EQ' | 'FILTER_OP_NE' | 'FILTER_OP_GT' | 'FILTER_OP_GTE' | 'FILTER_OP_LT' | 'FILTER_OP_LTE' | 'FILTER_OP_CONTAINS' | 'FILTER_OP_EXISTS';
-    /**
-     * The comparison value; omitted for EXISTS.
-     */
-    value?: AttributeValue;
-};
-
 export type Fork = {
     id?: string;
     tenantId?: string;
@@ -771,15 +748,6 @@ export type Operation = {
     errorJson?: string;
 };
 
-export type Order = {
-    /**
-     * A column name, a `$.`-prefixed JSON path into `attributes_json`, or a calculation alias (for an
-     * aggregate query).
-     */
-    column?: string;
-    descending?: boolean;
-};
-
 /**
  * A project record (the subset the API returns).
  */
@@ -853,49 +821,8 @@ export type PutSavedViewRequest = {
     sql?: string;
 };
 
-export type QueryRequest = {
-    spec?: QuerySpec;
-};
-
 export type QueryResponse = {
     rows?: Array<Row>;
-};
-
-/**
- * A structured, server-validated query. The set of addressable columns is fixed by the canonical
- * event schema; unknown columns are rejected.
- */
-export type QuerySpec = {
-    /**
-     * The run (session) to query. Optional: present scopes the query to that run; absent (empty) makes
-     * the query tenant-scoped across every run — the forced tenant predicate is unchanged either way,
-     * so tenant isolation always holds. A saved/reusable data view that spans runs leaves this empty.
-     */
-    runId?: string;
-    /**
-     * Subtree anchor: the fork-node path to scope to. Empty means the whole run.
-     */
-    forkPath?: string;
-    /**
-     * Aggregations to compute. Empty means return matching rows (subject to `limit`).
-     */
-    calculations?: Array<Calculation>;
-    /**
-     * Group-by columns for the calculations. Each is a column name or a `$.`-prefixed JSON path into
-     * `attributes_json` (e.g. `$.gen_ai.request.temperature`), so a breakdown can target an arbitrary
-     * SDK-emitted attribute, not just a promoted column.
-     */
-    breakdowns?: Array<string>;
-    /**
-     * Conjunctive (AND-ed) typed predicates.
-     */
-    filters?: Array<Filter>;
-    timeRange?: TimeRange;
-    orders?: Array<Order>;
-    /**
-     * Row cap; clamped server-side to a maximum.
-     */
-    limit?: number;
 };
 
 export type RegisterAnnotationSchemaRequest = {
@@ -1067,8 +994,8 @@ export type RotateSandboxSecretResponse = {
 };
 
 /**
- * One result row: column name -> typed value. For aggregations the columns are the breakdown
- * columns plus one per calculation (e.g. "p95_cost_usd").
+ * One result row: column name -> typed value. For aggregate surfaces (rollup) the columns are the
+ * grouping columns plus one per aggregate metric (e.g. "p95_cost_usd"). Reused by the view service.
  */
 export type Row = {
     columns?: {
@@ -1296,14 +1223,6 @@ export type StartExecutionResponse = {
      * with StreamExecution, drive it with SendExecutionInput, and stop it with KillExecution.
      */
     execution?: Execution;
-};
-
-/**
- * Inclusive wall-clock window in nanoseconds (matches CanonicalEvent.ts_wall_ns).
- */
-export type TimeRange = {
-    startNs?: string;
-    endNs?: string;
 };
 
 export type UpdateProjectRequest = {
@@ -2316,22 +2235,6 @@ export type TelemetryViewServiceRunDataViewResponses = {
 };
 
 export type TelemetryViewServiceRunDataViewResponse = TelemetryViewServiceRunDataViewResponses[keyof TelemetryViewServiceRunDataViewResponses];
-
-export type TelemetryQueryServiceQueryData = {
-    body: QueryRequest;
-    path?: never;
-    query?: never;
-    url: '/v1/telemetry/query';
-};
-
-export type TelemetryQueryServiceQueryResponses = {
-    /**
-     * OK
-     */
-    200: QueryResponse;
-};
-
-export type TelemetryQueryServiceQueryResponse = TelemetryQueryServiceQueryResponses[keyof TelemetryQueryServiceQueryResponses];
 
 export type TelemetryQueryServiceRollupData = {
     body: RollupRequest;

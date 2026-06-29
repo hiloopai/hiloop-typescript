@@ -1,0 +1,17 @@
+{
+  "name": "@hiloopai/sdk",
+  "version": "0.1.0",
+  "description": "Generated TypeScript client for the hiloop API. Generated, not hand-written.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hiloopai/hiloop-typescript.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@hiloopai/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official TypeScript client for the hiloop API. Generated from the hiloop OpenAPI contract.",
   "license": "Apache-2.0",
   "type": "module",

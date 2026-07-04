@@ -30,21 +30,18 @@ export type AnnotateRangeRequest = {
      */
     payloadJson?: string;
     /**
-     * The fork-node path the annotation is anchored at. Empty means the run root.
+     * The run lineage path the annotation is anchored at. Empty means the tree root.
      */
-    forkPath?: string;
-    /**
-     * Who produced the annotation (e.g. "human", "llm"); stamped as the reserved annotator-kind key.
-     */
-    annotatorKind?: string;
+    lineagePath?: string;
 };
 
 /**
- * A point annotation about a single target event.
+ * One annotation: run-scoped (optionally targeting a single event within the run) or
+ * project-scoped (no run — durable cross-run knowledge that outlives any sandbox).
  */
 export type AnnotateRequest = {
     /**
-     * The run (session) the annotation belongs to.
+     * The run (session) the annotation belongs to. Exactly one of `run_id` or `project_id` is set.
      */
     runId?: string;
     /**
@@ -52,7 +49,8 @@ export type AnnotateRequest = {
      */
     schemaName?: string;
     /**
-     * The `event_id` of the single event this annotation is about.
+     * The `event_id` of the single event this annotation is about. Only valid with `run_id`; empty
+     * annotates the run (or project) itself.
      */
     targetEventId?: string;
     /**
@@ -61,13 +59,15 @@ export type AnnotateRequest = {
      */
     payloadJson?: string;
     /**
-     * The fork-node path the annotation is anchored at. Empty means the run root.
+     * The run lineage path the annotation is anchored at. Empty means the tree root. Only valid with
+     * `run_id`.
      */
-    forkPath?: string;
+    lineagePath?: string;
     /**
-     * Who produced the annotation (e.g. "human", "llm"); stamped as the reserved annotator-kind key.
+     * The project a run-less annotation belongs to. Exactly one of `run_id` or `project_id` is set;
+     * a project-scoped annotation carries no run lineage and no target event.
      */
-    annotatorKind?: string;
+    projectId?: string;
 };
 
 export type AnnotateResponse = {
@@ -113,6 +113,11 @@ export type AnnotationSchema = {
      * When the config version was created (RFC 3339).
      */
     createdAt?: string;
+    /**
+     * The fields this schema promotes from the payload into typed columns, each with its server-assigned
+     * slot. Empty when the schema promotes nothing.
+     */
+    promotedFields?: Array<PromotedField>;
 };
 
 export type ArchiveAnnotationSchemaRequest = {
@@ -143,51 +148,39 @@ export type Artifact = {
     digest?: string;
 };
 
-/**
- * A typed scalar attribute value (mirrors the Event v1 narrow value model).
- */
-export type AttributeValue = {
-    stringValue?: string;
-    intValue?: string;
-    doubleValue?: number;
-    boolValue?: boolean;
-};
-
 export type BranchDiffRequest = {
     spec?: BranchDiffSpec;
 };
 
 export type BranchDiffResponse = {
     /**
-     * Events present under `path_a` but not under `path_b`, projected to the diff key columns.
+     * Events present in run A but not in run B, projected to the diff key columns (one flat JSON
+     * object per row, same canonical row encoding as QueryResponse).
      */
-    rows?: Array<Row>;
+    rows?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
- * A branch-diff (Q3): the events under subtree `path_a` that are absent under subtree `path_b`,
- * within one run. This is the differentiated tree-native query — two anchored `fork_path` prefix
- * scans, set-differenced on a semantic key (signal, name, attributes). The tenant is taken from
- * request identity, never from this body.
+ * A branch-diff (Q3): the events unique to run A that are absent from run B, across two runs sharing
+ * a tree. This is the differentiated tree-native query — each run's lineage subtree is resolved
+ * server-side and the two are set-differenced on a semantic key (signal, name, attributes). The
+ * tenant is taken from request identity, never from this body.
  */
 export type BranchDiffSpec = {
-    /**
-     * The run (session) both branches belong to. Required.
-     */
-    runId?: string;
-    /**
-     * The subtree whose unique events to return (the "A" branch). Required; anchored by `fork_path`
-     * prefix (the node plus its descendants).
-     */
-    pathA?: string;
-    /**
-     * The subtree to subtract (the "B" branch). Required.
-     */
-    pathB?: string;
     /**
      * Optional signal to restrict the diff to (e.g. "llm"); empty means all signals.
      */
     signal?: string;
+    /**
+     * The run whose unique events to return (the "A" branch). Required.
+     */
+    runIdA?: string;
+    /**
+     * The run to subtract (the "B" branch). Required.
+     */
+    runIdB?: string;
 };
 
 export type BuildArtifactImage = {
@@ -207,11 +200,6 @@ export type CapabilityRequirement = {
 };
 
 export type CaptureSpec = {
-    /**
-     * Compatibility capture toggle for existing clients. Omit this field, or omit the parent
-     * `capture` field, to use the default-enabled policy.
-     */
-    enabled?: boolean;
     /**
      * REST-safe capture policy. Use CAPTURE_POLICY_DISABLED to run the sandbox with no capture
      * instrumentation; omitted or CAPTURE_POLICY_UNSPECIFIED defaults to enabled.
@@ -268,6 +256,14 @@ export type CreateSandboxRequest = {
      * Secret bindings injected into matching outbound requests. Empty injects nothing.
      */
     secrets?: Array<SecretBinding>;
+    /**
+     * Runtime lease policy. Omitted uses the server default.
+     */
+    lifecycle?: LifecycleSpec;
+    /**
+     * User-assigned free-text description. Empty leaves the sandbox undescribed.
+     */
+    description?: string;
 };
 
 export type CreateSandboxResponse = {
@@ -290,7 +286,8 @@ export type CreateSandboxSecretRequest = {
      */
     value?: string;
     /**
-     * The outbound host to inject the value into (optional).
+     * The outbound host to inject the value into (optional). Must be a bare DNS hostname, e.g.
+     * `api.openai.com` — not a URL; stored in canonical lowercase form.
      */
     destHost?: string;
     /**
@@ -342,12 +339,11 @@ export type DataView = {
      */
     description?: string;
     /**
-     * The structured spec as opaque JSON — the engine's tagged `DataViewSpec` shape (a Query or Rollup
-     * view: scope + calculations + breakdowns + filters + orders + limit + opaque render config). Carried
-     * as a Struct so the spec schema lives in ONE place (the engine's serde types); the service never
-     * re-models it. Re-validated against the current column allowlist on store and on every run, so a
-     * view referencing a dropped column fails closed with INVALID_ARGUMENT rather than serving a stale
-     * result.
+     * The data-view spec as opaque JSON — the engine's tagged `DataViewSpec`: a raw `Sql` `SELECT`,
+     * plus opaque render config. Carried as a Struct so the spec schema lives
+     * in ONE place (the engine's serde types); the service never re-models it. Re-validated against the
+     * current column allowlist on store and on every run, so a view referencing a dropped column fails
+     * closed with INVALID_ARGUMENT rather than serving a stale result.
      */
     spec?: {
         [key: string]: unknown;
@@ -357,7 +353,7 @@ export type DataView = {
      */
     specVersion?: string;
     /**
-     * A seeded starter view (read-only; clone-on-edit per tenant). Customer-authored views are false.
+     * Always false: every stored view is customer-authored. Retained for wire compatibility.
      */
     isBuiltin?: boolean;
 };
@@ -366,12 +362,12 @@ export type DeleteDataViewResponse = {
     [key: string]: unknown;
 };
 
-export type DeleteSandboxResponse = {
-    operation?: Operation;
+export type DeleteProjectResponse = {
+    [key: string]: unknown;
 };
 
-export type DeleteSavedViewResponse = {
-    [key: string]: unknown;
+export type DeleteSandboxResponse = {
+    operation?: Operation;
 };
 
 export type DeleteSnapshotResponse = {
@@ -397,38 +393,6 @@ export type EgressPolicy = {
      * Destination IP ranges, in CIDR notation, the policy applies to.
      */
     cidrs?: Array<string>;
-};
-
-/**
- * Final disposition of an interactive execution.
- */
-export type ExecExit = {
-    /**
-     * Process exit code. Meaningful only when the process exited normally.
-     */
-    exitCode?: string;
-    /**
-     * Terminating signal number, or 0 when the process exited normally.
-     */
-    signal?: number;
-};
-
-/**
- * One framed event in an execution's combined output stream.
- */
-export type ExecOutputEvent = {
-    /**
-     * A chunk of standard output bytes.
-     */
-    stdoutChunk?: string;
-    /**
-     * A chunk of standard error bytes.
-     */
-    stderrChunk?: string;
-    /**
-     * The terminal exit event. No further events follow it.
-     */
-    exit?: ExecExit;
 };
 
 export type ExecuteSandboxRequest = {
@@ -476,49 +440,51 @@ export type Fork = {
     id?: string;
     tenantId?: string;
     sourceSandboxId?: string;
-    sourceSnapshotId?: string;
     childSandboxId?: string;
-    forkNodeId?: string;
     implementation?: string;
     effectiveSemanticsJson?: string;
     intermediateSnapshotId?: string;
     operationId?: string;
+    /**
+     * The child run this fork created.
+     */
+    childRunId?: string;
 };
 
-/**
- * A fork-tree node: one position in a run's fork lineage, shared with telemetry.
- */
-export type ForkNode = {
+export type ForkRunRequest = {
     /**
-     * The fork node id (a client-supplied ULID, shared with telemetry).
+     * The run to fork from. Required.
      */
-    id?: string;
+    parentRunId?: string;
     /**
-     * The run this fork node belongs to.
+     * The parent event id to fork at — the divergence point on the parent's timeline. Empty forks at
+     * the parent's current head.
      */
-    runId?: string;
+    branchEventId?: string;
     /**
-     * The gap-free fork path as a dotted ltree label (e.g. "1.2.1").
+     * The parent branch-point wall-clock time in nanoseconds that pairs with branch_event_id. Zero
+     * when forking at the head.
      */
-    forkPath?: string;
+    branchHlcWallNs?: string;
     /**
-     * The parent fork node id, empty for a root node.
+     * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns.
      */
-    parentForkNodeId?: string;
+    branchHlcLogical?: string;
     /**
-     * The fork node status: active or archived.
+     * An optional human-readable label for the child run.
      */
-    status?: string;
+    label?: string;
+};
+
+export type ForkRunResponse = {
     /**
-     * When the fork node was created (RFC 3339).
+     * The newly forked child run, with its lineage and branch point stamped.
      */
-    createdAt?: string;
+    run?: Run;
 };
 
 export type ForkSandboxRequest = {
     sourceSandboxId?: string;
-    parentForkNodeId?: string;
-    childForkNodeId?: string;
     projectId?: string;
     name?: string;
     image?: SandboxImage;
@@ -542,6 +508,33 @@ export type ForkSandboxRequest = {
      * Secret bindings for the child sandbox. Resolved per child; never inherited from the snapshot.
      */
     secrets?: Array<SecretBinding>;
+    /**
+     * The run being forked from. The fork mints a child run beneath it.
+     */
+    parentRunId?: string;
+    /**
+     * The parent event id the child forks at — the divergence point on the parent's timeline. Empty
+     * forks at the parent's current head.
+     */
+    branchEventId?: string;
+    /**
+     * The parent branch-point wall-clock time in nanoseconds that pairs with branch_event_id. Zero
+     * when forking at the head.
+     */
+    branchHlcWallNs?: string;
+    /**
+     * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns.
+     */
+    branchHlcLogical?: string;
+    /**
+     * An optional human-readable label for the child run the fork mints. When empty, the server
+     * assigns a friendly fallback name.
+     */
+    label?: string;
+    /**
+     * Runtime lease policy for the child sandbox. Omitted uses the server default.
+     */
+    lifecycle?: LifecycleSpec;
 };
 
 export type ForkSandboxResponse = {
@@ -582,17 +575,60 @@ export type GetProjectResponse = {
 
 export type GetRunResponse = {
     /**
-     * The requested run, including its live-fork-count roll-up.
+     * The requested run.
      */
     run?: Run;
 };
 
+export type GetRunTreeResponse = {
+    /**
+     * The runs on this page, ordered by lineage_path (so within a page each parent precedes its
+     * descendants; a follow-up page continues where the previous one left off).
+     */
+    runs?: Array<Run>;
+    /**
+     * The token to pass as page_token to fetch the next page. Empty when there are no more results.
+     */
+    nextPageToken?: string;
+};
+
 export type GetSandboxResponse = {
     sandbox?: Sandbox;
+    /**
+     * The describe-altitude detail for the sandbox.
+     */
+    describe?: SandboxDescribe;
+};
+
+export type GetServiceConfigResponse = {
+    /**
+     * Client-visible telemetry gRPC endpoint.
+     */
+    telemetryEndpoint?: string;
+    /**
+     * Client-visible sandbox-secret broker resolve URL.
+     */
+    secretBrokerUrl?: string;
+    /**
+     * API URL used to start the browser login flow.
+     */
+    loginUrl?: string;
+    /**
+     * Web console URL used to activate an RFC 8628 device-code login.
+     */
+    deviceActivationUrl?: string;
 };
 
 export type GetSnapshotResponse = {
     snapshot?: Snapshot;
+};
+
+export type GetTenantEgressPolicyResponse = {
+    /**
+     * The tenant's current baseline policy. When the tenant has never set one, this is the implicit
+     * default (allow-all, block enforcement) with an empty updated_at.
+     */
+    policy?: TenantEgressPolicy;
 };
 
 export type GetUsageSeriesResponse = {
@@ -610,33 +646,6 @@ export type GetUsageSnapshotResponse = {
 };
 
 /**
- * The caller's identity, as resolved from their credential by the API edge. The API trusts this
- * resolved identity; it does not re-authenticate.
- */
-export type Identity = {
-    /**
-     * x-hiloop-org-id — the organization the caller acts in.
-     */
-    orgId?: string;
-    /**
-     * x-hiloop-tenant-id — the tenant the caller acts in (drives app.tenant_id / RLS downstream).
-     */
-    tenantId?: string;
-    /**
-     * x-hiloop-user-id — the user, when the credential is user-scoped; empty for service keys.
-     */
-    userId?: string;
-    /**
-     * x-hiloop-auth-method — how the caller authenticated (e.g. "api_key", "session").
-     */
-    authMethod?: string;
-    /**
-     * x-hiloop-scope — the granted scope, when present.
-     */
-    scope?: string;
-};
-
-/**
  * Signal a running execution.
  */
 export type KillExecutionRequest = {
@@ -651,6 +660,19 @@ export type KillExecutionResponse = {
     [key: string]: unknown;
 };
 
+/**
+ * Runtime lease policy. Omitted, or lease_secs=0, uses the server default. This intentionally exposes
+ * only the expiry control needed by public callers; process defaults, mounts, environment, and user
+ * remain server-managed in the first runtime slice.
+ */
+export type LifecycleSpec = {
+    /**
+     * Max runtime duration in seconds. Nonzero values must be between 60 and 86400 inclusive;
+     * zero/omitted uses the server default.
+     */
+    leaseSecs?: string;
+};
+
 export type ListAnnotationSchemasResponse = {
     /**
      * The configs in the caller's tenant. By default the latest live version per name; with
@@ -661,16 +683,9 @@ export type ListAnnotationSchemasResponse = {
 
 export type ListDataViewsResponse = {
     /**
-     * The tenant's structured data views (own + un-overridden builtins).
+     * The tenant's structured data views.
      */
     views?: Array<DataView>;
-};
-
-export type ListForkNodesResponse = {
-    /**
-     * The fork tree, ordered by fork path (breadth-first within each level).
-     */
-    forkNodes?: Array<ForkNode>;
 };
 
 export type ListProjectsResponse = {
@@ -721,13 +736,6 @@ export type ListSandboxesResponse = {
     nextPageToken?: string;
 };
 
-export type ListSavedViewsResponse = {
-    /**
-     * The tenant's saved views, in a stable order (by name).
-     */
-    views?: Array<SavedView>;
-};
-
 export type ListSnapshotsResponse = {
     snapshots?: Array<Snapshot>;
 };
@@ -746,6 +754,35 @@ export type Operation = {
     state?: string;
     resultJson?: string;
     errorJson?: string;
+};
+
+/**
+ * The acting principal, as resolved from the caller's credential by the API edge. The API trusts
+ * the edge-resolved identity; it does not re-authenticate.
+ */
+export type Principal = {
+    /**
+     * The kind of principal: "user" (a human identity) or "service_account" (a machine credential
+     * not bound to a user).
+     */
+    kind?: string;
+    /**
+     * The principal's stable id: the user's id for a user, the API key's id for a service account.
+     */
+    id?: string;
+    /**
+     * The user's primary email. Empty for a service-account principal.
+     */
+    email?: string;
+    /**
+     * The presented API key's id. Empty for a browser-session login (no key is involved).
+     */
+    keyId?: string;
+    /**
+     * The presented API key's name — how this principal is displayed in listings and attribution.
+     * Empty for a browser-session login.
+     */
+    keyName?: string;
 };
 
 /**
@@ -776,6 +813,48 @@ export type Project = {
      * Optimistic-concurrency version, bumped on every update. Echo it back as the `If-Match` request header to make a later update conditional — if the project changed meanwhile the server rejects the update with error code `precondition_failed` instead of overwriting.
      */
     version?: string;
+    /**
+     * The total number of runs in the project, computed server-side across all of the project's runs (not just one page).
+     */
+    runCount?: string;
+    /**
+     * When the most recent run in the project was created (RFC 3339), or empty when the project has no runs yet.
+     */
+    lastRunAt?: string;
+};
+
+/**
+ * One tenant-declared field promoted from the annotation payload into a typed column for
+ * filter/sort/join speed. Unpromoted fields stay queryable from the JSON payload. The set of
+ * promoted fields is part of the immutable schema version: registering a new version re-binds slots,
+ * while an existing version's bindings never change.
+ */
+export type PromotedField = {
+    /**
+     * The payload field name to promote (e.g. "score"). Must be a field the schema's payload carries.
+     */
+    field?: string;
+    /**
+     * The storage type to lift the field into.
+     */
+    type?: 'PROMOTED_TYPE_UNSPECIFIED' | 'PROMOTED_TYPE_STR' | 'PROMOTED_TYPE_F64' | 'PROMOTED_TYPE_I64' | 'PROMOTED_TYPE_BOOL';
+    /**
+     * Whether this field is part of the latest-wins supersession identity. The default supersession key
+     * is the annotated target plus the schema name; declaring identity fields refines it (e.g. mark an
+     * "annotator" field identity to keep the latest write per annotator). Identity fields must be
+     * promoted, since dedup partitions on the typed column.
+     */
+    identity?: boolean;
+    /**
+     * Request a point-lookup bloom filter for this field (str only; default false). Useful for a
+     * high-cardinality promoted id queried by exact match.
+     */
+    bloom?: boolean;
+    /**
+     * The server-assigned physical column the field binds to (read-only; ignored on a register request,
+     * populated on the stored/returned schema).
+     */
+    slot?: string;
 };
 
 /**
@@ -799,7 +878,7 @@ export type PutDataViewRequest = {
      */
     description?: string;
     /**
-     * The structured spec (opaque JSON, the engine's tagged `DataViewSpec`). Compile-validated before
+     * The data-view spec (opaque JSON, the engine's tagged `DataViewSpec`). Compile-validated before
      * store.
      */
     spec?: {
@@ -807,22 +886,15 @@ export type PutDataViewRequest = {
     };
 };
 
-/**
- * Create or replace a saved view by name (upsert). The path `{name}` is authoritative.
- */
-export type PutSavedViewRequest = {
-    /**
-     * The view name (per-tenant unique); supplied by the path.
-     */
-    name?: string;
-    /**
-     * The view's `SELECT` SQL.
-     */
-    sql?: string;
-};
-
 export type QueryResponse = {
-    rows?: Array<Row>;
+    /**
+     * One flat JSON object per result row: column name -> bare scalar value, nulls omitted, 64-bit
+     * integers as decimal strings. For aggregate surfaces the columns are the grouping columns plus
+     * one per aggregate metric (e.g. "sum_input_tokens"). Reused by the view service.
+     */
+    rows?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type RegisterAnnotationSchemaRequest = {
@@ -839,6 +911,12 @@ export type RegisterAnnotationSchemaRequest = {
      * An optional human-readable description for this version.
      */
     description?: string;
+    /**
+     * The payload fields to promote into typed columns for this version. The caller sets
+     * field/type/identity/bloom; the server assigns each field's slot. Registration is rejected if more
+     * fields of a type are promoted than the slot pool holds.
+     */
+    promotedFields?: Array<PromotedField>;
 };
 
 export type RegisterAnnotationSchemaResponse = {
@@ -933,48 +1011,6 @@ export type RevokeSandboxSecretResponse = {
     secret?: SandboxSecret;
 };
 
-export type RollupRequest = {
-    spec?: RollupSpec;
-};
-
-/**
- * One rollup bucket per row: the `gen_ai_model` and `time_bucket` grouping columns plus the aggregate
- * metrics (count, sum_prompt_tokens, sum_completion_tokens, sum_cost_usd, avg_cost_usd, p95_cost_usd,
- * p50_ts_wall_ns, p95_ts_wall_ns).
- */
-export type RollupResponse = {
-    rows?: Array<Row>;
-};
-
-/**
- * A Q4 rollup: columnar aggregation over the promoted token/cost/latency/status columns, grouped by
- * gen_ai_model and a fixed-width wall-clock time bucket. Scoped to a single run when `run_id` is set,
- * or across every run for the tenant when it is empty. Restricted to the `llm` signal so non-llm
- * events never form a NULL-model group. The tenant is taken from request identity, never from this
- * body.
- */
-export type RollupSpec = {
-    /**
-     * The run (session) to roll up. Optional: present scopes the rollup to that run; absent (empty)
-     * rolls up across every run for the tenant. The forced tenant predicate is AND-ed in either way.
-     */
-    runId?: string;
-    /**
-     * Time-bucket width in nanoseconds; each event is grouped into `ts_wall_ns / bucket_ns`. Required
-     * and must be > 0.
-     */
-    bucketNs?: string;
-    /**
-     * Optional exact gen_ai_model to restrict to (e.g. "gpt-4"); empty means all models.
-     */
-    modelFilter?: string;
-    /**
-     * Optional minimum http_status_code (inclusive) to restrict to — the error-rate lever
-     * (e.g. 400 keeps only >= 400). 0 means no status floor.
-     */
-    statusMin?: string;
-};
-
 export type RotateSandboxSecretRequest = {
     /**
      * The secret id to rotate.
@@ -991,16 +1027,6 @@ export type RotateSandboxSecretResponse = {
      * The rotated secret's metadata (with the new current_version and rotated_at set).
      */
     secret?: SandboxSecret;
-};
-
-/**
- * One result row: column name -> typed value. For aggregate surfaces (rollup) the columns are the
- * grouping columns plus one per aggregate metric (e.g. "p95_cost_usd"). Reused by the view service.
- */
-export type Row = {
-    columns?: {
-        [key: string]: AttributeValue;
-    };
 };
 
 /**
@@ -1029,7 +1055,8 @@ export type Run = {
      */
     status?: string;
     /**
-     * The user that created the run, when recorded (empty otherwise).
+     * The stable id of the principal that created the run — the API key (or user) that performed the
+     * start or fork, recorded server-side. Empty when unrecorded.
      */
     createdBy?: string;
     /**
@@ -1045,9 +1072,34 @@ export type Run = {
      */
     createdAt?: string;
     /**
-     * The number of active (non-archived) fork nodes in the run's fork tree.
+     * The run this run forked from. Empty for a tree root.
      */
-    liveForkCount?: string;
+    parentRunId?: string;
+    /**
+     * The root of this run's tree (equal to id for a root). Lets the whole tree resolve in one
+     * indexed lookup.
+     */
+    rootRunId?: string;
+    /**
+     * The materialized path of run ids from the root to this run, as a dotted label (e.g.
+     * "root_ulid.child_ulid"). Sorts in creation order and addresses the subtree by prefix.
+     */
+    lineagePath?: string;
+    /**
+     * The parent event id this run forked at — the divergence point on the parent's timeline. Empty
+     * for a tree root or a manually started new tree.
+     */
+    branchEventId?: string;
+    /**
+     * The parent branch-point wall-clock time in nanoseconds (the cursor coordinate the timeline
+     * uses). Zero when there is no branch point.
+     */
+    branchHlcWallNs?: string;
+    /**
+     * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns. Zero when there is
+     * no branch point.
+     */
+    branchHlcLogical?: string;
 };
 
 export type Sandbox = {
@@ -1060,16 +1112,104 @@ export type Sandbox = {
     activeGeneration?: string;
     version?: string;
     /**
-     * Fork-tree node that represents this sandbox as a fork source. Present for project-backed
-     * sandboxes; absent project-less sandboxes are not fork sources.
+     * The run this sandbox is (or was) executing. Present for project-backed sandboxes; project-less
+     * sandboxes have no run.
      */
-    forkNodeId?: string;
+    runId?: string;
+    /**
+     * User-assigned free-text description. Empty when unset.
+     */
+    description?: string;
+    /**
+     * Stable id of the principal that created the sandbox — the API key (or user) that performed the
+     * create, recorded server-side. Empty when unrecorded.
+     */
+    createdBy?: string;
+    /**
+     * When the sandbox was created (RFC 3339).
+     */
+    createdAt?: string;
+    /**
+     * When the sandbox record was last updated (RFC 3339). Equal to created_at until the first update.
+     */
+    updatedAt?: string;
+    /**
+     * Accelerators requested by the sandbox's spec. Zero when none were requested.
+     */
+    gpus?: string;
+};
+
+/**
+ * Describe-altitude detail for one sandbox: what it runs, what it asked for, where it is in its
+ * lifecycle, and what recently happened to it. Returned only by GetSandbox; list rows stay lean.
+ */
+export type SandboxDescribe = {
+    /**
+     * The container image reference the sandbox's spec pinned, when it names one.
+     */
+    imageReference?: string;
+    /**
+     * The image content digest, when known.
+     */
+    imageDigest?: string;
+    /**
+     * The resources the sandbox's spec requested.
+     */
+    requestedResources?: ResourceSpec;
+    /**
+     * Accelerator count the sandbox's spec requested. Zero when none.
+     */
+    requestedGpus?: string;
+    /**
+     * Requested accelerator model (e.g. "b200"). Empty when no accelerator was requested.
+     */
+    acceleratorModel?: string;
+    /**
+     * When the current observed state began (RFC 3339): the completion time of the last succeeded
+     * state-changing operation, or the creation time before any state change.
+     */
+    stateSince?: string;
+    /**
+     * When the sandbox's keepalive lease expires (RFC 3339). Empty when the sandbox has no idle
+     * timeout.
+     */
+    leaseExpiresAt?: string;
+    /**
+     * The lineage path of the sandbox's run (dotted run ids, root first). Empty without a run.
+     */
+    lineagePath?: string;
+    /**
+     * The parent event the sandbox's run branched at. Empty for a tree root or no run.
+     */
+    branchEventId?: string;
+    /**
+     * The sandbox's most recent operations, newest first (capped by the server).
+     */
+    recentOperations?: Array<SandboxOperationSummary>;
 };
 
 export type SandboxImage = {
     oci?: OciImage;
     buildArtifact?: BuildArtifactImage;
     providerNative?: ProviderNativeImage;
+};
+
+/**
+ * One recent operation on a sandbox, summarized for the describe view.
+ */
+export type SandboxOperationSummary = {
+    id?: string;
+    kind?: string;
+    state?: string;
+    /**
+     * When the operation was created (RFC 3339).
+     */
+    createdAt?: string;
+    /**
+     * When the operation last transitioned (RFC 3339). Equal to created_at until the first
+     * transition; the completion time once the operation is terminal.
+     */
+    updatedAt?: string;
 };
 
 /**
@@ -1137,20 +1277,6 @@ export type SandboxStateCount = {
 };
 
 /**
- * A saved SQL view: a named, per-tenant `SELECT` re-validated on every run.
- */
-export type SavedView = {
-    /**
-     * The view name, unique within a tenant.
-     */
-    name?: string;
-    /**
-     * The stored `SELECT` SQL. Validated before store and re-validated on every execution.
-     */
-    sql?: string;
-};
-
-/**
  * Binds a stored sandbox secret to a placeholder the agent sees and the outbound target the value is
  * injected into. The agent only ever observes the placeholder; the real value is injected in flight
  * and never written into the sandbox environment, disk, snapshot, or captured telemetry.
@@ -1189,6 +1315,24 @@ export type SendExecutionInputResponse = {
     [key: string]: unknown;
 };
 
+export type SetTenantEgressPolicyRequest = {
+    /**
+     * The baseline outbound network policy to set for the tenant.
+     */
+    policy?: EgressPolicy;
+    /**
+     * The default enforcement disposition to set for the tenant.
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+};
+
+export type SetTenantEgressPolicyResponse = {
+    /**
+     * The stored baseline policy.
+     */
+    policy?: TenantEgressPolicy;
+};
+
 export type Snapshot = {
     id?: string;
     tenantId?: string;
@@ -1223,6 +1367,69 @@ export type StartExecutionResponse = {
      * with StreamExecution, drive it with SendExecutionInput, and stop it with KillExecution.
      */
     execution?: Execution;
+};
+
+export type StartRunRequest = {
+    /**
+     * The project the new run belongs to.
+     */
+    projectId?: string;
+    /**
+     * Optional parent run to continue the tree from. Empty starts a new tree root.
+     */
+    parentRunId?: string;
+    /**
+     * An optional human-readable label.
+     */
+    label?: string;
+};
+
+export type StartRunResponse = {
+    /**
+     * The newly started run, with its lineage fields resolved.
+     */
+    run?: Run;
+};
+
+export type StopSandboxRequest = {
+    id?: string;
+};
+
+export type StopSandboxResponse = {
+    operation?: Operation;
+};
+
+/**
+ * A tenant's baseline egress policy — one per tenant.
+ */
+export type TenantEgressPolicy = {
+    /**
+     * The baseline outbound network policy (mode + domain/CIDR lists) every sandbox inherits.
+     */
+    policy?: EgressPolicy;
+    /**
+     * The default enforcement disposition for the tenant.
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+    /**
+     * When the policy was last set (RFC 3339). Empty when the tenant has never set a policy (the
+     * implicit default baseline applies).
+     */
+    updatedAt?: string;
+};
+
+/**
+ * The tenant the caller acts in.
+ */
+export type TenantRef = {
+    /**
+     * The tenant id.
+     */
+    id?: string;
+    /**
+     * The tenant slug.
+     */
+    slug?: string;
 };
 
 export type UpdateProjectRequest = {
@@ -1264,6 +1471,10 @@ export type UsageSeriesPoint = {
      * Time-weighted average reserved accelerators during the bucket.
      */
     reservedGpus?: string;
+    /**
+     * Time-weighted average reserved root disk (MiB) during the bucket.
+     */
+    reservedDiskMb?: string;
 };
 
 /**
@@ -1292,18 +1503,17 @@ export type UsageSnapshot = {
      * quota (a plan limit), not measured provider capacity; managed providers expose no fleet total.
      */
     capacity?: ReservedResources;
-    /**
-     * Resources held by idle (paused) sandboxes that could be reclaimed by stopping them. A subset of
-     * `reserved`. `disk_mb` is not tracked here.
-     */
-    reclaimable?: ReservedResources;
 };
 
 export type WhoAmIResponse = {
     /**
-     * The caller identity reflected from the request's x-hiloop-* headers.
+     * The acting principal.
      */
-    identity?: Identity;
+    principal?: Principal;
+    /**
+     * The tenant the caller acts in. Unset for an org-scoped credential.
+     */
+    tenant?: TenantRef;
 };
 
 export type AnnotationSchemaServiceListAnnotationSchemasData = {
@@ -1409,6 +1619,22 @@ export type RuntimeServiceGetArtifactResponses = {
 
 export type RuntimeServiceGetArtifactResponse = RuntimeServiceGetArtifactResponses[keyof RuntimeServiceGetArtifactResponses];
 
+export type MetaServiceGetServiceConfigData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/config';
+};
+
+export type MetaServiceGetServiceConfigResponses = {
+    /**
+     * OK
+     */
+    200: GetServiceConfigResponse;
+};
+
+export type MetaServiceGetServiceConfigResponse = MetaServiceGetServiceConfigResponses[keyof MetaServiceGetServiceConfigResponses];
+
 export type RuntimeServiceSendExecutionInputData = {
     body: SendExecutionInputRequest;
     path: {
@@ -1444,24 +1670,6 @@ export type RuntimeServiceKillExecutionResponses = {
 };
 
 export type RuntimeServiceKillExecutionResponse = RuntimeServiceKillExecutionResponses[keyof RuntimeServiceKillExecutionResponses];
-
-export type RuntimeServiceStreamExecutionData = {
-    body?: never;
-    path: {
-        executionId: string;
-    };
-    query?: never;
-    url: '/v1/executions/{executionId}:stream';
-};
-
-export type RuntimeServiceStreamExecutionResponses = {
-    /**
-     * OK
-     */
-    200: ExecOutputEvent;
-};
-
-export type RuntimeServiceStreamExecutionResponse = RuntimeServiceStreamExecutionResponses[keyof RuntimeServiceStreamExecutionResponses];
 
 export type RuntimeServiceGetExecutionData = {
     body?: never;
@@ -1559,6 +1767,32 @@ export type ProjectServiceCreateProjectResponses = {
 
 export type ProjectServiceCreateProjectResponse = ProjectServiceCreateProjectResponses[keyof ProjectServiceCreateProjectResponses];
 
+export type ProjectServiceDeleteProjectData = {
+    body?: never;
+    path: {
+        /**
+         * The project id to delete.
+         */
+        id: string;
+    };
+    query?: {
+        /**
+         * When true, also delete the project's runs, snapshots, deleted sandboxes, and other resources; otherwise a project with resources returns a conflict. A cascade requires every sandbox in the project to be deleted first — while one is not, the call returns a conflict with error code `sandboxes_not_deleted`.
+         */
+        cascade?: boolean;
+    };
+    url: '/v1/projects/{id}';
+};
+
+export type ProjectServiceDeleteProjectResponses = {
+    /**
+     * OK
+     */
+    200: DeleteProjectResponse;
+};
+
+export type ProjectServiceDeleteProjectResponse = ProjectServiceDeleteProjectResponses[keyof ProjectServiceDeleteProjectResponses];
+
 export type ProjectServiceGetProjectData = {
     body?: never;
     path: {
@@ -1619,7 +1853,8 @@ export type RunServiceListRunsData = {
          */
         status?: string;
         /**
-         * Optional creator filter (an app user id). Empty returns runs from any creator.
+         * Optional creator filter: the stable principal id (API key or user) that created the run. Empty
+         * returns runs from any creator.
          */
         createdBy?: string;
         /**
@@ -1630,6 +1865,16 @@ export type RunServiceListRunsData = {
          * Optional upper bound on created_at (RFC 3339, exclusive). Empty applies no upper bound.
          */
         createdBefore?: string;
+        /**
+         * Optional run-tree filter: restrict to the runs whose root_run_id matches. Empty returns runs
+         * across every tree.
+         */
+        rootRunId?: string;
+        /**
+         * Optional project filter: restrict to the runs belonging to this project. Empty returns runs
+         * across every project.
+         */
+        projectId?: string;
     };
     url: '/v1/runs';
 };
@@ -1642,6 +1887,22 @@ export type RunServiceListRunsResponses = {
 };
 
 export type RunServiceListRunsResponse = RunServiceListRunsResponses[keyof RunServiceListRunsResponses];
+
+export type RunServiceStartRunData = {
+    body: StartRunRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/runs';
+};
+
+export type RunServiceStartRunResponses = {
+    /**
+     * OK
+     */
+    200: StartRunResponse;
+};
+
+export type RunServiceStartRunResponse = RunServiceStartRunResponses[keyof RunServiceStartRunResponses];
 
 export type RunServiceGetRunData = {
     body?: never;
@@ -1664,26 +1925,57 @@ export type RunServiceGetRunResponses = {
 
 export type RunServiceGetRunResponse = RunServiceGetRunResponses[keyof RunServiceGetRunResponses];
 
-export type RunServiceListForkNodesData = {
-    body?: never;
+export type RunServiceForkRunData = {
+    body: ForkRunRequest;
     path: {
         /**
-         * The run whose fork tree to list.
+         * The run to fork from. Required.
          */
-        runId: string;
+        parentRunId: string;
     };
     query?: never;
-    url: '/v1/runs/{runId}/fork-nodes';
+    url: '/v1/runs/{parentRunId}:fork';
 };
 
-export type RunServiceListForkNodesResponses = {
+export type RunServiceForkRunResponses = {
     /**
      * OK
      */
-    200: ListForkNodesResponse;
+    200: ForkRunResponse;
 };
 
-export type RunServiceListForkNodesResponse = RunServiceListForkNodesResponses[keyof RunServiceListForkNodesResponses];
+export type RunServiceForkRunResponse = RunServiceForkRunResponses[keyof RunServiceForkRunResponses];
+
+export type RunServiceGetRunTreeData = {
+    body?: never;
+    path: {
+        /**
+         * The root run whose tree to return.
+         */
+        rootRunId: string;
+    };
+    query?: {
+        /**
+         * The maximum number of runs to return. The server caps and defaults this; 0 means "use the
+         * server default". Pages follow lineage order, so a large tree streams depth-first across pages.
+         */
+        pageSize?: number;
+        /**
+         * An opaque page token from a previous response's next_page_token. Empty for the first page.
+         */
+        pageToken?: string;
+    };
+    url: '/v1/runs/{rootRunId}/tree';
+};
+
+export type RunServiceGetRunTreeResponses = {
+    /**
+     * OK
+     */
+    200: GetRunTreeResponse;
+};
+
+export type RunServiceGetRunTreeResponse = RunServiceGetRunTreeResponses[keyof RunServiceGetRunTreeResponses];
 
 export type RuntimeServiceListRuntimeCapabilitiesData = {
     body?: never;
@@ -1792,6 +2084,24 @@ export type RuntimeServiceGetSandboxResponses = {
 };
 
 export type RuntimeServiceGetSandboxResponse = RuntimeServiceGetSandboxResponses[keyof RuntimeServiceGetSandboxResponses];
+
+export type RuntimeServiceStopSandboxData = {
+    body: StopSandboxRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/sandboxes/{id}:stop';
+};
+
+export type RuntimeServiceStopSandboxResponses = {
+    /**
+     * OK
+     */
+    200: StopSandboxResponse;
+};
+
+export type RuntimeServiceStopSandboxResponse = RuntimeServiceStopSandboxResponses[keyof RuntimeServiceStopSandboxResponses];
 
 export type RuntimeServiceStartExecutionData = {
     body: StartExecutionRequest;
@@ -2236,100 +2546,37 @@ export type TelemetryViewServiceRunDataViewResponses = {
 
 export type TelemetryViewServiceRunDataViewResponse = TelemetryViewServiceRunDataViewResponses[keyof TelemetryViewServiceRunDataViewResponses];
 
-export type TelemetryQueryServiceRollupData = {
-    body: RollupRequest;
-    path?: never;
-    query?: never;
-    url: '/v1/telemetry/rollup';
-};
-
-export type TelemetryQueryServiceRollupResponses = {
-    /**
-     * OK
-     */
-    200: RollupResponse;
-};
-
-export type TelemetryQueryServiceRollupResponse = TelemetryQueryServiceRollupResponses[keyof TelemetryQueryServiceRollupResponses];
-
-export type TelemetryViewServiceListSavedViewsData = {
+export type EgressPolicyServiceGetTenantEgressPolicyData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/v1/telemetry/views';
+    url: '/v1/tenant/egress-policy';
 };
 
-export type TelemetryViewServiceListSavedViewsResponses = {
+export type EgressPolicyServiceGetTenantEgressPolicyResponses = {
     /**
      * OK
      */
-    200: ListSavedViewsResponse;
+    200: GetTenantEgressPolicyResponse;
 };
 
-export type TelemetryViewServiceListSavedViewsResponse = TelemetryViewServiceListSavedViewsResponses[keyof TelemetryViewServiceListSavedViewsResponses];
+export type EgressPolicyServiceGetTenantEgressPolicyResponse = EgressPolicyServiceGetTenantEgressPolicyResponses[keyof EgressPolicyServiceGetTenantEgressPolicyResponses];
 
-export type TelemetryViewServiceDeleteSavedViewData = {
-    body?: never;
-    path: {
-        /**
-         * The saved view to delete.
-         */
-        name: string;
-    };
+export type EgressPolicyServiceSetTenantEgressPolicyData = {
+    body: SetTenantEgressPolicyRequest;
+    path?: never;
     query?: never;
-    url: '/v1/telemetry/views/{name}';
+    url: '/v1/tenant/egress-policy';
 };
 
-export type TelemetryViewServiceDeleteSavedViewResponses = {
+export type EgressPolicyServiceSetTenantEgressPolicyResponses = {
     /**
      * OK
      */
-    200: DeleteSavedViewResponse;
+    200: SetTenantEgressPolicyResponse;
 };
 
-export type TelemetryViewServiceDeleteSavedViewResponse = TelemetryViewServiceDeleteSavedViewResponses[keyof TelemetryViewServiceDeleteSavedViewResponses];
-
-export type TelemetryViewServicePutSavedViewData = {
-    body: PutSavedViewRequest;
-    path: {
-        /**
-         * The view name (per-tenant unique); supplied by the path.
-         */
-        name: string;
-    };
-    query?: never;
-    url: '/v1/telemetry/views/{name}';
-};
-
-export type TelemetryViewServicePutSavedViewResponses = {
-    /**
-     * OK
-     */
-    200: SavedView;
-};
-
-export type TelemetryViewServicePutSavedViewResponse = TelemetryViewServicePutSavedViewResponses[keyof TelemetryViewServicePutSavedViewResponses];
-
-export type TelemetryViewServiceRunSavedViewData = {
-    body?: never;
-    path: {
-        /**
-         * The saved view to run.
-         */
-        name: string;
-    };
-    query?: never;
-    url: '/v1/telemetry/views/{name}:run';
-};
-
-export type TelemetryViewServiceRunSavedViewResponses = {
-    /**
-     * OK
-     */
-    200: QueryResponse;
-};
-
-export type TelemetryViewServiceRunSavedViewResponse = TelemetryViewServiceRunSavedViewResponses[keyof TelemetryViewServiceRunSavedViewResponses];
+export type EgressPolicyServiceSetTenantEgressPolicyResponse = EgressPolicyServiceSetTenantEgressPolicyResponses[keyof EgressPolicyServiceSetTenantEgressPolicyResponses];
 
 export type UsageServiceGetUsageSeriesData = {
     body?: never;

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectResponses, RunServiceGetRunData, RunServiceGetRunResponses, RunServiceListForkNodesData, RunServiceListForkNodesResponses, RunServiceListRunsData, RunServiceListRunsResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionResponses, RuntimeServiceStreamExecutionData, RuntimeServiceStreamExecutionResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffResponses, TelemetryQueryServiceRollupData, TelemetryQueryServiceRollupResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceDeleteSavedViewData, TelemetryViewServiceDeleteSavedViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsResponses, TelemetryViewServiceListSavedViewsData, TelemetryViewServiceListSavedViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewResponses, TelemetryViewServicePutSavedViewData, TelemetryViewServicePutSavedViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewResponses, TelemetryViewServiceRunSavedViewData, TelemetryViewServiceRunSavedViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotResponses } from './types.gen';
+import type { AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, EgressPolicyServiceGetTenantEgressPolicyData, EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyData, EgressPolicyServiceSetTenantEgressPolicyResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIResponses, MetaServiceGetServiceConfigData, MetaServiceGetServiceConfigResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectResponses, ProjectServiceDeleteProjectData, ProjectServiceDeleteProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectResponses, RunServiceForkRunData, RunServiceForkRunResponses, RunServiceGetRunData, RunServiceGetRunResponses, RunServiceGetRunTreeData, RunServiceGetRunTreeResponses, RunServiceListRunsData, RunServiceListRunsResponses, RunServiceStartRunData, RunServiceStartRunResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionResponses, RuntimeServiceStopSandboxData, RuntimeServiceStopSandboxResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -21,7 +21,11 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * List the schema configs in the caller's tenant. By default the latest live version per name.
  */
-export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extends boolean = false>(options?: Options<AnnotationSchemaServiceListAnnotationSchemasData, ThrowOnError>): RequestResult<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError>({ url: '/v1/annotation-schemas', ...options });
+export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extends boolean = false>(options?: Options<AnnotationSchemaServiceListAnnotationSchemasData, ThrowOnError>): RequestResult<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/annotation-schemas',
+    ...options
+});
 
 /**
  * Register a schema config in the caller's tenant. An unseen name starts at version 1; an existing
@@ -29,6 +33,7 @@ export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extend
  * version (an incompatible change is rejected).
  */
 export const annotationSchemaServiceRegisterAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceRegisterAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas',
     ...options,
     headers: {
@@ -40,12 +45,17 @@ export const annotationSchemaServiceRegisterAnnotationSchema = <ThrowOnError ext
 /**
  * Get a schema config by name (latest live version, or a specific version) in the caller's tenant.
  */
-export const annotationSchemaServiceGetAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceGetAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).get<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError>({ url: '/v1/annotation-schemas/{name}', ...options });
+export const annotationSchemaServiceGetAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceGetAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).get<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/annotation-schemas/{name}',
+    ...options
+});
 
 /**
  * Archive a schema config version (stamp archived_at; never hard-delete) in the caller's tenant.
  */
 export const annotationSchemaServiceArchiveAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceArchiveAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas/{name}:archive',
     ...options,
     headers: {
@@ -54,12 +64,22 @@ export const annotationSchemaServiceArchiveAnnotationSchema = <ThrowOnError exte
     }
 });
 
-export const runtimeServiceGetArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetArtifactData, ThrowOnError>): RequestResult<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError>({ url: '/v1/artifacts/{id}', ...options });
+export const runtimeServiceGetArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetArtifactData, ThrowOnError>): RequestResult<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/artifacts/{id}',
+    ...options
+});
+
+/**
+ * Return the service URLs a client needs before it has credentials.
+ */
+export const metaServiceGetServiceConfig = <ThrowOnError extends boolean = false>(options?: Options<MetaServiceGetServiceConfigData, ThrowOnError>): RequestResult<MetaServiceGetServiceConfigResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MetaServiceGetServiceConfigResponses, unknown, ThrowOnError>({ url: '/v1/config', ...options });
 
 /**
  * Send standard input or a control signal to a running execution.
  */
 export const runtimeServiceSendExecutionInput = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceSendExecutionInputData, ThrowOnError>): RequestResult<RuntimeServiceSendExecutionInputResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceSendExecutionInputResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/executions/{executionId}:input',
     ...options,
     headers: {
@@ -72,6 +92,7 @@ export const runtimeServiceSendExecutionInput = <ThrowOnError extends boolean = 
  * Signal a running execution (terminate by default).
  */
 export const runtimeServiceKillExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceKillExecutionData, ThrowOnError>): RequestResult<RuntimeServiceKillExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceKillExecutionResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/executions/{executionId}:kill',
     ...options,
     headers: {
@@ -80,26 +101,38 @@ export const runtimeServiceKillExecution = <ThrowOnError extends boolean = false
     }
 });
 
-/**
- * Stream an execution's combined stdout/stderr until it exits.
- */
-export const runtimeServiceStreamExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStreamExecutionData, ThrowOnError>): RequestResult<RuntimeServiceStreamExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceStreamExecutionResponses, unknown, ThrowOnError>({ url: '/v1/executions/{executionId}:stream', ...options });
+export const runtimeServiceGetExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetExecutionData, ThrowOnError>): RequestResult<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/executions/{id}',
+    ...options
+});
 
-export const runtimeServiceGetExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetExecutionData, ThrowOnError>): RequestResult<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError>({ url: '/v1/executions/{id}', ...options });
+export const runtimeServiceGetFork = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetForkData, ThrowOnError>): RequestResult<RuntimeServiceGetForkResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetForkResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/forks/{id}',
+    ...options
+});
 
-export const runtimeServiceGetFork = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetForkData, ThrowOnError>): RequestResult<RuntimeServiceGetForkResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetForkResponses, unknown, ThrowOnError>({ url: '/v1/forks/{id}', ...options });
-
-export const runtimeServiceGetOperation = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetOperationData, ThrowOnError>): RequestResult<RuntimeServiceGetOperationResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetOperationResponses, unknown, ThrowOnError>({ url: '/v1/operations/{id}', ...options });
+export const runtimeServiceGetOperation = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetOperationData, ThrowOnError>): RequestResult<RuntimeServiceGetOperationResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetOperationResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/operations/{id}',
+    ...options
+});
 
 /**
  * List the projects in the caller's tenant, newest first, with cursor pagination.
  */
-export const projectServiceListProjects = <ThrowOnError extends boolean = false>(options?: Options<ProjectServiceListProjectsData, ThrowOnError>): RequestResult<ProjectServiceListProjectsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ProjectServiceListProjectsResponses, unknown, ThrowOnError>({ url: '/v1/projects', ...options });
+export const projectServiceListProjects = <ThrowOnError extends boolean = false>(options?: Options<ProjectServiceListProjectsData, ThrowOnError>): RequestResult<ProjectServiceListProjectsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ProjectServiceListProjectsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/projects',
+    ...options
+});
 
 /**
  * Create a project in the caller's tenant. A duplicate slug within the tenant is a conflict.
  */
 export const projectServiceCreateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceCreateProjectData, ThrowOnError>): RequestResult<ProjectServiceCreateProjectResponses, unknown, ThrowOnError> => (options.client ?? client).post<ProjectServiceCreateProjectResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects',
     ...options,
     headers: {
@@ -109,14 +142,34 @@ export const projectServiceCreateProject = <ThrowOnError extends boolean = false
 });
 
 /**
+ * Delete a project within the caller's tenant. By default a project that still has sandboxes, runs,
+ * or other resources cannot be deleted — remove those first — and the call returns a conflict. Set
+ * `cascade` to also delete the project's runs, snapshots, deleted sandboxes, and other resources
+ * (and reclaim the storage backing its artifacts) in one call. A cascade never tears down a live
+ * sandbox: every sandbox in the project must be deleted first, and while one is not the call
+ * returns a conflict with error code `sandboxes_not_deleted`. Deleting a project that does not
+ * exist in the caller's tenant is `not_found`.
+ */
+export const projectServiceDeleteProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceDeleteProjectData, ThrowOnError>): RequestResult<ProjectServiceDeleteProjectResponses, unknown, ThrowOnError> => (options.client ?? client).delete<ProjectServiceDeleteProjectResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/projects/{id}',
+    ...options
+});
+
+/**
  * Get a project by id within the caller's tenant.
  */
-export const projectServiceGetProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceGetProjectData, ThrowOnError>): RequestResult<ProjectServiceGetProjectResponses, unknown, ThrowOnError> => (options.client ?? client).get<ProjectServiceGetProjectResponses, unknown, ThrowOnError>({ url: '/v1/projects/{id}', ...options });
+export const projectServiceGetProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceGetProjectData, ThrowOnError>): RequestResult<ProjectServiceGetProjectResponses, unknown, ThrowOnError> => (options.client ?? client).get<ProjectServiceGetProjectResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/projects/{id}',
+    ...options
+});
 
 /**
  * Update a project's name (the slug is immutable) within the caller's tenant.
  */
 export const projectServiceUpdateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceUpdateProjectData, ThrowOnError>): RequestResult<ProjectServiceUpdateProjectResponses, unknown, ThrowOnError> => (options.client ?? client).patch<ProjectServiceUpdateProjectResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects/{id}',
     ...options,
     headers: {
@@ -127,25 +180,73 @@ export const projectServiceUpdateProject = <ThrowOnError extends boolean = false
 
 /**
  * List the runs in the caller's tenant, newest first, with cursor pagination and optional
- * status / creator / time filters.
+ * status / creator / time / tree filters.
  */
-export const runServiceListRuns = <ThrowOnError extends boolean = false>(options?: Options<RunServiceListRunsData, ThrowOnError>): RequestResult<RunServiceListRunsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RunServiceListRunsResponses, unknown, ThrowOnError>({ url: '/v1/runs', ...options });
+export const runServiceListRuns = <ThrowOnError extends boolean = false>(options?: Options<RunServiceListRunsData, ThrowOnError>): RequestResult<RunServiceListRunsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RunServiceListRunsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs',
+    ...options
+});
 
 /**
- * Get a run by id within the caller's tenant, including its live-fork-count roll-up.
+ * Start a new run: a new tree root, or a run that continues an existing tree when parent_run_id
+ * is set.
  */
-export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunData, ThrowOnError>): RequestResult<RunServiceGetRunResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunResponses, unknown, ThrowOnError>({ url: '/v1/runs/{id}', ...options });
+export const runServiceStartRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceStartRunData, ThrowOnError>): RequestResult<RunServiceStartRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceStartRunResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * List the fork tree for a run within the caller's tenant.
+ * Get a run by id within the caller's tenant.
  */
-export const runServiceListForkNodes = <ThrowOnError extends boolean = false>(options: Options<RunServiceListForkNodesData, ThrowOnError>): RequestResult<RunServiceListForkNodesResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceListForkNodesResponses, unknown, ThrowOnError>({ url: '/v1/runs/{runId}/fork-nodes', ...options });
+export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunData, ThrowOnError>): RequestResult<RunServiceGetRunResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs/{id}',
+    ...options
+});
 
-export const runtimeServiceListRuntimeCapabilities = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListRuntimeCapabilitiesData, ThrowOnError>): RequestResult<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError>({ url: '/v1/runtime/capabilities', ...options });
+/**
+ * Fork a run: mint a child run that branches from the parent at the given branch point.
+ */
+export const runServiceForkRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceForkRunData, ThrowOnError>): RequestResult<RunServiceForkRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceForkRunResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs/{parentRunId}:fork',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const runtimeServiceListSandboxes = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListSandboxesData, ThrowOnError>): RequestResult<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError>({ url: '/v1/sandboxes', ...options });
+/**
+ * Get the ordered lineage tree rooted at a run within the caller's tenant.
+ */
+export const runServiceGetRunTree = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunTreeData, ThrowOnError>): RequestResult<RunServiceGetRunTreeResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunTreeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs/{rootRunId}/tree',
+    ...options
+});
+
+export const runtimeServiceListRuntimeCapabilities = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListRuntimeCapabilitiesData, ThrowOnError>): RequestResult<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runtime/capabilities',
+    ...options
+});
+
+export const runtimeServiceListSandboxes = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListSandboxesData, ThrowOnError>): RequestResult<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes',
+    ...options
+});
 
 export const runtimeServiceCreateSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSandboxData, ThrowOnError>): RequestResult<RuntimeServiceCreateSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes',
     ...options,
     headers: {
@@ -154,15 +255,40 @@ export const runtimeServiceCreateSandbox = <ThrowOnError extends boolean = false
     }
 });
 
-export const runtimeServiceDeleteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError>({ url: '/v1/sandboxes/{id}', ...options });
+export const runtimeServiceDeleteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{id}',
+    ...options
+});
 
-export const runtimeServiceGetSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSandboxData, ThrowOnError>): RequestResult<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError>({ url: '/v1/sandboxes/{id}', ...options });
+export const runtimeServiceGetSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSandboxData, ThrowOnError>): RequestResult<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{id}',
+    ...options
+});
+
+/**
+ * Gracefully stop a running sandbox. The workload is terminated and the sandbox comes to rest in a
+ * stopped state, but its record is retained so it stays inspectable — distinct from DeleteSandbox,
+ * which tears the sandbox down entirely. Work that completed before the stop is reported as
+ * succeeded rather than interrupted.
+ */
+export const runtimeServiceStopSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStopSandboxData, ThrowOnError>): RequestResult<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{id}:stop',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Start an interactive execution. Returns immediately with the created execution and operation;
  * output is consumed through StreamExecution and driven through SendExecutionInput.
  */
 export const runtimeServiceStartExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStartExecutionData, ThrowOnError>): RequestResult<RuntimeServiceStartExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStartExecutionResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sandboxId}/executions',
     ...options,
     headers: {
@@ -172,6 +298,7 @@ export const runtimeServiceStartExecution = <ThrowOnError extends boolean = fals
 });
 
 export const runtimeServiceFileFromArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileFromArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileFromArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).put<RuntimeServiceFileFromArtifactResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sandboxId}/files:from-artifact',
     ...options,
     headers: {
@@ -181,6 +308,7 @@ export const runtimeServiceFileFromArtifact = <ThrowOnError extends boolean = fa
 });
 
 export const runtimeServiceFileToArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileToArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileToArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceFileToArtifactResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sandboxId}/files:to-artifact',
     ...options,
     headers: {
@@ -190,6 +318,7 @@ export const runtimeServiceFileToArtifact = <ThrowOnError extends boolean = fals
 });
 
 export const runtimeServiceCreateSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceCreateSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSnapshotResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sandboxId}/snapshots',
     ...options,
     headers: {
@@ -199,6 +328,7 @@ export const runtimeServiceCreateSnapshot = <ThrowOnError extends boolean = fals
 });
 
 export const runtimeServiceExecuteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceExecuteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceExecuteSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceExecuteSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sandboxId}:execute',
     ...options,
     headers: {
@@ -208,6 +338,7 @@ export const runtimeServiceExecuteSandbox = <ThrowOnError extends boolean = fals
 });
 
 export const runtimeServiceForkSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceForkSandboxData, ThrowOnError>): RequestResult<RuntimeServiceForkSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceForkSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{sourceSandboxId}:fork',
     ...options,
     headers: {
@@ -219,13 +350,18 @@ export const runtimeServiceForkSandbox = <ThrowOnError extends boolean = false>(
 /**
  * List the secrets in the caller's tenant, newest first — metadata only, never the value.
  */
-export const secretServiceListSandboxSecrets = <ThrowOnError extends boolean = false>(options?: Options<SecretServiceListSandboxSecretsData, ThrowOnError>): RequestResult<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError>({ url: '/v1/secrets', ...options });
+export const secretServiceListSandboxSecrets = <ThrowOnError extends boolean = false>(options?: Options<SecretServiceListSandboxSecretsData, ThrowOnError>): RequestResult<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/secrets',
+    ...options
+});
 
 /**
  * Create a secret in the caller's tenant, storing the value encrypted. A duplicate name within the
  * tenant is a conflict. The value is not returned.
  */
 export const secretServiceCreateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceCreateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceCreateSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceCreateSandboxSecretResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets',
     ...options,
     headers: {
@@ -240,6 +376,7 @@ export const secretServiceCreateSandboxSecret = <ThrowOnError extends boolean = 
  * the only RPC that returns the value.
  */
 export const secretServiceResolveSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceResolveSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceResolveSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceResolveSandboxSecretResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets/resolve',
     ...options,
     headers: {
@@ -251,13 +388,18 @@ export const secretServiceResolveSandboxSecret = <ThrowOnError extends boolean =
 /**
  * Revoke a secret by id within the caller's tenant. A revoked secret resolves to nothing.
  */
-export const secretServiceRevokeSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRevokeSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).delete<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError>({ url: '/v1/secrets/{id}', ...options });
+export const secretServiceRevokeSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRevokeSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).delete<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/secrets/{id}',
+    ...options
+});
 
 /**
  * Rotate a secret to a new value within the caller's tenant, storing it as a new version. The new
  * value is not returned.
  */
 export const secretServiceRotateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRotateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRotateSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceRotateSandboxSecretResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets/{id}/rotate',
     ...options,
     headers: {
@@ -266,13 +408,26 @@ export const secretServiceRotateSandboxSecret = <ThrowOnError extends boolean = 
     }
 });
 
-export const runtimeServiceListSnapshots = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceListSnapshotsData, ThrowOnError>): RequestResult<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError>({ url: '/v1/snapshots', ...options });
+export const runtimeServiceListSnapshots = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceListSnapshotsData, ThrowOnError>): RequestResult<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/snapshots',
+    ...options
+});
 
-export const runtimeServiceDeleteSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError>({ url: '/v1/snapshots/{id}', ...options });
+export const runtimeServiceDeleteSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/snapshots/{id}',
+    ...options
+});
 
-export const runtimeServiceGetSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError>({ url: '/v1/snapshots/{id}', ...options });
+export const runtimeServiceGetSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/snapshots/{id}',
+    ...options
+});
 
 export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceRestoreSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/snapshots/{snapshotId}:restore',
     ...options,
     headers: {
@@ -286,6 +441,7 @@ export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = fal
  * payload against the named schema, and durably appends it; returns the minted `event_id`.
  */
 export const annotationServiceAnnotate = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/annotations',
     ...options,
     headers: {
@@ -299,6 +455,7 @@ export const annotationServiceAnnotate = <ThrowOnError extends boolean = false>(
  * its payload against the named schema, and durably appends it; returns the minted `event_id`.
  */
 export const annotationServiceAnnotateRange = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateRangeData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateRangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateRangeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/annotations:range',
     ...options,
     headers: {
@@ -308,9 +465,10 @@ export const annotationServiceAnnotateRange = <ThrowOnError extends boolean = fa
 });
 
 /**
- * Diff two fork branches: the events unique to `path_a` versus `path_b` within one run.
+ * Diff two runs in a tree: the events unique to run A versus run B.
  */
 export const telemetryQueryServiceBranchDiff = <ThrowOnError extends boolean = false>(options: Options<TelemetryQueryServiceBranchDiffData, ThrowOnError>): RequestResult<TelemetryQueryServiceBranchDiffResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryQueryServiceBranchDiffResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/branch-diff',
     ...options,
     headers: {
@@ -320,19 +478,28 @@ export const telemetryQueryServiceBranchDiff = <ThrowOnError extends boolean = f
 });
 
 /**
- * List the tenant's structured data views (own + un-overridden builtins).
+ * List the tenant's data views.
  */
-export const telemetryViewServiceListDataViews = <ThrowOnError extends boolean = false>(options?: Options<TelemetryViewServiceListDataViewsData, ThrowOnError>): RequestResult<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/data-views', ...options });
+export const telemetryViewServiceListDataViews = <ThrowOnError extends boolean = false>(options?: Options<TelemetryViewServiceListDataViewsData, ThrowOnError>): RequestResult<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/telemetry/data-views',
+    ...options
+});
 
 /**
  * Delete a data view (a name with no tenant-owned view is NOT_FOUND, not a silent no-op).
  */
-export const telemetryViewServiceDeleteDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceDeleteDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/data-views/{name}', ...options });
+export const telemetryViewServiceDeleteDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceDeleteDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/telemetry/data-views/{name}',
+    ...options
+});
 
 /**
- * Create or replace a structured data view (compile-validated before store).
+ * Create or replace a data view (compile-validated before store).
  */
 export const telemetryViewServicePutDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServicePutDataViewData, ThrowOnError>): RequestResult<TelemetryViewServicePutDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).put<TelemetryViewServicePutDataViewResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/data-views/{name}',
     ...options,
     headers: {
@@ -344,62 +511,61 @@ export const telemetryViewServicePutDataView = <ThrowOnError extends boolean = f
 /**
  * Run a data view: compile its stored spec fresh + execute it, returning typed rows.
  */
-export const telemetryViewServiceRunDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceRunDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/data-views/{name}:run', ...options });
+export const telemetryViewServiceRunDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceRunDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/telemetry/data-views/{name}:run',
+    ...options
+});
 
 /**
- * Roll up token/cost/latency/error-rate metrics by model and time-bucket, scoped to one run or
- * across all of the tenant's runs when `run_id` is omitted.
+ * Get the caller's tenant baseline egress policy. Returns the implicit default when none is set.
  */
-export const telemetryQueryServiceRollup = <ThrowOnError extends boolean = false>(options: Options<TelemetryQueryServiceRollupData, ThrowOnError>): RequestResult<TelemetryQueryServiceRollupResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryQueryServiceRollupResponses, unknown, ThrowOnError>({
-    url: '/v1/telemetry/rollup',
+export const egressPolicyServiceGetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options?: Options<EgressPolicyServiceGetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceGetTenantEgressPolicyResponses, unknown, ThrowOnError> => (options?.client ?? client).get<EgressPolicyServiceGetTenantEgressPolicyResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy',
+    ...options
+});
+
+/**
+ * Set the caller's tenant baseline egress policy. Requires an owner or admin in the tenant.
+ */
+export const egressPolicyServiceSetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServiceSetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceSetTenantEgressPolicyResponses, unknown, ThrowOnError> => (options.client ?? client).put<EgressPolicyServiceSetTenantEgressPolicyResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy',
     ...options,
     headers: {
         'Content-Type': 'application/json',
         ...options.headers
     }
 });
-
-/**
- * List the tenant's saved SQL views.
- */
-export const telemetryViewServiceListSavedViews = <ThrowOnError extends boolean = false>(options?: Options<TelemetryViewServiceListSavedViewsData, ThrowOnError>): RequestResult<TelemetryViewServiceListSavedViewsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TelemetryViewServiceListSavedViewsResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/views', ...options });
-
-/**
- * Delete a saved SQL view (idempotent).
- */
-export const telemetryViewServiceDeleteSavedView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceDeleteSavedViewData, ThrowOnError>): RequestResult<TelemetryViewServiceDeleteSavedViewResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TelemetryViewServiceDeleteSavedViewResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/views/{name}', ...options });
-
-/**
- * Create or replace a saved SQL view (validated before store).
- */
-export const telemetryViewServicePutSavedView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServicePutSavedViewData, ThrowOnError>): RequestResult<TelemetryViewServicePutSavedViewResponses, unknown, ThrowOnError> => (options.client ?? client).put<TelemetryViewServicePutSavedViewResponses, unknown, ThrowOnError>({
-    url: '/v1/telemetry/views/{name}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Run a saved SQL view (re-validated + executed fresh), returning typed rows.
- */
-export const telemetryViewServiceRunSavedView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceRunSavedViewData, ThrowOnError>): RequestResult<TelemetryViewServiceRunSavedViewResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryViewServiceRunSavedViewResponses, unknown, ThrowOnError>({ url: '/v1/telemetry/views/{name}:run', ...options });
 
 /**
  * Get reserved-resource usage over time for the caller's tenant, bucketed for the usage dashboard's
  * over-time charts.
  */
-export const usageServiceGetUsageSeries = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSeriesData, ThrowOnError>): RequestResult<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError>({ url: '/v1/usage/series', ...options });
+export const usageServiceGetUsageSeries = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSeriesData, ThrowOnError>): RequestResult<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/usage/series',
+    ...options
+});
 
 /**
  * Get a point-in-time usage snapshot for the caller's tenant: active sandbox counts (with a
  * per-state breakdown) and the resources those sandboxes have reserved against the configured quota.
  */
-export const usageServiceGetUsageSnapshot = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSnapshotData, ThrowOnError>): RequestResult<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError>({ url: '/v1/usage/snapshot', ...options });
+export const usageServiceGetUsageSnapshot = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSnapshotData, ThrowOnError>): RequestResult<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/usage/snapshot',
+    ...options
+});
 
 /**
- * Echo the caller's identity. Acts as both a health probe and an identity sanity-check, and is the
- * endpoint the generated OpenAPI, SDKs, and CLI consume.
+ * Resolve the caller's identity: the acting principal (kind, id, email, key id/name) and tenant.
+ * Acts as both a health probe and an identity sanity-check, and is the endpoint the generated
+ * OpenAPI, SDKs, and CLI consume.
  */
-export const identityServiceWhoAmI = <ThrowOnError extends boolean = false>(options?: Options<IdentityServiceWhoAmIData, ThrowOnError>): RequestResult<IdentityServiceWhoAmIResponses, unknown, ThrowOnError> => (options?.client ?? client).get<IdentityServiceWhoAmIResponses, unknown, ThrowOnError>({ url: '/v1/whoami', ...options });
+export const identityServiceWhoAmI = <ThrowOnError extends boolean = false>(options?: Options<IdentityServiceWhoAmIData, ThrowOnError>): RequestResult<IdentityServiceWhoAmIResponses, unknown, ThrowOnError> => (options?.client ?? client).get<IdentityServiceWhoAmIResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/whoami',
+    ...options
+});

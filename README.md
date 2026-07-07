@@ -7,4 +7,4 @@ release. Pull requests that hand-edit `src/` will be overwritten by the next rel
 - Source of truth: protobuf in `hiloopai/hiloop` → OpenAPI → generated TypeScript client.
 - File issues against `hiloopai/hiloop`, not this mirror.
 
-Current release: `0.2.0`.
+Current release: `0.3.0`.

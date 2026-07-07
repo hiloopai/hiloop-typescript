@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, EgressPolicyServiceGetTenantEgressPolicyData, EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyData, EgressPolicyServiceSetTenantEgressPolicyResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIResponses, MetaServiceGetServiceConfigData, MetaServiceGetServiceConfigResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectResponses, ProjectServiceDeleteProjectData, ProjectServiceDeleteProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectResponses, RunServiceForkRunData, RunServiceForkRunResponses, RunServiceGetRunData, RunServiceGetRunResponses, RunServiceGetRunTreeData, RunServiceGetRunTreeResponses, RunServiceListRunsData, RunServiceListRunsResponses, RunServiceStartRunData, RunServiceStartRunResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionResponses, RuntimeServiceStopSandboxData, RuntimeServiceStopSandboxResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotResponses } from './types.gen';
+import type { AgentServiceCreateAgentData, AgentServiceCreateAgentResponses, AgentServiceGetAgentData, AgentServiceGetAgentResponses, AgentServiceListAgentsData, AgentServiceListAgentsResponses, AgentServiceSetAgentLaunchAclData, AgentServiceSetAgentLaunchAclResponses, AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, AnnotationServiceListAnnotationsData, AnnotationServiceListAnnotationsResponses, EgressPolicyServiceGetTenantEgressPolicyData, EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyData, EgressPolicyServiceSetTenantEgressPolicyResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIResponses, MetaServiceGetServiceConfigData, MetaServiceGetServiceConfigResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectResponses, ProjectServiceDeleteProjectData, ProjectServiceDeleteProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectResponses, RunServiceCompleteRunData, RunServiceCompleteRunResponses, RunServiceForkRunData, RunServiceForkRunResponses, RunServiceGetRunData, RunServiceGetRunResponses, RunServiceGetRunTreeData, RunServiceGetRunTreeResponses, RunServiceListRunsData, RunServiceListRunsResponses, RunServiceStartRunData, RunServiceStartRunResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceResumeSandboxData, RuntimeServiceResumeSandboxResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionResponses, RuntimeServiceStopSandboxData, RuntimeServiceStopSandboxResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,51 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * List the caller's tenant's registered agents.
+ */
+export const agentServiceListAgents = <ThrowOnError extends boolean = false>(options?: Options<AgentServiceListAgentsData, ThrowOnError>): RequestResult<AgentServiceListAgentsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AgentServiceListAgentsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/agents',
+    ...options
+});
+
+/**
+ * Register an agent in the caller's tenant. The name must be unique within the tenant; the new
+ * agent starts with the default launch ACL (any tenant member may launch).
+ */
+export const agentServiceCreateAgent = <ThrowOnError extends boolean = false>(options: Options<AgentServiceCreateAgentData, ThrowOnError>): RequestResult<AgentServiceCreateAgentResponses, unknown, ThrowOnError> => (options.client ?? client).post<AgentServiceCreateAgentResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/agents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get one registered agent by name, including its launch ACL.
+ */
+export const agentServiceGetAgent = <ThrowOnError extends boolean = false>(options: Options<AgentServiceGetAgentData, ThrowOnError>): RequestResult<AgentServiceGetAgentResponses, unknown, ThrowOnError> => (options.client ?? client).get<AgentServiceGetAgentResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/agents/{name}',
+    ...options
+});
+
+/**
+ * Replace an agent's launch ACL. Requires an owner or admin in the tenant.
+ */
+export const agentServiceSetAgentLaunchAcl = <ThrowOnError extends boolean = false>(options: Options<AgentServiceSetAgentLaunchAclData, ThrowOnError>): RequestResult<AgentServiceSetAgentLaunchAclResponses, unknown, ThrowOnError> => (options.client ?? client).put<AgentServiceSetAgentLaunchAclResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/agents/{name}/launch-acl',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List the schema configs in the caller's tenant. By default the latest live version per name.
@@ -190,7 +235,8 @@ export const runServiceListRuns = <ThrowOnError extends boolean = false>(options
 
 /**
  * Start a new run: a new tree root, or a run that continues an existing tree when parent_run_id
- * is set.
+ * is set. The run begins executing immediately (status running, started_at stamped); record its
+ * outcome with CompleteRun.
  */
 export const runServiceStartRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceStartRunData, ThrowOnError>): RequestResult<RunServiceStartRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceStartRunResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -209,6 +255,21 @@ export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: 
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs/{id}',
     ...options
+});
+
+/**
+ * Complete a run: record its terminal status (succeeded, failed, or canceled) and stamp its end
+ * time. Only a pending or running run can be completed; completing a run that already has a
+ * terminal status is a conflict.
+ */
+export const runServiceCompleteRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceCompleteRunData, ThrowOnError>): RequestResult<RunServiceCompleteRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceCompleteRunResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/runs/{id}:complete',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -268,10 +329,28 @@ export const runtimeServiceGetSandbox = <ThrowOnError extends boolean = false>(o
 });
 
 /**
- * Gracefully stop a running sandbox. The workload is terminated and the sandbox comes to rest in a
- * stopped state, but its record is retained so it stays inspectable — distinct from DeleteSandbox,
- * which tears the sandbox down entirely. Work that completed before the stop is reported as
- * succeeded rather than interrupted.
+ * Resume a stopped sandbox whose state was preserved at stop time, returning it to running with
+ * its filesystem and process state intact. Resuming a sandbox that is already running succeeds
+ * without effect; a sandbox whose workload was torn down (stopped without state preservation, or
+ * deleted) cannot be resumed and reports a conflict.
+ */
+export const runtimeServiceResumeSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceResumeSandboxData, ThrowOnError>): RequestResult<RuntimeServiceResumeSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceResumeSandboxResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{id}:resume',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Gracefully stop a running sandbox. The sandbox comes to rest in a stopped state and its record
+ * is retained so it stays inspectable — distinct from DeleteSandbox, which tears the sandbox down
+ * entirely. Where the provider supports state-preserving suspension, the workload's filesystem
+ * and process state are preserved and ResumeSandbox brings it back; otherwise the workload is
+ * terminated and the stop is final. Work that completed before the stop is reported as succeeded
+ * rather than interrupted.
  */
 export const runtimeServiceStopSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStopSandboxData, ThrowOnError>): RequestResult<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -426,6 +505,12 @@ export const runtimeServiceGetSnapshot = <ThrowOnError extends boolean = false>(
     ...options
 });
 
+/**
+ * Create a new sandbox from a snapshot — fork-from-snapshot. The source sandbox may be stopped
+ * or deleted; only the snapshot must be ready. A snapshot that records its source run mints the
+ * new sandbox's run as a child branched at the snapshot's recorded anchor, so the restored
+ * sandbox extends the source's run lineage.
+ */
 export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceRestoreSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/snapshots/{snapshotId}:restore',
@@ -434,6 +519,16 @@ export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = fal
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * List a run's (or project's) annotations: the current latest-wins set by default, every stored
+ * version with `history`, optionally widened to the run's lineage subtree.
+ */
+export const annotationServiceListAnnotations = <ThrowOnError extends boolean = false>(options?: Options<AnnotationServiceListAnnotationsData, ThrowOnError>): RequestResult<AnnotationServiceListAnnotationsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AnnotationServiceListAnnotationsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/telemetry/annotations',
+    ...options
 });
 
 /**

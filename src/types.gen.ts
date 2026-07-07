@@ -5,7 +5,60 @@ export type ClientOptions = {
 };
 
 /**
- * A range annotation spanning a wall-clock window within a run (rather than a single target event).
+ * A registered agent identity, scoped to the caller's tenant.
+ */
+export type Agent = {
+    /**
+     * The agent's stable id.
+     */
+    id?: string;
+    /**
+     * The agent's registered name — unique within the tenant, and how the agent is displayed in
+     * attribution everywhere. Lowercase letters, digits, `.`, `_`, and `-`; must start and end with
+     * a letter or digit; at most 100 characters.
+     */
+    name?: string;
+    /**
+     * A free-text description of what the agent is for. May be empty.
+     */
+    description?: string;
+    /**
+     * Who may launch as this agent.
+     */
+    launchAcl?: AgentLaunchAcl;
+    /**
+     * Stable id of the principal that registered the agent, when recorded.
+     */
+    createdBy?: string;
+    /**
+     * When the agent was registered (RFC 3339).
+     */
+    createdAt?: string;
+    /**
+     * When the agent's registration or ACL was last changed (RFC 3339).
+     */
+    updatedAt?: string;
+};
+
+/**
+ * A per-agent launch ACL: which principals may launch a run or sandbox as the agent.
+ */
+export type AgentLaunchAcl = {
+    /**
+     * The launch policy: open to all tenant members, or restricted to the listed users.
+     */
+    policy?: 'AGENT_LAUNCH_POLICY_UNSPECIFIED' | 'AGENT_LAUNCH_POLICY_MEMBERS' | 'AGENT_LAUNCH_POLICY_RESTRICTED';
+    /**
+     * The user ids allowed to launch as this agent. Meaningful only when the policy is
+     * AGENT_LAUNCH_POLICY_RESTRICTED; empty otherwise.
+     */
+    userIds?: Array<string>;
+};
+
+/**
+ * A range annotation spanning a window within a run (rather than a single target event). The window
+ * is either a pair of wall-clock nanosecond bounds or a pair of event ids whose recorded timestamps
+ * become the bounds — supply exactly one form.
  */
 export type AnnotateRangeRequest = {
     /**
@@ -17,11 +70,13 @@ export type AnnotateRangeRequest = {
      */
     schemaName?: string;
     /**
-     * Inclusive start of the annotated window, in wall-clock nanoseconds.
+     * Inclusive start of the annotated window, in wall-clock nanoseconds. Mutually exclusive with the
+     * event-pair form.
      */
     rangeStartNs?: string;
     /**
-     * Inclusive end of the annotated window, in wall-clock nanoseconds.
+     * Inclusive end of the annotated window, in wall-clock nanoseconds. Mutually exclusive with the
+     * event-pair form.
      */
     rangeEndNs?: string;
     /**
@@ -30,9 +85,16 @@ export type AnnotateRangeRequest = {
      */
     payloadJson?: string;
     /**
-     * The run lineage path the annotation is anchored at. Empty means the tree root.
+     * The `event_id` whose recorded timestamp starts the annotated window. Both event endpoints must
+     * exist in `run_id`; the window bounds are materialized from their timestamps. Set together with
+     * `range_end_event_id`, and not alongside the nanosecond bounds.
      */
-    lineagePath?: string;
+    rangeStartEventId?: string;
+    /**
+     * The `event_id` whose recorded timestamp ends the annotated window. Set together with
+     * `range_start_event_id`, and not alongside the nanosecond bounds.
+     */
+    rangeEndEventId?: string;
 };
 
 /**
@@ -58,11 +120,6 @@ export type AnnotateRequest = {
      * JSON Schema at ingest. Reserved `hiloop.annotation.*` keys are platform-owned and excluded.
      */
     payloadJson?: string;
-    /**
-     * The run lineage path the annotation is anchored at. Empty means the tree root. Only valid with
-     * `run_id`.
-     */
-    lineagePath?: string;
     /**
      * The project a run-less annotation belongs to. Exactly one of `run_id` or `project_id` is set;
      * a project-scoped annotation carries no run lineage and no target event.
@@ -183,6 +240,20 @@ export type BranchDiffSpec = {
     runIdB?: string;
 };
 
+/**
+ * A hybrid logical clock coordinate on an event timeline.
+ */
+export type BranchHlc = {
+    /**
+     * Wall-clock component in nanoseconds since the Unix epoch.
+     */
+    wallNs?: string;
+    /**
+     * Logical tiebreak for events sharing a wall-clock reading.
+     */
+    logical?: number;
+};
+
 export type BuildArtifactImage = {
     artifactRef?: string;
 };
@@ -220,6 +291,43 @@ export type CommandSpec = {
     timeoutSecs?: string;
 };
 
+export type CompleteRunRequest = {
+    /**
+     * The run to complete.
+     */
+    id?: string;
+    /**
+     * The terminal status to record: succeeded, failed, or canceled.
+     */
+    status?: string;
+};
+
+export type CompleteRunResponse = {
+    /**
+     * The completed run, with its terminal status and end time stamped.
+     */
+    run?: Run;
+};
+
+export type CreateAgentRequest = {
+    /**
+     * The agent name to register — unique within the tenant. Lowercase letters, digits, `.`, `_`,
+     * and `-`; must start and end with a letter or digit; at most 100 characters.
+     */
+    name?: string;
+    /**
+     * A free-text description of what the agent is for. Optional.
+     */
+    description?: string;
+};
+
+export type CreateAgentResponse = {
+    /**
+     * The registered agent, carrying the default launch ACL (any tenant member may launch).
+     */
+    agent?: Agent;
+};
+
 export type CreateProjectRequest = {
     /**
      * The project slug — unique within the caller's tenant.
@@ -240,6 +348,10 @@ export type CreateProjectResponse = {
 
 export type CreateSandboxRequest = {
     projectId?: string;
+    /**
+     * An optional display name for the sandbox. When empty the server generates one. Names are not
+     * unique; the id returned in the response is the canonical handle.
+     */
     name?: string;
     image?: SandboxImage;
     resources?: ResourceSpec;
@@ -257,18 +369,38 @@ export type CreateSandboxRequest = {
      */
     secrets?: Array<SecretBinding>;
     /**
-     * Runtime lease policy. Omitted uses the server default.
+     * Sandbox lifecycle policy. Omitted uses the pattern's server default (see LifecycleSpec).
      */
     lifecycle?: LifecycleSpec;
     /**
      * User-assigned free-text description. Empty leaves the sandbox undescribed.
      */
     description?: string;
+    /**
+     * One-shot mode: the command this sandbox exists to run. When set, the command starts as the
+     * sandbox's purpose execution once the sandbox is running, records under the sandbox's run with
+     * capture as usual, and the sandbox stops (state preserved, resumable) when the command exits.
+     * The command's exit code lands on the execution; the run ends succeeded on exit 0 and failed
+     * otherwise. The command is not bounded by operation deadlines — only by lifecycle.lease_secs (the
+     * sandbox keepalive cap, defaulting to 86400s/24h for one-shot) — so command.timeout_secs must be
+     * zero. Omitted creates a plain interactive sandbox.
+     */
+    command?: CommandSpec;
+    /**
+     * One-shot mode only: delete the sandbox on command exit instead of stopping it. The run and its
+     * captured events persist either way.
+     */
+    deleteOnExit?: boolean;
 };
 
 export type CreateSandboxResponse = {
     sandbox?: Sandbox;
     operation?: Operation;
+    /**
+     * The purpose execution minted for a one-shot create (a request that carried a command). Absent
+     * for plain creates. Stream it with StreamExecution; its exit code lands here when observed.
+     */
+    execution?: Execution;
 };
 
 export type CreateSandboxSecretRequest = {
@@ -320,6 +452,15 @@ export type CreateSnapshotRequest = {
      * snapshot.
      */
     verificationProbePath?: string;
+    /**
+     * Optional user-assigned snapshot name. Names are not enforced unique; where a name is unique
+     * within its project, the snapshot is addressable by it wherever a snapshot id is accepted.
+     */
+    name?: string;
+    /**
+     * Optional user-assigned free-text description.
+     */
+    description?: string;
 };
 
 export type CreateSnapshotResponse = {
@@ -352,10 +493,6 @@ export type DataView = {
      * Monotonic per-edit version; the store bumps it on each upsert.
      */
     specVersion?: string;
-    /**
-     * Always false: every stored view is customer-authored. Retained for wire compatibility.
-     */
-    isBuiltin?: boolean;
 };
 
 export type DeleteDataViewResponse = {
@@ -411,9 +548,31 @@ export type Execution = {
     tenantId?: string;
     sandboxId?: string;
     state?: string;
+    /**
+     * Process exit code. Absent until the process exit is observed; a failed execution whose exit was
+     * never seen carries no exit code.
+     */
     exitCode?: string;
     stdoutArtifactId?: string;
     stderrArtifactId?: string;
+    /**
+     * Why the execution failed. Present only on failed executions.
+     */
+    error?: ExecutionError;
+};
+
+/**
+ * Why an execution failed, when it did.
+ */
+export type ExecutionError = {
+    /**
+     * Stable machine-readable failure class (for example ambiguous_timeout or sandbox_terminated).
+     */
+    code?: string;
+    /**
+     * Human-readable description of the failure.
+     */
+    message?: string;
 };
 
 export type FileFromArtifactRequest = {
@@ -486,6 +645,11 @@ export type ForkRunResponse = {
 export type ForkSandboxRequest = {
     sourceSandboxId?: string;
     projectId?: string;
+    /**
+     * An optional display name for the child sandbox. When empty the server names it: a labeled fork
+     * of a named source gets `<source-name>-<label>`, anything else gets a generated name. Names are
+     * not unique; the child id in the response is the canonical handle.
+     */
     name?: string;
     image?: SandboxImage;
     resources?: ResourceSpec;
@@ -540,6 +704,13 @@ export type ForkSandboxRequest = {
 export type ForkSandboxResponse = {
     sandbox?: Sandbox;
     operation?: Operation;
+};
+
+export type GetAgentResponse = {
+    /**
+     * The registered agent.
+     */
+    agent?: Agent;
 };
 
 export type GetAnnotationSchemaResponse = {
@@ -661,16 +832,33 @@ export type KillExecutionResponse = {
 };
 
 /**
- * Runtime lease policy. Omitted, or lease_secs=0, uses the server default. This intentionally exposes
- * only the expiry control needed by public callers; process defaults, mounts, environment, and user
- * remain server-managed in the first runtime slice.
+ * Sandbox lifecycle policy: two independent clocks, matching how the completion sweep and the
+ * lifetime reaper enforce them. This intentionally exposes only the two expiry controls needed by
+ * public callers; process defaults, mounts, environment, and user remain server-managed in the first
+ * runtime slice.
  */
 export type LifecycleSpec = {
     /**
-     * Max runtime duration in seconds. Nonzero values must be between 60 and 86400 inclusive;
-     * zero/omitted uses the server default.
+     * Absolute max sandbox lifetime in seconds, regardless of activity — the honest upper bound on a
+     * one-shot `sandbox run` command (default 86400s/24h when omitted) and an opt-in hard cap on a plain
+     * interactive sandbox (no default cap: an actively-used sandbox may run indefinitely). Nonzero
+     * values must be between 60 and 86400 (24h) inclusive; zero/omitted uses the pattern's server
+     * default.
      */
     leaseSecs?: string;
+    /**
+     * Idle timeout in seconds: how long the sandbox may go without activity before the lifetime reaper
+     * stops it. Nonzero values must be between 60 and 86400 inclusive; zero/omitted uses the server
+     * default (1800s/30min).
+     */
+    idleTimeoutSecs?: string;
+};
+
+export type ListAgentsResponse = {
+    /**
+     * The tenant's registered agents, by name.
+     */
+    agents?: Array<Agent>;
 };
 
 export type ListAnnotationSchemasResponse = {
@@ -679,6 +867,20 @@ export type ListAnnotationSchemasResponse = {
      * include_archived, every version, newest first.
      */
     schemas?: Array<AnnotationSchema>;
+};
+
+export type ListAnnotationsResponse = {
+    /**
+     * One annotation per row, newest first. Each row carries the annotation's identity and anchor
+     * (`event_id`, `run_id` — absent on project-scoped rows — `project_id`, `lineage_path`, the
+     * schema `name`, `ts_wall_ns`, `principal`), its target (`target_event_id`, or the range bounds
+     * `range_start_ns`/`range_end_ns` plus `range_start_event_id`/`range_end_event_id` when the range
+     * was event-bounded), and the schema-validated payload under `payload`. Encoded canonically:
+     * snake_case keys, 64-bit integers as decimal strings, absent fields omitted.
+     */
+    annotations?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type ListDataViewsResponse = {
@@ -762,16 +964,17 @@ export type Operation = {
  */
 export type Principal = {
     /**
-     * The kind of principal: "user" (a human identity) or "service_account" (a machine credential
-     * not bound to a user).
+     * The kind of principal: "user" (a human identity), "service_account" (a machine credential
+     * not bound to a user), or "agent" (a credential bound to a registered agent identity).
      */
     kind?: string;
     /**
-     * The principal's stable id: the user's id for a user, the API key's id for a service account.
+     * The principal's stable id: the user's id for a user, the API key's id for a service account
+     * or an agent.
      */
     id?: string;
     /**
-     * The user's primary email. Empty for a service-account principal.
+     * The user's primary email. Empty for a service-account or agent principal.
      */
     email?: string;
     /**
@@ -783,6 +986,11 @@ export type Principal = {
      * Empty for a browser-session login.
      */
     keyName?: string;
+    /**
+     * The bound agent's registered name — how an agent principal is displayed in listings and
+     * attribution. Empty unless the presented credential is bound to a registered agent.
+     */
+    agentName?: string;
 };
 
 /**
@@ -1004,6 +1212,14 @@ export type RestoreSnapshotResponse = {
     operation?: Operation;
 };
 
+export type ResumeSandboxRequest = {
+    id?: string;
+};
+
+export type ResumeSandboxResponse = {
+    operation?: Operation;
+};
+
 export type RevokeSandboxSecretResponse = {
     /**
      * The revoked secret's metadata (with revoked_at set).
@@ -1100,12 +1316,21 @@ export type Run = {
      * no branch point.
      */
     branchHlcLogical?: string;
+    /**
+     * The sandbox executing (or last to execute) this run, when the run is sandbox-backed. Empty for
+     * a run with no sandbox (e.g. a local wrapped run).
+     */
+    sandboxId?: string;
 };
 
 export type Sandbox = {
     id?: string;
     tenantId?: string;
     projectId?: string;
+    /**
+     * The sandbox's display name. Every sandbox has one — caller-assigned at create, otherwise
+     * generated by the server. Names are not unique; the id is the canonical handle.
+     */
     name?: string;
     desiredState?: string;
     observedState?: string;
@@ -1294,6 +1519,26 @@ export type SecretBinding = {
      * Outbound target the resolved value is injected into (e.g. a host or header).
      */
     bind?: string;
+    /**
+     * Safe model classification to attach to brokered telemetry.
+     */
+    genAiModel?: string;
+    /**
+     * Safe tool-call classification to attach to brokered telemetry.
+     */
+    toolCall?: string;
+    /**
+     * Digest of a redacted brokered payload artifact.
+     */
+    redactedPayloadDigest?: string;
+    /**
+     * Media type of a redacted brokered payload artifact.
+     */
+    redactedPayloadMediaType?: string;
+    /**
+     * Size of a redacted brokered payload artifact.
+     */
+    redactedPayloadSizeBytes?: string;
 };
 
 /**
@@ -1313,6 +1558,25 @@ export type SendExecutionInputRequest = {
 
 export type SendExecutionInputResponse = {
     [key: string]: unknown;
+};
+
+export type SetAgentLaunchAclRequest = {
+    /**
+     * The registered agent name.
+     */
+    name?: string;
+    /**
+     * The launch ACL to set, replacing the agent's current one. A RESTRICTED policy must list at
+     * least one user; a MEMBERS policy must not list any.
+     */
+    acl?: AgentLaunchAcl;
+};
+
+export type SetAgentLaunchAclResponse = {
+    /**
+     * The agent with its updated launch ACL.
+     */
+    agent?: Agent;
 };
 
 export type SetTenantEgressPolicyRequest = {
@@ -1337,12 +1601,62 @@ export type Snapshot = {
     id?: string;
     tenantId?: string;
     projectId?: string;
+    /**
+     * The sandbox whose state the snapshot captured.
+     */
     sourceSandboxId?: string;
-    status?: string;
     requestedSemanticsJson?: string;
     effectiveSemanticsJson?: string;
     sizeBytes?: string;
     legalHold?: boolean;
+    /**
+     * Lifecycle state: pending, ready, or failed.
+     */
+    state?: string;
+    /**
+     * Who minted the snapshot: user (an explicit request), fork (a fork's recorded branch point), or
+     * recovery. Capability is identical across origins.
+     */
+    origin?: string;
+    /**
+     * The run the source sandbox was executing at capture. Empty when the source had no run.
+     */
+    sourceRunId?: string;
+    /**
+     * The latest ingested event on the source run's timeline at capture — the branch anchor a
+     * restore's child run derives from. Correlational ("state as of this point on the timeline"),
+     * never a transactional cut; empty when no event linkage was known.
+     */
+    branchEventId?: string;
+    /**
+     * The branch anchor's clock coordinate. Present exactly when branch_event_id is set.
+     */
+    branchHlc?: BranchHlc;
+    /**
+     * When the snapshot's bytes were frozen (RFC 3339). Empty until captured.
+     */
+    capturedAt?: string;
+    /**
+     * User-assigned name. Empty when unset.
+     */
+    name?: string;
+    /**
+     * User-assigned free-text description. Empty when unset.
+     */
+    description?: string;
+    /**
+     * Stable id of the principal that requested the snapshot (the forking principal for fork-minted
+     * snapshots). Empty when unrecorded.
+     */
+    createdBy?: string;
+    /**
+     * When the snapshot record was created (RFC 3339).
+     */
+    createdAt?: string;
+    /**
+     * When the snapshot record was last updated (RFC 3339).
+     */
+    updatedAt?: string;
 };
 
 /**
@@ -1515,6 +1829,80 @@ export type WhoAmIResponse = {
      */
     tenant?: TenantRef;
 };
+
+export type AgentServiceListAgentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/agents';
+};
+
+export type AgentServiceListAgentsResponses = {
+    /**
+     * OK
+     */
+    200: ListAgentsResponse;
+};
+
+export type AgentServiceListAgentsResponse = AgentServiceListAgentsResponses[keyof AgentServiceListAgentsResponses];
+
+export type AgentServiceCreateAgentData = {
+    body: CreateAgentRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/agents';
+};
+
+export type AgentServiceCreateAgentResponses = {
+    /**
+     * OK
+     */
+    200: CreateAgentResponse;
+};
+
+export type AgentServiceCreateAgentResponse = AgentServiceCreateAgentResponses[keyof AgentServiceCreateAgentResponses];
+
+export type AgentServiceGetAgentData = {
+    body?: never;
+    path: {
+        /**
+         * The registered agent name.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/agents/{name}';
+};
+
+export type AgentServiceGetAgentResponses = {
+    /**
+     * OK
+     */
+    200: GetAgentResponse;
+};
+
+export type AgentServiceGetAgentResponse = AgentServiceGetAgentResponses[keyof AgentServiceGetAgentResponses];
+
+export type AgentServiceSetAgentLaunchAclData = {
+    body: SetAgentLaunchAclRequest;
+    path: {
+        /**
+         * The registered agent name.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/agents/{name}/launch-acl';
+};
+
+export type AgentServiceSetAgentLaunchAclResponses = {
+    /**
+     * OK
+     */
+    200: SetAgentLaunchAclResponse;
+};
+
+export type AgentServiceSetAgentLaunchAclResponse = AgentServiceSetAgentLaunchAclResponses[keyof AgentServiceSetAgentLaunchAclResponses];
 
 export type AnnotationSchemaServiceListAnnotationSchemasData = {
     body?: never;
@@ -1925,6 +2313,27 @@ export type RunServiceGetRunResponses = {
 
 export type RunServiceGetRunResponse = RunServiceGetRunResponses[keyof RunServiceGetRunResponses];
 
+export type RunServiceCompleteRunData = {
+    body: CompleteRunRequest;
+    path: {
+        /**
+         * The run to complete.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/runs/{id}:complete';
+};
+
+export type RunServiceCompleteRunResponses = {
+    /**
+     * OK
+     */
+    200: CompleteRunResponse;
+};
+
+export type RunServiceCompleteRunResponse = RunServiceCompleteRunResponses[keyof RunServiceCompleteRunResponses];
+
 export type RunServiceForkRunData = {
     body: ForkRunRequest;
     path: {
@@ -2084,6 +2493,24 @@ export type RuntimeServiceGetSandboxResponses = {
 };
 
 export type RuntimeServiceGetSandboxResponse = RuntimeServiceGetSandboxResponses[keyof RuntimeServiceGetSandboxResponses];
+
+export type RuntimeServiceResumeSandboxData = {
+    body: ResumeSandboxRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/sandboxes/{id}:resume';
+};
+
+export type RuntimeServiceResumeSandboxResponses = {
+    /**
+     * OK
+     */
+    200: ResumeSandboxResponse;
+};
+
+export type RuntimeServiceResumeSandboxResponse = RuntimeServiceResumeSandboxResponses[keyof RuntimeServiceResumeSandboxResponses];
 
 export type RuntimeServiceStopSandboxData = {
     body: StopSandboxRequest;
@@ -2346,6 +2773,22 @@ export type RuntimeServiceListSnapshotsData = {
     path?: never;
     query: {
         projectId: string;
+        /**
+         * Only snapshots captured from this source sandbox. Empty matches any.
+         */
+        sandboxId?: string;
+        /**
+         * Only snapshots anchored to this source run. Empty matches any.
+         */
+        runId?: string;
+        /**
+         * Only snapshots with this origin: user, fork, or recovery. Empty matches any.
+         */
+        origin?: string;
+        /**
+         * Only snapshots in this state: pending, ready, or failed. Empty matches any.
+         */
+        state?: string;
     };
     url: '/v1/snapshots';
 };
@@ -2418,6 +2861,47 @@ export type RuntimeServiceRestoreSnapshotResponses = {
 };
 
 export type RuntimeServiceRestoreSnapshotResponse = RuntimeServiceRestoreSnapshotResponses[keyof RuntimeServiceRestoreSnapshotResponses];
+
+export type AnnotationServiceListAnnotationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The run whose annotations to list. Exactly one of `run_id` or `project_id` is set.
+         */
+        runId?: string;
+        /**
+         * Widen a run listing to the run's whole lineage subtree — the annotations of the run and every
+         * descendant, each row still anchored at its own run. Without it the listing is the run's own
+         * annotations. Only valid with `run_id`.
+         */
+        subtree?: boolean;
+        /**
+         * Restrict to one registered annotation-schema name. Naming the schema also applies its declared
+         * identity fields to the latest-wins key; without it the dedup uses the default key.
+         */
+        schemaName?: string;
+        /**
+         * Return every stored version (newest first) instead of only the current one per supersession
+         * key. Nothing is ever mutated or hidden — history is always available.
+         */
+        history?: boolean;
+        /**
+         * The project whose run-less annotations to list. Exactly one of `run_id` or `project_id` is set.
+         */
+        projectId?: string;
+    };
+    url: '/v1/telemetry/annotations';
+};
+
+export type AnnotationServiceListAnnotationsResponses = {
+    /**
+     * OK
+     */
+    200: ListAnnotationsResponse;
+};
+
+export type AnnotationServiceListAnnotationsResponse = AnnotationServiceListAnnotationsResponses[keyof AnnotationServiceListAnnotationsResponses];
 
 export type AnnotationServiceAnnotateData = {
     body: AnnotateRequest;

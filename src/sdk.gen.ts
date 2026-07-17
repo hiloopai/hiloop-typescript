@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AgentServiceCreateAgentData, AgentServiceCreateAgentResponses, AgentServiceGetAgentData, AgentServiceGetAgentResponses, AgentServiceListAgentsData, AgentServiceListAgentsResponses, AgentServiceSetAgentLaunchAclData, AgentServiceSetAgentLaunchAclResponses, AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, AnnotationServiceListAnnotationsData, AnnotationServiceListAnnotationsResponses, EgressPolicyServiceGetTenantEgressPolicyData, EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyData, EgressPolicyServiceSetTenantEgressPolicyResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIResponses, MetaServiceGetServiceConfigData, MetaServiceGetServiceConfigResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectResponses, ProjectServiceDeleteProjectData, ProjectServiceDeleteProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectResponses, RunServiceCompleteRunData, RunServiceCompleteRunResponses, RunServiceForkRunData, RunServiceForkRunResponses, RunServiceGetRunData, RunServiceGetRunResponses, RunServiceGetRunTreeData, RunServiceGetRunTreeResponses, RunServiceListRunsData, RunServiceListRunsResponses, RunServiceStartRunData, RunServiceStartRunResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceResumeSandboxData, RuntimeServiceResumeSandboxResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionResponses, RuntimeServiceStopSandboxData, RuntimeServiceStopSandboxResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotResponses } from './types.gen';
+import type { AnnotationSchemaServiceArchiveAnnotationSchemaData, AnnotationSchemaServiceArchiveAnnotationSchemaErrors, AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaData, AnnotationSchemaServiceGetAnnotationSchemaErrors, AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceListAnnotationSchemasData, AnnotationSchemaServiceListAnnotationSchemasErrors, AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceRegisterAnnotationSchemaData, AnnotationSchemaServiceRegisterAnnotationSchemaErrors, AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationServiceAnnotateData, AnnotationServiceAnnotateErrors, AnnotationServiceAnnotateRangeData, AnnotationServiceAnnotateRangeErrors, AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateResponses, AnnotationServiceListAnnotationsData, AnnotationServiceListAnnotationsErrors, AnnotationServiceListAnnotationsResponses, EgressPolicyServiceDeleteEgressPolicyBindingData, EgressPolicyServiceDeleteEgressPolicyBindingErrors, EgressPolicyServiceDeleteEgressPolicyBindingResponses, EgressPolicyServiceGetTenantEgressPolicyData, EgressPolicyServiceGetTenantEgressPolicyErrors, EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceListEgressPolicyBindingsData, EgressPolicyServiceListEgressPolicyBindingsErrors, EgressPolicyServiceListEgressPolicyBindingsResponses, EgressPolicyServicePreviewBaselineImpactData, EgressPolicyServicePreviewBaselineImpactErrors, EgressPolicyServicePreviewBaselineImpactResponses, EgressPolicyServiceResolveEffectiveEgressData, EgressPolicyServiceResolveEffectiveEgressErrors, EgressPolicyServiceResolveEffectiveEgressResponses, EgressPolicyServiceSetEgressPolicyBindingData, EgressPolicyServiceSetEgressPolicyBindingErrors, EgressPolicyServiceSetEgressPolicyBindingResponses, EgressPolicyServiceSetTenantEgressPolicyData, EgressPolicyServiceSetTenantEgressPolicyErrors, EgressPolicyServiceSetTenantEgressPolicyResponses, FeedbackServiceCreateFeedbackData, FeedbackServiceCreateFeedbackErrors, FeedbackServiceCreateFeedbackResponses, IdentityServiceWhoAmIData, IdentityServiceWhoAmIErrors, IdentityServiceWhoAmIResponses, LeaseServiceAcquireLeaseData, LeaseServiceAcquireLeaseErrors, LeaseServiceAcquireLeaseResponses, LeaseServiceReleaseLeaseData, LeaseServiceReleaseLeaseErrors, LeaseServiceReleaseLeaseResponses, LeaseServiceRenewLeaseData, LeaseServiceRenewLeaseErrors, LeaseServiceRenewLeaseResponses, MetaServiceGetServiceConfigData, MetaServiceGetServiceConfigErrors, MetaServiceGetServiceConfigResponses, ProjectServiceCreateProjectData, ProjectServiceCreateProjectErrors, ProjectServiceCreateProjectResponses, ProjectServiceDeleteProjectData, ProjectServiceDeleteProjectErrors, ProjectServiceDeleteProjectResponses, ProjectServiceGetProjectData, ProjectServiceGetProjectErrors, ProjectServiceGetProjectResponses, ProjectServiceListProjectsData, ProjectServiceListProjectsErrors, ProjectServiceListProjectsResponses, ProjectServiceUpdateProjectData, ProjectServiceUpdateProjectErrors, ProjectServiceUpdateProjectResponses, RunServiceCompleteRunData, RunServiceCompleteRunErrors, RunServiceCompleteRunResponses, RunServiceForkRunData, RunServiceForkRunErrors, RunServiceForkRunResponses, RunServiceGetRunData, RunServiceGetRunErrors, RunServiceGetRunResponses, RunServiceGetRunTreeData, RunServiceGetRunTreeErrors, RunServiceGetRunTreeResponses, RunServiceListRunsData, RunServiceListRunsErrors, RunServiceListRunsResponses, RunServiceStartRunData, RunServiceStartRunErrors, RunServiceStartRunResponses, RuntimeServiceCreateSandboxData, RuntimeServiceCreateSandboxErrors, RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSnapshotData, RuntimeServiceCreateSnapshotErrors, RuntimeServiceCreateSnapshotResponses, RuntimeServiceDeleteSandboxData, RuntimeServiceDeleteSandboxErrors, RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSnapshotData, RuntimeServiceDeleteSnapshotErrors, RuntimeServiceDeleteSnapshotResponses, RuntimeServiceExecuteSandboxData, RuntimeServiceExecuteSandboxErrors, RuntimeServiceExecuteSandboxResponses, RuntimeServiceExposePortData, RuntimeServiceExposePortErrors, RuntimeServiceExposePortResponses, RuntimeServiceFileFromArtifactData, RuntimeServiceFileFromArtifactErrors, RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileToArtifactData, RuntimeServiceFileToArtifactErrors, RuntimeServiceFileToArtifactResponses, RuntimeServiceForkSandboxData, RuntimeServiceForkSandboxErrors, RuntimeServiceForkSandboxResponses, RuntimeServiceGetArtifactData, RuntimeServiceGetArtifactErrors, RuntimeServiceGetArtifactResponses, RuntimeServiceGetExecutionData, RuntimeServiceGetExecutionErrors, RuntimeServiceGetExecutionResponses, RuntimeServiceGetForkData, RuntimeServiceGetForkErrors, RuntimeServiceGetForkResponses, RuntimeServiceGetOperationData, RuntimeServiceGetOperationErrors, RuntimeServiceGetOperationResponses, RuntimeServiceGetSandboxData, RuntimeServiceGetSandboxErrors, RuntimeServiceGetSandboxResponses, RuntimeServiceGetSnapshotData, RuntimeServiceGetSnapshotErrors, RuntimeServiceGetSnapshotResponses, RuntimeServiceKillExecutionData, RuntimeServiceKillExecutionErrors, RuntimeServiceKillExecutionResponses, RuntimeServiceListArtifactsData, RuntimeServiceListArtifactsErrors, RuntimeServiceListArtifactsResponses, RuntimeServiceListExposedPortsData, RuntimeServiceListExposedPortsErrors, RuntimeServiceListExposedPortsResponses, RuntimeServiceListRuntimeCapabilitiesData, RuntimeServiceListRuntimeCapabilitiesErrors, RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListSandboxesData, RuntimeServiceListSandboxesErrors, RuntimeServiceListSandboxesResponses, RuntimeServiceListSnapshotsData, RuntimeServiceListSnapshotsErrors, RuntimeServiceListSnapshotsResponses, RuntimeServiceRestoreSnapshotData, RuntimeServiceRestoreSnapshotErrors, RuntimeServiceRestoreSnapshotResponses, RuntimeServiceResumeSandboxData, RuntimeServiceResumeSandboxErrors, RuntimeServiceResumeSandboxResponses, RuntimeServiceSendExecutionInputData, RuntimeServiceSendExecutionInputErrors, RuntimeServiceSendExecutionInputResponses, RuntimeServiceStartExecutionData, RuntimeServiceStartExecutionErrors, RuntimeServiceStartExecutionResponses, RuntimeServiceStopSandboxData, RuntimeServiceStopSandboxErrors, RuntimeServiceStopSandboxResponses, RuntimeServiceUnexposePortData, RuntimeServiceUnexposePortErrors, RuntimeServiceUnexposePortResponses, SecretServiceCreateSandboxSecretData, SecretServiceCreateSandboxSecretErrors, SecretServiceCreateSandboxSecretResponses, SecretServiceListSandboxSecretsData, SecretServiceListSandboxSecretsErrors, SecretServiceListSandboxSecretsResponses, SecretServiceResolveSandboxSecretData, SecretServiceResolveSandboxSecretErrors, SecretServiceResolveSandboxSecretResponses, SecretServiceRevokeSandboxSecretData, SecretServiceRevokeSandboxSecretErrors, SecretServiceRevokeSandboxSecretResponses, SecretServiceRotateSandboxSecretData, SecretServiceRotateSandboxSecretErrors, SecretServiceRotateSandboxSecretResponses, TelemetryQueryServiceBranchDiffData, TelemetryQueryServiceBranchDiffErrors, TelemetryQueryServiceBranchDiffResponses, TelemetryViewServiceDeleteDataViewData, TelemetryViewServiceDeleteDataViewErrors, TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceListDataViewsData, TelemetryViewServiceListDataViewsErrors, TelemetryViewServiceListDataViewsResponses, TelemetryViewServicePutDataViewData, TelemetryViewServicePutDataViewErrors, TelemetryViewServicePutDataViewResponses, TelemetryViewServiceRunDataViewData, TelemetryViewServiceRunDataViewErrors, TelemetryViewServiceRunDataViewResponses, UsageServiceGetUsageSeriesData, UsageServiceGetUsageSeriesErrors, UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSnapshotData, UsageServiceGetUsageSnapshotErrors, UsageServiceGetUsageSnapshotResponses, VolumeServiceAttachVolumeData, VolumeServiceAttachVolumeErrors, VolumeServiceAttachVolumeResponses, VolumeServiceCreateVolumeData, VolumeServiceCreateVolumeErrors, VolumeServiceCreateVolumeResponses, VolumeServiceDeleteVolumeData, VolumeServiceDeleteVolumeErrors, VolumeServiceDeleteVolumeResponses, VolumeServiceDetachVolumeData, VolumeServiceDetachVolumeErrors, VolumeServiceDetachVolumeResponses, VolumeServiceGetVolumeData, VolumeServiceGetVolumeErrors, VolumeServiceGetVolumeResponses, VolumeServiceListVolumesData, VolumeServiceListVolumesErrors, VolumeServiceListVolumesResponses, VolumeServicePrefetchVolumeData, VolumeServicePrefetchVolumeErrors, VolumeServicePrefetchVolumeResponses, VolumeServicePublishVolumeVersionData, VolumeServicePublishVolumeVersionErrors, VolumeServicePublishVolumeVersionResponses, VolumeServiceRequestVolumeBlobUploadsData, VolumeServiceRequestVolumeBlobUploadsErrors, VolumeServiceRequestVolumeBlobUploadsResponses, VolumeServiceStartVolumePushData, VolumeServiceStartVolumePushErrors, VolumeServiceStartVolumePushResponses, WorkloadServiceCreateWorkloadData, WorkloadServiceCreateWorkloadErrors, WorkloadServiceCreateWorkloadResponses, WorkloadServiceDeleteWorkloadData, WorkloadServiceDeleteWorkloadErrors, WorkloadServiceDeleteWorkloadResponses, WorkloadServiceGetWorkloadData, WorkloadServiceGetWorkloadErrors, WorkloadServiceGetWorkloadResponses, WorkloadServiceListWorkloadsData, WorkloadServiceListWorkloadsErrors, WorkloadServiceListWorkloadsResponses, WorkloadServiceSetWorkloadLaunchAclData, WorkloadServiceSetWorkloadLaunchAclErrors, WorkloadServiceSetWorkloadLaunchAclResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,54 +19,9 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * List the caller's tenant's registered agents.
- */
-export const agentServiceListAgents = <ThrowOnError extends boolean = false>(options?: Options<AgentServiceListAgentsData, ThrowOnError>): RequestResult<AgentServiceListAgentsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AgentServiceListAgentsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/agents',
-    ...options
-});
-
-/**
- * Register an agent in the caller's tenant. The name must be unique within the tenant; the new
- * agent starts with the default launch ACL (any tenant member may launch).
- */
-export const agentServiceCreateAgent = <ThrowOnError extends boolean = false>(options: Options<AgentServiceCreateAgentData, ThrowOnError>): RequestResult<AgentServiceCreateAgentResponses, unknown, ThrowOnError> => (options.client ?? client).post<AgentServiceCreateAgentResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/agents',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Get one registered agent by name, including its launch ACL.
- */
-export const agentServiceGetAgent = <ThrowOnError extends boolean = false>(options: Options<AgentServiceGetAgentData, ThrowOnError>): RequestResult<AgentServiceGetAgentResponses, unknown, ThrowOnError> => (options.client ?? client).get<AgentServiceGetAgentResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/agents/{name}',
-    ...options
-});
-
-/**
- * Replace an agent's launch ACL. Requires an owner or admin in the tenant.
- */
-export const agentServiceSetAgentLaunchAcl = <ThrowOnError extends boolean = false>(options: Options<AgentServiceSetAgentLaunchAclData, ThrowOnError>): RequestResult<AgentServiceSetAgentLaunchAclResponses, unknown, ThrowOnError> => (options.client ?? client).put<AgentServiceSetAgentLaunchAclResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/agents/{name}/launch-acl',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
  * List the schema configs in the caller's tenant. By default the latest live version per name.
  */
-export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extends boolean = false>(options?: Options<AnnotationSchemaServiceListAnnotationSchemasData, ThrowOnError>): RequestResult<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AnnotationSchemaServiceListAnnotationSchemasResponses, unknown, ThrowOnError>({
+export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extends boolean = false>(options?: Options<AnnotationSchemaServiceListAnnotationSchemasData, ThrowOnError>): RequestResult<AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceListAnnotationSchemasErrors, ThrowOnError> => (options?.client ?? client).get<AnnotationSchemaServiceListAnnotationSchemasResponses, AnnotationSchemaServiceListAnnotationSchemasErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas',
     ...options
@@ -75,9 +30,11 @@ export const annotationSchemaServiceListAnnotationSchemas = <ThrowOnError extend
 /**
  * Register a schema config in the caller's tenant. An unseen name starts at version 1; an existing
  * name creates the next version after a backward-compatibility check against the latest live
- * version (an incompatible change is rejected).
+ * version (an incompatible change is rejected). Registering content identical to the latest live
+ * version returns that version unchanged instead of creating a new one, so retrying a register is
+ * always safe.
  */
-export const annotationSchemaServiceRegisterAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceRegisterAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, unknown, ThrowOnError>({
+export const annotationSchemaServiceRegisterAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceRegisterAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationSchemaServiceRegisterAnnotationSchemaErrors, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceRegisterAnnotationSchemaResponses, AnnotationSchemaServiceRegisterAnnotationSchemaErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas',
     ...options,
@@ -90,7 +47,7 @@ export const annotationSchemaServiceRegisterAnnotationSchema = <ThrowOnError ext
 /**
  * Get a schema config by name (latest live version, or a specific version) in the caller's tenant.
  */
-export const annotationSchemaServiceGetAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceGetAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).get<AnnotationSchemaServiceGetAnnotationSchemaResponses, unknown, ThrowOnError>({
+export const annotationSchemaServiceGetAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceGetAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaErrors, ThrowOnError> => (options.client ?? client).get<AnnotationSchemaServiceGetAnnotationSchemaResponses, AnnotationSchemaServiceGetAnnotationSchemaErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas/{name}',
     ...options
@@ -99,7 +56,7 @@ export const annotationSchemaServiceGetAnnotationSchema = <ThrowOnError extends 
 /**
  * Archive a schema config version (stamp archived_at; never hard-delete) in the caller's tenant.
  */
-export const annotationSchemaServiceArchiveAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceArchiveAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, unknown, ThrowOnError>({
+export const annotationSchemaServiceArchiveAnnotationSchema = <ThrowOnError extends boolean = false>(options: Options<AnnotationSchemaServiceArchiveAnnotationSchemaData, ThrowOnError>): RequestResult<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceArchiveAnnotationSchemaErrors, ThrowOnError> => (options.client ?? client).post<AnnotationSchemaServiceArchiveAnnotationSchemaResponses, AnnotationSchemaServiceArchiveAnnotationSchemaErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/annotation-schemas/{name}:archive',
     ...options,
@@ -109,7 +66,13 @@ export const annotationSchemaServiceArchiveAnnotationSchema = <ThrowOnError exte
     }
 });
 
-export const runtimeServiceGetArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetArtifactData, ThrowOnError>): RequestResult<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetArtifactResponses, unknown, ThrowOnError>({
+export const runtimeServiceListArtifacts = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListArtifactsData, ThrowOnError>): RequestResult<RuntimeServiceListArtifactsResponses, RuntimeServiceListArtifactsErrors, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListArtifactsResponses, RuntimeServiceListArtifactsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/artifacts',
+    ...options
+});
+
+export const runtimeServiceGetArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetArtifactData, ThrowOnError>): RequestResult<RuntimeServiceGetArtifactResponses, RuntimeServiceGetArtifactErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetArtifactResponses, RuntimeServiceGetArtifactErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/artifacts/{id}',
     ...options
@@ -118,14 +81,15 @@ export const runtimeServiceGetArtifact = <ThrowOnError extends boolean = false>(
 /**
  * Return the service URLs a client needs before it has credentials.
  */
-export const metaServiceGetServiceConfig = <ThrowOnError extends boolean = false>(options?: Options<MetaServiceGetServiceConfigData, ThrowOnError>): RequestResult<MetaServiceGetServiceConfigResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MetaServiceGetServiceConfigResponses, unknown, ThrowOnError>({ url: '/v1/config', ...options });
+export const metaServiceGetServiceConfig = <ThrowOnError extends boolean = false>(options?: Options<MetaServiceGetServiceConfigData, ThrowOnError>): RequestResult<MetaServiceGetServiceConfigResponses, MetaServiceGetServiceConfigErrors, ThrowOnError> => (options?.client ?? client).get<MetaServiceGetServiceConfigResponses, MetaServiceGetServiceConfigErrors, ThrowOnError>({ url: '/v1/config', ...options });
 
 /**
- * Send standard input or a control signal to a running execution.
+ * Retired provider-interactive compatibility RPC. Clean sandbox-cell deployments return
+ * unsupported; input to an attached terminal travels inside its managed SSH session.
  */
-export const runtimeServiceSendExecutionInput = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceSendExecutionInputData, ThrowOnError>): RequestResult<RuntimeServiceSendExecutionInputResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceSendExecutionInputResponses, unknown, ThrowOnError>({
+export const runtimeServiceSendExecutionInput = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceSendExecutionInputData, ThrowOnError>): RequestResult<RuntimeServiceSendExecutionInputResponses, RuntimeServiceSendExecutionInputErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceSendExecutionInputResponses, RuntimeServiceSendExecutionInputErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/executions/{executionId}:input',
+    url: '/v1/executions/{execution_id}:input',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -134,11 +98,12 @@ export const runtimeServiceSendExecutionInput = <ThrowOnError extends boolean = 
 });
 
 /**
- * Signal a running execution (terminate by default).
+ * Retired provider-interactive compatibility RPC. Clean sandbox-cell deployments return
+ * unsupported.
  */
-export const runtimeServiceKillExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceKillExecutionData, ThrowOnError>): RequestResult<RuntimeServiceKillExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceKillExecutionResponses, unknown, ThrowOnError>({
+export const runtimeServiceKillExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceKillExecutionData, ThrowOnError>): RequestResult<RuntimeServiceKillExecutionResponses, RuntimeServiceKillExecutionErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceKillExecutionResponses, RuntimeServiceKillExecutionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/executions/{executionId}:kill',
+    url: '/v1/executions/{execution_id}:kill',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -146,19 +111,83 @@ export const runtimeServiceKillExecution = <ThrowOnError extends boolean = false
     }
 });
 
-export const runtimeServiceGetExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetExecutionData, ThrowOnError>): RequestResult<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetExecutionResponses, unknown, ThrowOnError>({
+export const runtimeServiceGetExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetExecutionData, ThrowOnError>): RequestResult<RuntimeServiceGetExecutionResponses, RuntimeServiceGetExecutionErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetExecutionResponses, RuntimeServiceGetExecutionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/executions/{id}',
     ...options
 });
 
-export const runtimeServiceGetFork = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetForkData, ThrowOnError>): RequestResult<RuntimeServiceGetForkResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetForkResponses, unknown, ThrowOnError>({
+/**
+ * Submit a bug report or product feedback. The report is persisted first and then surfaced to
+ * the hiloop team; a delivery problem on the surfacing side never fails the request. Repeat
+ * submissions with the same fingerprint (supplied, or content-derived when omitted) return the
+ * original report instead of storing a duplicate, so retries are safe.
+ */
+export const feedbackServiceCreateFeedback = <ThrowOnError extends boolean = false>(options: Options<FeedbackServiceCreateFeedbackData, ThrowOnError>): RequestResult<FeedbackServiceCreateFeedbackResponses, FeedbackServiceCreateFeedbackErrors, ThrowOnError> => (options.client ?? client).post<FeedbackServiceCreateFeedbackResponses, FeedbackServiceCreateFeedbackErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/feedback',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Retired fork compatibility RPC. Clean sandbox-cell deployments return unsupported.
+ */
+export const runtimeServiceGetFork = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetForkData, ThrowOnError>): RequestResult<RuntimeServiceGetForkResponses, RuntimeServiceGetForkErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetForkResponses, RuntimeServiceGetForkErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/forks/{id}',
     ...options
 });
 
-export const runtimeServiceGetOperation = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetOperationData, ThrowOnError>): RequestResult<RuntimeServiceGetOperationResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetOperationResponses, unknown, ThrowOnError>({
+/**
+ * Acquire a project-scoped lease by name. Succeeds when the name is free — or held by a lease
+ * whose TTL has lapsed, which the acquire atomically takes over — and returns the new lease with
+ * a freshly minted id. While a live holder exists the call fails with error code `lease_held`
+ * (HTTP 409); the CLI surfaces that as exit code 1 so contention loops can branch on it.
+ */
+export const leaseServiceAcquireLease = <ThrowOnError extends boolean = false>(options: Options<LeaseServiceAcquireLeaseData, ThrowOnError>): RequestResult<LeaseServiceAcquireLeaseResponses, LeaseServiceAcquireLeaseErrors, ThrowOnError> => (options.client ?? client).post<LeaseServiceAcquireLeaseResponses, LeaseServiceAcquireLeaseErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/leases',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Release a held lease by id, freeing the name immediately. A lease whose TTL already lapsed is
+ * reported as `lease_expired` rather than released (it had already ended on its own), and an id
+ * that no longer names a live lease is `not_found` — for a crash-only caller both mean the same
+ * thing: the claim is gone, acquire again when needed.
+ */
+export const leaseServiceReleaseLease = <ThrowOnError extends boolean = false>(options: Options<LeaseServiceReleaseLeaseData, ThrowOnError>): RequestResult<LeaseServiceReleaseLeaseResponses, LeaseServiceReleaseLeaseErrors, ThrowOnError> => (options.client ?? client).delete<LeaseServiceReleaseLeaseResponses, LeaseServiceReleaseLeaseErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/leases/{id}',
+    ...options
+});
+
+/**
+ * Renew a held lease by id, resetting its expiry to now + the requested TTL. The id is the
+ * capability: possession of it proves the caller's claim on this acquisition generation. A lease
+ * whose TTL already lapsed cannot be renewed — the call fails with `lease_expired` (the lease is
+ * gone; acquire again) — and an id that no longer names a live lease (released, expired, or taken
+ * over) is `not_found`.
+ */
+export const leaseServiceRenewLease = <ThrowOnError extends boolean = false>(options: Options<LeaseServiceRenewLeaseData, ThrowOnError>): RequestResult<LeaseServiceRenewLeaseResponses, LeaseServiceRenewLeaseErrors, ThrowOnError> => (options.client ?? client).post<LeaseServiceRenewLeaseResponses, LeaseServiceRenewLeaseErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/leases/{id}/renew',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const runtimeServiceGetOperation = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetOperationData, ThrowOnError>): RequestResult<RuntimeServiceGetOperationResponses, RuntimeServiceGetOperationErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetOperationResponses, RuntimeServiceGetOperationErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/operations/{id}',
     ...options
@@ -167,7 +196,7 @@ export const runtimeServiceGetOperation = <ThrowOnError extends boolean = false>
 /**
  * List the projects in the caller's tenant, newest first, with cursor pagination.
  */
-export const projectServiceListProjects = <ThrowOnError extends boolean = false>(options?: Options<ProjectServiceListProjectsData, ThrowOnError>): RequestResult<ProjectServiceListProjectsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ProjectServiceListProjectsResponses, unknown, ThrowOnError>({
+export const projectServiceListProjects = <ThrowOnError extends boolean = false>(options?: Options<ProjectServiceListProjectsData, ThrowOnError>): RequestResult<ProjectServiceListProjectsResponses, ProjectServiceListProjectsErrors, ThrowOnError> => (options?.client ?? client).get<ProjectServiceListProjectsResponses, ProjectServiceListProjectsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects',
     ...options
@@ -176,7 +205,7 @@ export const projectServiceListProjects = <ThrowOnError extends boolean = false>
 /**
  * Create a project in the caller's tenant. A duplicate slug within the tenant is a conflict.
  */
-export const projectServiceCreateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceCreateProjectData, ThrowOnError>): RequestResult<ProjectServiceCreateProjectResponses, unknown, ThrowOnError> => (options.client ?? client).post<ProjectServiceCreateProjectResponses, unknown, ThrowOnError>({
+export const projectServiceCreateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceCreateProjectData, ThrowOnError>): RequestResult<ProjectServiceCreateProjectResponses, ProjectServiceCreateProjectErrors, ThrowOnError> => (options.client ?? client).post<ProjectServiceCreateProjectResponses, ProjectServiceCreateProjectErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects',
     ...options,
@@ -192,10 +221,13 @@ export const projectServiceCreateProject = <ThrowOnError extends boolean = false
  * `cascade` to also delete the project's runs, snapshots, deleted sandboxes, and other resources
  * (and reclaim the storage backing its artifacts) in one call. A cascade never tears down a live
  * sandbox: every sandbox in the project must be deleted first, and while one is not the call
- * returns a conflict with error code `sandboxes_not_deleted`. Deleting a project that does not
- * exist in the caller's tenant is `not_found`.
+ * returns a conflict with error code `sandboxes_not_deleted`. A cascade also never deletes a
+ * snapshot under an active legal hold: while the project has one, the call returns a conflict with
+ * error code `snapshots_on_legal_hold` and deletes nothing. Deleting a project that does not
+ * exist in the caller's tenant is `not_found`. The response reports how many of each dependent
+ * resource the delete actually removed.
  */
-export const projectServiceDeleteProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceDeleteProjectData, ThrowOnError>): RequestResult<ProjectServiceDeleteProjectResponses, unknown, ThrowOnError> => (options.client ?? client).delete<ProjectServiceDeleteProjectResponses, unknown, ThrowOnError>({
+export const projectServiceDeleteProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceDeleteProjectData, ThrowOnError>): RequestResult<ProjectServiceDeleteProjectResponses, ProjectServiceDeleteProjectErrors, ThrowOnError> => (options.client ?? client).delete<ProjectServiceDeleteProjectResponses, ProjectServiceDeleteProjectErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects/{id}',
     ...options
@@ -204,16 +236,18 @@ export const projectServiceDeleteProject = <ThrowOnError extends boolean = false
 /**
  * Get a project by id within the caller's tenant.
  */
-export const projectServiceGetProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceGetProjectData, ThrowOnError>): RequestResult<ProjectServiceGetProjectResponses, unknown, ThrowOnError> => (options.client ?? client).get<ProjectServiceGetProjectResponses, unknown, ThrowOnError>({
+export const projectServiceGetProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceGetProjectData, ThrowOnError>): RequestResult<ProjectServiceGetProjectResponses, ProjectServiceGetProjectErrors, ThrowOnError> => (options.client ?? client).get<ProjectServiceGetProjectResponses, ProjectServiceGetProjectErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects/{id}',
     ...options
 });
 
 /**
- * Update a project's name (the slug is immutable) within the caller's tenant.
+ * Update a project's name, description, or display configuration (the slug is immutable) within
+ * the caller's tenant. Only the fields present in the request change; a request that changes
+ * nothing is invalid.
  */
-export const projectServiceUpdateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceUpdateProjectData, ThrowOnError>): RequestResult<ProjectServiceUpdateProjectResponses, unknown, ThrowOnError> => (options.client ?? client).patch<ProjectServiceUpdateProjectResponses, unknown, ThrowOnError>({
+export const projectServiceUpdateProject = <ThrowOnError extends boolean = false>(options: Options<ProjectServiceUpdateProjectData, ThrowOnError>): RequestResult<ProjectServiceUpdateProjectResponses, ProjectServiceUpdateProjectErrors, ThrowOnError> => (options.client ?? client).patch<ProjectServiceUpdateProjectResponses, ProjectServiceUpdateProjectErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/projects/{id}',
     ...options,
@@ -227,7 +261,7 @@ export const projectServiceUpdateProject = <ThrowOnError extends boolean = false
  * List the runs in the caller's tenant, newest first, with cursor pagination and optional
  * status / creator / time / tree filters.
  */
-export const runServiceListRuns = <ThrowOnError extends boolean = false>(options?: Options<RunServiceListRunsData, ThrowOnError>): RequestResult<RunServiceListRunsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RunServiceListRunsResponses, unknown, ThrowOnError>({
+export const runServiceListRuns = <ThrowOnError extends boolean = false>(options?: Options<RunServiceListRunsData, ThrowOnError>): RequestResult<RunServiceListRunsResponses, RunServiceListRunsErrors, ThrowOnError> => (options?.client ?? client).get<RunServiceListRunsResponses, RunServiceListRunsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs',
     ...options
@@ -237,8 +271,13 @@ export const runServiceListRuns = <ThrowOnError extends boolean = false>(options
  * Start a new run: a new tree root, or a run that continues an existing tree when parent_run_id
  * is set. The run begins executing immediately (status running, started_at stamped); record its
  * outcome with CompleteRun.
+ *
+ * Retries are safe with an `idempotency-key` header: repeating the request with the same key
+ * returns the original run (in whatever state it has reached) instead of starting a second one,
+ * and reusing a key with a different request fails with `idempotency_conflict`. Without a key,
+ * every call starts a fresh run.
  */
-export const runServiceStartRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceStartRunData, ThrowOnError>): RequestResult<RunServiceStartRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceStartRunResponses, unknown, ThrowOnError>({
+export const runServiceStartRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceStartRunData, ThrowOnError>): RequestResult<RunServiceStartRunResponses, RunServiceStartRunErrors, ThrowOnError> => (options.client ?? client).post<RunServiceStartRunResponses, RunServiceStartRunErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs',
     ...options,
@@ -251,7 +290,7 @@ export const runServiceStartRun = <ThrowOnError extends boolean = false>(options
 /**
  * Get a run by id within the caller's tenant.
  */
-export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunData, ThrowOnError>): RequestResult<RunServiceGetRunResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunResponses, unknown, ThrowOnError>({
+export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunData, ThrowOnError>): RequestResult<RunServiceGetRunResponses, RunServiceGetRunErrors, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunResponses, RunServiceGetRunErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs/{id}',
     ...options
@@ -262,7 +301,7 @@ export const runServiceGetRun = <ThrowOnError extends boolean = false>(options: 
  * time. Only a pending or running run can be completed; completing a run that already has a
  * terminal status is a conflict.
  */
-export const runServiceCompleteRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceCompleteRunData, ThrowOnError>): RequestResult<RunServiceCompleteRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceCompleteRunResponses, unknown, ThrowOnError>({
+export const runServiceCompleteRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceCompleteRunData, ThrowOnError>): RequestResult<RunServiceCompleteRunResponses, RunServiceCompleteRunErrors, ThrowOnError> => (options.client ?? client).post<RunServiceCompleteRunResponses, RunServiceCompleteRunErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs/{id}:complete',
     ...options,
@@ -274,10 +313,15 @@ export const runServiceCompleteRun = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Fork a run: mint a child run that branches from the parent at the given branch point.
+ *
+ * Retries are safe with an `idempotency-key` header: repeating the request with the same key
+ * returns the original child run instead of minting a second one, and reusing a key with a
+ * different request fails with `idempotency_conflict`. Without a key, every call mints a fresh
+ * child run.
  */
-export const runServiceForkRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceForkRunData, ThrowOnError>): RequestResult<RunServiceForkRunResponses, unknown, ThrowOnError> => (options.client ?? client).post<RunServiceForkRunResponses, unknown, ThrowOnError>({
+export const runServiceForkRun = <ThrowOnError extends boolean = false>(options: Options<RunServiceForkRunData, ThrowOnError>): RequestResult<RunServiceForkRunResponses, RunServiceForkRunErrors, ThrowOnError> => (options.client ?? client).post<RunServiceForkRunResponses, RunServiceForkRunErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/runs/{parentRunId}:fork',
+    url: '/v1/runs/{parent_run_id}:fork',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -288,25 +332,25 @@ export const runServiceForkRun = <ThrowOnError extends boolean = false>(options:
 /**
  * Get the ordered lineage tree rooted at a run within the caller's tenant.
  */
-export const runServiceGetRunTree = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunTreeData, ThrowOnError>): RequestResult<RunServiceGetRunTreeResponses, unknown, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunTreeResponses, unknown, ThrowOnError>({
+export const runServiceGetRunTree = <ThrowOnError extends boolean = false>(options: Options<RunServiceGetRunTreeData, ThrowOnError>): RequestResult<RunServiceGetRunTreeResponses, RunServiceGetRunTreeErrors, ThrowOnError> => (options.client ?? client).get<RunServiceGetRunTreeResponses, RunServiceGetRunTreeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/runs/{rootRunId}/tree',
+    url: '/v1/runs/{root_run_id}/tree',
     ...options
 });
 
-export const runtimeServiceListRuntimeCapabilities = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListRuntimeCapabilitiesData, ThrowOnError>): RequestResult<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListRuntimeCapabilitiesResponses, unknown, ThrowOnError>({
+export const runtimeServiceListRuntimeCapabilities = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListRuntimeCapabilitiesData, ThrowOnError>): RequestResult<RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListRuntimeCapabilitiesErrors, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListRuntimeCapabilitiesResponses, RuntimeServiceListRuntimeCapabilitiesErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runtime/capabilities',
     ...options
 });
 
-export const runtimeServiceListSandboxes = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListSandboxesData, ThrowOnError>): RequestResult<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListSandboxesResponses, unknown, ThrowOnError>({
+export const runtimeServiceListSandboxes = <ThrowOnError extends boolean = false>(options?: Options<RuntimeServiceListSandboxesData, ThrowOnError>): RequestResult<RuntimeServiceListSandboxesResponses, RuntimeServiceListSandboxesErrors, ThrowOnError> => (options?.client ?? client).get<RuntimeServiceListSandboxesResponses, RuntimeServiceListSandboxesErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes',
     ...options
 });
 
-export const runtimeServiceCreateSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSandboxData, ThrowOnError>): RequestResult<RuntimeServiceCreateSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSandboxResponses, unknown, ThrowOnError>({
+export const runtimeServiceCreateSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSandboxData, ThrowOnError>): RequestResult<RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSandboxErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSandboxResponses, RuntimeServiceCreateSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes',
     ...options,
@@ -316,25 +360,25 @@ export const runtimeServiceCreateSandbox = <ThrowOnError extends boolean = false
     }
 });
 
-export const runtimeServiceDeleteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSandboxResponses, unknown, ThrowOnError>({
+export const runtimeServiceDeleteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSandboxErrors, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSandboxResponses, RuntimeServiceDeleteSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{id}',
     ...options
 });
 
-export const runtimeServiceGetSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSandboxData, ThrowOnError>): RequestResult<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSandboxResponses, unknown, ThrowOnError>({
+export const runtimeServiceGetSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSandboxData, ThrowOnError>): RequestResult<RuntimeServiceGetSandboxResponses, RuntimeServiceGetSandboxErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSandboxResponses, RuntimeServiceGetSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{id}',
     ...options
 });
 
 /**
- * Resume a stopped sandbox whose state was preserved at stop time, returning it to running with
- * its filesystem and process state intact. Resuming a sandbox that is already running succeeds
- * without effect; a sandbox whose workload was torn down (stopped without state preservation, or
- * deleted) cannot be resumed and reports a conflict.
+ * Resume a stopped sandbox. A sealed BranchFS continuation boots a fresh runtime generation from
+ * the exact immutable change; it preserves filesystem bytes, not process or memory state. Without
+ * a sealed continuation, resume provisions fresh scratch storage only when fresh_workspace is
+ * explicitly set.
  */
-export const runtimeServiceResumeSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceResumeSandboxData, ThrowOnError>): RequestResult<RuntimeServiceResumeSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceResumeSandboxResponses, unknown, ThrowOnError>({
+export const runtimeServiceResumeSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceResumeSandboxData, ThrowOnError>): RequestResult<RuntimeServiceResumeSandboxResponses, RuntimeServiceResumeSandboxErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceResumeSandboxResponses, RuntimeServiceResumeSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{id}:resume',
     ...options,
@@ -346,13 +390,12 @@ export const runtimeServiceResumeSandbox = <ThrowOnError extends boolean = false
 
 /**
  * Gracefully stop a running sandbox. The sandbox comes to rest in a stopped state and its record
- * is retained so it stays inspectable — distinct from DeleteSandbox, which tears the sandbox down
- * entirely. Where the provider supports state-preserving suspension, the workload's filesystem
- * and process state are preserved and ResumeSandbox brings it back; otherwise the workload is
- * terminated and the stop is final. Work that completed before the stop is reported as succeeded
- * rather than interrupted.
+ * is retained so it stays inspectable — distinct from DeleteSandbox. A versioned BranchFS
+ * workspace is destroyed only after its exact terminal bytes are sealed; ResumeSandbox boots a
+ * new generation from that immutable change. Process and memory state do not survive that path.
+ * Ephemeral scratch storage has no continuation and requires fresh_workspace on resume.
  */
-export const runtimeServiceStopSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStopSandboxData, ThrowOnError>): RequestResult<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStopSandboxResponses, unknown, ThrowOnError>({
+export const runtimeServiceStopSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStopSandboxData, ThrowOnError>): RequestResult<RuntimeServiceStopSandboxResponses, RuntimeServiceStopSandboxErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStopSandboxResponses, RuntimeServiceStopSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/sandboxes/{id}:stop',
     ...options,
@@ -363,12 +406,13 @@ export const runtimeServiceStopSandbox = <ThrowOnError extends boolean = false>(
 });
 
 /**
- * Start an interactive execution. Returns immediately with the created execution and operation;
- * output is consumed through StreamExecution and driven through SendExecutionInput.
+ * Retired provider-interactive compatibility RPC. Clean sandbox-cell deployments return
+ * unsupported. Use ExecuteSandbox for durable shared-queue commands or managed SSH through the
+ * signed session gateway for an attached terminal.
  */
-export const runtimeServiceStartExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStartExecutionData, ThrowOnError>): RequestResult<RuntimeServiceStartExecutionResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStartExecutionResponses, unknown, ThrowOnError>({
+export const runtimeServiceStartExecution = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceStartExecutionData, ThrowOnError>): RequestResult<RuntimeServiceStartExecutionResponses, RuntimeServiceStartExecutionErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceStartExecutionResponses, RuntimeServiceStartExecutionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sandboxId}/executions',
+    url: '/v1/sandboxes/{sandbox_id}/executions',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -376,9 +420,9 @@ export const runtimeServiceStartExecution = <ThrowOnError extends boolean = fals
     }
 });
 
-export const runtimeServiceFileFromArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileFromArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileFromArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).put<RuntimeServiceFileFromArtifactResponses, unknown, ThrowOnError>({
+export const runtimeServiceFileFromArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileFromArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileFromArtifactErrors, ThrowOnError> => (options.client ?? client).put<RuntimeServiceFileFromArtifactResponses, RuntimeServiceFileFromArtifactErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sandboxId}/files:from-artifact',
+    url: '/v1/sandboxes/{sandbox_id}/files:from-artifact',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -386,9 +430,9 @@ export const runtimeServiceFileFromArtifact = <ThrowOnError extends boolean = fa
     }
 });
 
-export const runtimeServiceFileToArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileToArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileToArtifactResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceFileToArtifactResponses, unknown, ThrowOnError>({
+export const runtimeServiceFileToArtifact = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceFileToArtifactData, ThrowOnError>): RequestResult<RuntimeServiceFileToArtifactResponses, RuntimeServiceFileToArtifactErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceFileToArtifactResponses, RuntimeServiceFileToArtifactErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sandboxId}/files:to-artifact',
+    url: '/v1/sandboxes/{sandbox_id}/files:to-artifact',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -396,9 +440,19 @@ export const runtimeServiceFileToArtifact = <ThrowOnError extends boolean = fals
     }
 });
 
-export const runtimeServiceCreateSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceCreateSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSnapshotResponses, unknown, ThrowOnError>({
+export const runtimeServiceListExposedPorts = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceListExposedPortsData, ThrowOnError>): RequestResult<RuntimeServiceListExposedPortsResponses, RuntimeServiceListExposedPortsErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceListExposedPortsResponses, RuntimeServiceListExposedPortsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sandboxId}/snapshots',
+    url: '/v1/sandboxes/{sandbox_id}/ports',
+    ...options
+});
+
+/**
+ * Retired snapshot compatibility RPC. Clean sandbox-cell deployments return unsupported; use a
+ * BranchFS workspace plus stop/resume for filesystem continuity.
+ */
+export const runtimeServiceCreateSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceCreateSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceCreateSnapshotResponses, RuntimeServiceCreateSnapshotErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceCreateSnapshotResponses, RuntimeServiceCreateSnapshotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{sandbox_id}/snapshots',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -406,9 +460,13 @@ export const runtimeServiceCreateSnapshot = <ThrowOnError extends boolean = fals
     }
 });
 
-export const runtimeServiceExecuteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceExecuteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceExecuteSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceExecuteSandboxResponses, unknown, ThrowOnError>({
+/**
+ * Submit one bounded command through the durable shared execution queue. The operation and
+ * execution records remain the source of truth; bounded stdout and stderr are stored as artifacts.
+ */
+export const runtimeServiceExecuteSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceExecuteSandboxData, ThrowOnError>): RequestResult<RuntimeServiceExecuteSandboxResponses, RuntimeServiceExecuteSandboxErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceExecuteSandboxResponses, RuntimeServiceExecuteSandboxErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sandboxId}:execute',
+    url: '/v1/sandboxes/{sandbox_id}:execute',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -416,9 +474,40 @@ export const runtimeServiceExecuteSandbox = <ThrowOnError extends boolean = fals
     }
 });
 
-export const runtimeServiceForkSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceForkSandboxData, ThrowOnError>): RequestResult<RuntimeServiceForkSandboxResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceForkSandboxResponses, unknown, ThrowOnError>({
+/**
+ * Expose one guest port through the deployment's preview edge. Identity is `(sandbox_id, port)`:
+ * repeating an active identity succeeds without rotating or returning its token. Rotate explicitly
+ * with UnexposePort followed by ExposePort.
+ */
+export const runtimeServiceExposePort = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceExposePortData, ThrowOnError>): RequestResult<RuntimeServiceExposePortResponses, RuntimeServiceExposePortErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceExposePortResponses, RuntimeServiceExposePortErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/sandboxes/{sourceSandboxId}:fork',
+    url: '/v1/sandboxes/{sandbox_id}:expose',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Immediately revoke one guest-port exposure. Repeating the call succeeds without effect.
+ */
+export const runtimeServiceUnexposePort = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceUnexposePortData, ThrowOnError>): RequestResult<RuntimeServiceUnexposePortResponses, RuntimeServiceUnexposePortErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceUnexposePortResponses, RuntimeServiceUnexposePortErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{sandbox_id}:unexpose',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Retired fork compatibility RPC. Clean sandbox-cell deployments return unsupported.
+ */
+export const runtimeServiceForkSandbox = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceForkSandboxData, ThrowOnError>): RequestResult<RuntimeServiceForkSandboxResponses, RuntimeServiceForkSandboxErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceForkSandboxResponses, RuntimeServiceForkSandboxErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/sandboxes/{source_sandbox_id}:fork',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -429,7 +518,7 @@ export const runtimeServiceForkSandbox = <ThrowOnError extends boolean = false>(
 /**
  * List the secrets in the caller's tenant, newest first — metadata only, never the value.
  */
-export const secretServiceListSandboxSecrets = <ThrowOnError extends boolean = false>(options?: Options<SecretServiceListSandboxSecretsData, ThrowOnError>): RequestResult<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<SecretServiceListSandboxSecretsResponses, unknown, ThrowOnError>({
+export const secretServiceListSandboxSecrets = <ThrowOnError extends boolean = false>(options?: Options<SecretServiceListSandboxSecretsData, ThrowOnError>): RequestResult<SecretServiceListSandboxSecretsResponses, SecretServiceListSandboxSecretsErrors, ThrowOnError> => (options?.client ?? client).get<SecretServiceListSandboxSecretsResponses, SecretServiceListSandboxSecretsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets',
     ...options
@@ -439,7 +528,7 @@ export const secretServiceListSandboxSecrets = <ThrowOnError extends boolean = f
  * Create a secret in the caller's tenant, storing the value encrypted. A duplicate name within the
  * tenant is a conflict. The value is not returned.
  */
-export const secretServiceCreateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceCreateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceCreateSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceCreateSandboxSecretResponses, unknown, ThrowOnError>({
+export const secretServiceCreateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceCreateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceCreateSandboxSecretResponses, SecretServiceCreateSandboxSecretErrors, ThrowOnError> => (options.client ?? client).post<SecretServiceCreateSandboxSecretResponses, SecretServiceCreateSandboxSecretErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets',
     ...options,
@@ -454,7 +543,7 @@ export const secretServiceCreateSandboxSecret = <ThrowOnError extends boolean = 
  * proxy with the per-sandbox credential to fetch a value to inject into an outbound request; this is
  * the only RPC that returns the value.
  */
-export const secretServiceResolveSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceResolveSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceResolveSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceResolveSandboxSecretResponses, unknown, ThrowOnError>({
+export const secretServiceResolveSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceResolveSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceResolveSandboxSecretResponses, SecretServiceResolveSandboxSecretErrors, ThrowOnError> => (options.client ?? client).post<SecretServiceResolveSandboxSecretResponses, SecretServiceResolveSandboxSecretErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets/resolve',
     ...options,
@@ -467,7 +556,7 @@ export const secretServiceResolveSandboxSecret = <ThrowOnError extends boolean =
 /**
  * Revoke a secret by id within the caller's tenant. A revoked secret resolves to nothing.
  */
-export const secretServiceRevokeSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRevokeSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).delete<SecretServiceRevokeSandboxSecretResponses, unknown, ThrowOnError>({
+export const secretServiceRevokeSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRevokeSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRevokeSandboxSecretResponses, SecretServiceRevokeSandboxSecretErrors, ThrowOnError> => (options.client ?? client).delete<SecretServiceRevokeSandboxSecretResponses, SecretServiceRevokeSandboxSecretErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets/{id}',
     ...options
@@ -476,8 +565,13 @@ export const secretServiceRevokeSandboxSecret = <ThrowOnError extends boolean = 
 /**
  * Rotate a secret to a new value within the caller's tenant, storing it as a new version. The new
  * value is not returned.
+ *
+ * Retries are safe with an `idempotency-key` header: repeating the request with the same key and
+ * the same value returns the secret's current metadata instead of rotating a second time, and
+ * reusing a key with a different value (or another secret) fails with `idempotency_conflict`.
+ * Without a key, every call mints a new version.
  */
-export const secretServiceRotateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRotateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRotateSandboxSecretResponses, unknown, ThrowOnError> => (options.client ?? client).post<SecretServiceRotateSandboxSecretResponses, unknown, ThrowOnError>({
+export const secretServiceRotateSandboxSecret = <ThrowOnError extends boolean = false>(options: Options<SecretServiceRotateSandboxSecretData, ThrowOnError>): RequestResult<SecretServiceRotateSandboxSecretResponses, SecretServiceRotateSandboxSecretErrors, ThrowOnError> => (options.client ?? client).post<SecretServiceRotateSandboxSecretResponses, SecretServiceRotateSandboxSecretErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/secrets/{id}/rotate',
     ...options,
@@ -487,33 +581,40 @@ export const secretServiceRotateSandboxSecret = <ThrowOnError extends boolean = 
     }
 });
 
-export const runtimeServiceListSnapshots = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceListSnapshotsData, ThrowOnError>): RequestResult<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceListSnapshotsResponses, unknown, ThrowOnError>({
+/**
+ * Retired snapshot compatibility RPC. Clean sandbox-cell deployments return unsupported.
+ */
+export const runtimeServiceListSnapshots = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceListSnapshotsData, ThrowOnError>): RequestResult<RuntimeServiceListSnapshotsResponses, RuntimeServiceListSnapshotsErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceListSnapshotsResponses, RuntimeServiceListSnapshotsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/snapshots',
     ...options
 });
 
-export const runtimeServiceDeleteSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSnapshotResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/snapshots/{id}',
-    ...options
-});
-
-export const runtimeServiceGetSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSnapshotResponses, unknown, ThrowOnError>({
+/**
+ * Retired snapshot compatibility RPC. Clean sandbox-cell deployments return unsupported.
+ */
+export const runtimeServiceDeleteSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceDeleteSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceDeleteSnapshotResponses, RuntimeServiceDeleteSnapshotErrors, ThrowOnError> => (options.client ?? client).delete<RuntimeServiceDeleteSnapshotResponses, RuntimeServiceDeleteSnapshotErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/snapshots/{id}',
     ...options
 });
 
 /**
- * Create a new sandbox from a snapshot — fork-from-snapshot. The source sandbox may be stopped
- * or deleted; only the snapshot must be ready. A snapshot that records its source run mints the
- * new sandbox's run as a child branched at the snapshot's recorded anchor, so the restored
- * sandbox extends the source's run lineage.
+ * Retired snapshot compatibility RPC. Clean sandbox-cell deployments return unsupported.
  */
-export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceRestoreSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError> => (options.client ?? client).post<RuntimeServiceRestoreSnapshotResponses, unknown, ThrowOnError>({
+export const runtimeServiceGetSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceGetSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceGetSnapshotResponses, RuntimeServiceGetSnapshotErrors, ThrowOnError> => (options.client ?? client).get<RuntimeServiceGetSnapshotResponses, RuntimeServiceGetSnapshotErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/snapshots/{snapshotId}:restore',
+    url: '/v1/snapshots/{id}',
+    ...options
+});
+
+/**
+ * Retired snapshot-restore compatibility RPC. Clean sandbox-cell deployments return unsupported;
+ * resume an exact sealed BranchFS workspace into a fresh runtime generation instead.
+ */
+export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = false>(options: Options<RuntimeServiceRestoreSnapshotData, ThrowOnError>): RequestResult<RuntimeServiceRestoreSnapshotResponses, RuntimeServiceRestoreSnapshotErrors, ThrowOnError> => (options.client ?? client).post<RuntimeServiceRestoreSnapshotResponses, RuntimeServiceRestoreSnapshotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/snapshots/{snapshot_id}:restore',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -525,7 +626,7 @@ export const runtimeServiceRestoreSnapshot = <ThrowOnError extends boolean = fal
  * List a run's (or project's) annotations: the current latest-wins set by default, every stored
  * version with `history`, optionally widened to the run's lineage subtree.
  */
-export const annotationServiceListAnnotations = <ThrowOnError extends boolean = false>(options?: Options<AnnotationServiceListAnnotationsData, ThrowOnError>): RequestResult<AnnotationServiceListAnnotationsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AnnotationServiceListAnnotationsResponses, unknown, ThrowOnError>({
+export const annotationServiceListAnnotations = <ThrowOnError extends boolean = false>(options?: Options<AnnotationServiceListAnnotationsData, ThrowOnError>): RequestResult<AnnotationServiceListAnnotationsResponses, AnnotationServiceListAnnotationsErrors, ThrowOnError> => (options?.client ?? client).get<AnnotationServiceListAnnotationsResponses, AnnotationServiceListAnnotationsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/annotations',
     ...options
@@ -535,7 +636,7 @@ export const annotationServiceListAnnotations = <ThrowOnError extends boolean = 
  * Annotate a single target event in a run. Mints one `signal = "annotation"` event, validates its
  * payload against the named schema, and durably appends it; returns the minted `event_id`.
  */
-export const annotationServiceAnnotate = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateResponses, unknown, ThrowOnError>({
+export const annotationServiceAnnotate = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateResponses, AnnotationServiceAnnotateErrors, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateResponses, AnnotationServiceAnnotateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/annotations',
     ...options,
@@ -549,7 +650,7 @@ export const annotationServiceAnnotate = <ThrowOnError extends boolean = false>(
  * Annotate a wall-clock range within a run. Mints one `signal = "annotation"` range event, validates
  * its payload against the named schema, and durably appends it; returns the minted `event_id`.
  */
-export const annotationServiceAnnotateRange = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateRangeData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateRangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateRangeResponses, unknown, ThrowOnError>({
+export const annotationServiceAnnotateRange = <ThrowOnError extends boolean = false>(options: Options<AnnotationServiceAnnotateRangeData, ThrowOnError>): RequestResult<AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateRangeErrors, ThrowOnError> => (options.client ?? client).post<AnnotationServiceAnnotateRangeResponses, AnnotationServiceAnnotateRangeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/annotations:range',
     ...options,
@@ -562,7 +663,7 @@ export const annotationServiceAnnotateRange = <ThrowOnError extends boolean = fa
 /**
  * Diff two runs in a tree: the events unique to run A versus run B.
  */
-export const telemetryQueryServiceBranchDiff = <ThrowOnError extends boolean = false>(options: Options<TelemetryQueryServiceBranchDiffData, ThrowOnError>): RequestResult<TelemetryQueryServiceBranchDiffResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryQueryServiceBranchDiffResponses, unknown, ThrowOnError>({
+export const telemetryQueryServiceBranchDiff = <ThrowOnError extends boolean = false>(options: Options<TelemetryQueryServiceBranchDiffData, ThrowOnError>): RequestResult<TelemetryQueryServiceBranchDiffResponses, TelemetryQueryServiceBranchDiffErrors, ThrowOnError> => (options.client ?? client).post<TelemetryQueryServiceBranchDiffResponses, TelemetryQueryServiceBranchDiffErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/branch-diff',
     ...options,
@@ -575,7 +676,7 @@ export const telemetryQueryServiceBranchDiff = <ThrowOnError extends boolean = f
 /**
  * List the tenant's data views.
  */
-export const telemetryViewServiceListDataViews = <ThrowOnError extends boolean = false>(options?: Options<TelemetryViewServiceListDataViewsData, ThrowOnError>): RequestResult<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TelemetryViewServiceListDataViewsResponses, unknown, ThrowOnError>({
+export const telemetryViewServiceListDataViews = <ThrowOnError extends boolean = false>(options?: Options<TelemetryViewServiceListDataViewsData, ThrowOnError>): RequestResult<TelemetryViewServiceListDataViewsResponses, TelemetryViewServiceListDataViewsErrors, ThrowOnError> => (options?.client ?? client).get<TelemetryViewServiceListDataViewsResponses, TelemetryViewServiceListDataViewsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/data-views',
     ...options
@@ -584,7 +685,7 @@ export const telemetryViewServiceListDataViews = <ThrowOnError extends boolean =
 /**
  * Delete a data view (a name with no tenant-owned view is NOT_FOUND, not a silent no-op).
  */
-export const telemetryViewServiceDeleteDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceDeleteDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TelemetryViewServiceDeleteDataViewResponses, unknown, ThrowOnError>({
+export const telemetryViewServiceDeleteDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceDeleteDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceDeleteDataViewErrors, ThrowOnError> => (options.client ?? client).delete<TelemetryViewServiceDeleteDataViewResponses, TelemetryViewServiceDeleteDataViewErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/data-views/{name}',
     ...options
@@ -593,7 +694,7 @@ export const telemetryViewServiceDeleteDataView = <ThrowOnError extends boolean 
 /**
  * Create or replace a data view (compile-validated before store).
  */
-export const telemetryViewServicePutDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServicePutDataViewData, ThrowOnError>): RequestResult<TelemetryViewServicePutDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).put<TelemetryViewServicePutDataViewResponses, unknown, ThrowOnError>({
+export const telemetryViewServicePutDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServicePutDataViewData, ThrowOnError>): RequestResult<TelemetryViewServicePutDataViewResponses, TelemetryViewServicePutDataViewErrors, ThrowOnError> => (options.client ?? client).put<TelemetryViewServicePutDataViewResponses, TelemetryViewServicePutDataViewErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/data-views/{name}',
     ...options,
@@ -606,7 +707,7 @@ export const telemetryViewServicePutDataView = <ThrowOnError extends boolean = f
 /**
  * Run a data view: compile its stored spec fresh + execute it, returning typed rows.
  */
-export const telemetryViewServiceRunDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceRunDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError> => (options.client ?? client).post<TelemetryViewServiceRunDataViewResponses, unknown, ThrowOnError>({
+export const telemetryViewServiceRunDataView = <ThrowOnError extends boolean = false>(options: Options<TelemetryViewServiceRunDataViewData, ThrowOnError>): RequestResult<TelemetryViewServiceRunDataViewResponses, TelemetryViewServiceRunDataViewErrors, ThrowOnError> => (options.client ?? client).post<TelemetryViewServiceRunDataViewResponses, TelemetryViewServiceRunDataViewErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/telemetry/data-views/{name}:run',
     ...options
@@ -615,18 +716,88 @@ export const telemetryViewServiceRunDataView = <ThrowOnError extends boolean = f
 /**
  * Get the caller's tenant baseline egress policy. Returns the implicit default when none is set.
  */
-export const egressPolicyServiceGetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options?: Options<EgressPolicyServiceGetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceGetTenantEgressPolicyResponses, unknown, ThrowOnError> => (options?.client ?? client).get<EgressPolicyServiceGetTenantEgressPolicyResponses, unknown, ThrowOnError>({
+export const egressPolicyServiceGetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options?: Options<EgressPolicyServiceGetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceGetTenantEgressPolicyErrors, ThrowOnError> => (options?.client ?? client).get<EgressPolicyServiceGetTenantEgressPolicyResponses, EgressPolicyServiceGetTenantEgressPolicyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/tenant/egress-policy',
     ...options
 });
 
 /**
- * Set the caller's tenant baseline egress policy. Requires an owner or admin in the tenant.
+ * Set the caller's tenant baseline egress policy. Requires an owner or admin in the tenant. The
+ * response reports how the new baseline changed the effective policy of every existing binding
+ * (and the default class), so a write that re-clamps existing rules says so at write time.
  */
-export const egressPolicyServiceSetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServiceSetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceSetTenantEgressPolicyResponses, unknown, ThrowOnError> => (options.client ?? client).put<EgressPolicyServiceSetTenantEgressPolicyResponses, unknown, ThrowOnError>({
+export const egressPolicyServiceSetTenantEgressPolicy = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServiceSetTenantEgressPolicyData, ThrowOnError>): RequestResult<EgressPolicyServiceSetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyErrors, ThrowOnError> => (options.client ?? client).put<EgressPolicyServiceSetTenantEgressPolicyResponses, EgressPolicyServiceSetTenantEgressPolicyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/tenant/egress-policy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Preview how a proposed tenant baseline would change the effective policy of every existing
+ * binding (and the default class) before it is set — the per-selector added/removed destinations.
+ * A read: it evaluates the proposal without persisting it. It reveals binding structure and serves
+ * the operator management surfaces, so it requires an owner or admin in the tenant.
+ */
+export const egressPolicyServicePreviewBaselineImpact = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServicePreviewBaselineImpactData, ThrowOnError>): RequestResult<EgressPolicyServicePreviewBaselineImpactResponses, EgressPolicyServicePreviewBaselineImpactErrors, ThrowOnError> => (options.client ?? client).post<EgressPolicyServicePreviewBaselineImpactResponses, EgressPolicyServicePreviewBaselineImpactErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy/baseline-impact',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete an identity-bound egress policy binding by selector. Requires an owner or admin.
+ */
+export const egressPolicyServiceDeleteEgressPolicyBinding = <ThrowOnError extends boolean = false>(options?: Options<EgressPolicyServiceDeleteEgressPolicyBindingData, ThrowOnError>): RequestResult<EgressPolicyServiceDeleteEgressPolicyBindingResponses, EgressPolicyServiceDeleteEgressPolicyBindingErrors, ThrowOnError> => (options?.client ?? client).delete<EgressPolicyServiceDeleteEgressPolicyBindingResponses, EgressPolicyServiceDeleteEgressPolicyBindingErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy/bindings',
+    ...options
+});
+
+/**
+ * List the caller's tenant's identity-bound egress policy bindings. Requires an owner or admin.
+ */
+export const egressPolicyServiceListEgressPolicyBindings = <ThrowOnError extends boolean = false>(options?: Options<EgressPolicyServiceListEgressPolicyBindingsData, ThrowOnError>): RequestResult<EgressPolicyServiceListEgressPolicyBindingsResponses, EgressPolicyServiceListEgressPolicyBindingsErrors, ThrowOnError> => (options?.client ?? client).get<EgressPolicyServiceListEgressPolicyBindingsResponses, EgressPolicyServiceListEgressPolicyBindingsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy/bindings',
+    ...options
+});
+
+/**
+ * Set (create or replace) an identity-bound egress policy binding for a selector. Requires an
+ * owner or admin in the tenant. The response reports the destinations the tenant baseline
+ * ceiling clamps away from the stored binding, so a write whose entries can never take effect
+ * says so at write time.
+ */
+export const egressPolicyServiceSetEgressPolicyBinding = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServiceSetEgressPolicyBindingData, ThrowOnError>): RequestResult<EgressPolicyServiceSetEgressPolicyBindingResponses, EgressPolicyServiceSetEgressPolicyBindingErrors, ThrowOnError> => (options.client ?? client).put<EgressPolicyServiceSetEgressPolicyBindingResponses, EgressPolicyServiceSetEgressPolicyBindingErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy/bindings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Resolve the effective egress policy for an identity selector: the tenant baseline narrowed by the
+ * most-specific matching binding (or, when a proposed policy is supplied, by that unsaved policy at
+ * the selector's tier), plus which binding won, what the baseline ceiling clamped away, and how many
+ * identities the selector covers. This runs the same resolution the runtime enforces, server-side,
+ * so callers never re-derive it. It reveals binding structure and serves the operator management
+ * surfaces, so it requires an owner or admin in the tenant.
+ */
+export const egressPolicyServiceResolveEffectiveEgress = <ThrowOnError extends boolean = false>(options: Options<EgressPolicyServiceResolveEffectiveEgressData, ThrowOnError>): RequestResult<EgressPolicyServiceResolveEffectiveEgressResponses, EgressPolicyServiceResolveEffectiveEgressErrors, ThrowOnError> => (options.client ?? client).post<EgressPolicyServiceResolveEffectiveEgressResponses, EgressPolicyServiceResolveEffectiveEgressErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tenant/egress-policy/effective',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -638,7 +809,7 @@ export const egressPolicyServiceSetTenantEgressPolicy = <ThrowOnError extends bo
  * Get reserved-resource usage over time for the caller's tenant, bucketed for the usage dashboard's
  * over-time charts.
  */
-export const usageServiceGetUsageSeries = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSeriesData, ThrowOnError>): RequestResult<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSeriesResponses, unknown, ThrowOnError>({
+export const usageServiceGetUsageSeries = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSeriesData, ThrowOnError>): RequestResult<UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSeriesErrors, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSeriesResponses, UsageServiceGetUsageSeriesErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/usage/series',
     ...options
@@ -646,12 +817,158 @@ export const usageServiceGetUsageSeries = <ThrowOnError extends boolean = false>
 
 /**
  * Get a point-in-time usage snapshot for the caller's tenant: active sandbox counts (with a
- * per-state breakdown) and the resources those sandboxes have reserved against the configured quota.
+ * per-state breakdown), the resources those sandboxes have reserved, and the workspace's
+ * configured limits with the usage observed against each.
  */
-export const usageServiceGetUsageSnapshot = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSnapshotData, ThrowOnError>): RequestResult<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSnapshotResponses, unknown, ThrowOnError>({
+export const usageServiceGetUsageSnapshot = <ThrowOnError extends boolean = false>(options?: Options<UsageServiceGetUsageSnapshotData, ThrowOnError>): RequestResult<UsageServiceGetUsageSnapshotResponses, UsageServiceGetUsageSnapshotErrors, ThrowOnError> => (options?.client ?? client).get<UsageServiceGetUsageSnapshotResponses, UsageServiceGetUsageSnapshotErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/usage/snapshot',
     ...options
+});
+
+/**
+ * List the volumes in the caller's tenant, newest first, with cursor pagination. Optionally
+ * filtered to one project.
+ */
+export const volumeServiceListVolumes = <ThrowOnError extends boolean = false>(options?: Options<VolumeServiceListVolumesData, ThrowOnError>): RequestResult<VolumeServiceListVolumesResponses, VolumeServiceListVolumesErrors, ThrowOnError> => (options?.client ?? client).get<VolumeServiceListVolumesResponses, VolumeServiceListVolumesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes',
+    ...options
+});
+
+/**
+ * Create a volume in the caller's tenant. A duplicate name within the project is a conflict. The
+ * volume starts empty (no versions); push content to publish its first version.
+ */
+export const volumeServiceCreateVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceCreateVolumeData, ThrowOnError>): RequestResult<VolumeServiceCreateVolumeResponses, VolumeServiceCreateVolumeErrors, ThrowOnError> => (options.client ?? client).post<VolumeServiceCreateVolumeResponses, VolumeServiceCreateVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detach a volume attachment by id, unmounting it from the sandbox. Detaching an unknown or
+ * already-detached attachment is a not-found error, so a caller holding a stale handle finds out.
+ */
+export const volumeServiceDetachVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceDetachVolumeData, ThrowOnError>): RequestResult<VolumeServiceDetachVolumeResponses, VolumeServiceDetachVolumeErrors, ThrowOnError> => (options.client ?? client).post<VolumeServiceDetachVolumeResponses, VolumeServiceDetachVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/attachments/{attachment_id}:detach',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a volume by id within the caller's tenant, together with its versions. A volume that is
+ * attached to a sandbox cannot be deleted — detach it first — and the call returns a conflict.
+ */
+export const volumeServiceDeleteVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceDeleteVolumeData, ThrowOnError>): RequestResult<VolumeServiceDeleteVolumeResponses, VolumeServiceDeleteVolumeErrors, ThrowOnError> => (options.client ?? client).delete<VolumeServiceDeleteVolumeResponses, VolumeServiceDeleteVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{id}',
+    ...options
+});
+
+/**
+ * Get a volume by id within the caller's tenant.
+ */
+export const volumeServiceGetVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceGetVolumeData, ThrowOnError>): RequestResult<VolumeServiceGetVolumeResponses, VolumeServiceGetVolumeErrors, ThrowOnError> => (options.client ?? client).get<VolumeServiceGetVolumeResponses, VolumeServiceGetVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{id}',
+    ...options
+});
+
+/**
+ * Attach a volume to a running sandbox read-only, pinning the volume's current version at
+ * admission — so a long-lived sandbox can pick up a new dataset or checkpoint version without
+ * being recreated. The mount is read-only in v1. The volume and sandbox must share a project. A
+ * volume with no published version, or a sandbox that already has something mounted at the path,
+ * is a conflict.
+ */
+export const volumeServiceAttachVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceAttachVolumeData, ThrowOnError>): RequestResult<VolumeServiceAttachVolumeResponses, VolumeServiceAttachVolumeErrors, ThrowOnError> => (options.client ?? client).post<VolumeServiceAttachVolumeResponses, VolumeServiceAttachVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{volume_id}:attach',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Pre-warm a volume version into the node-side cache ahead of a planned wave of sandbox
+ * creates, so their attaches find the content already local instead of each paying the cold
+ * fill from the volume store. The call returns once every node has accepted the fill;
+ * hydration continues in the background, and re-issuing is safe — fills are deduplicated, so
+ * a repeat never restarts one that is already warming or warm. Prefetch is purely an
+ * optimization: it never changes the volume or any sandbox, and an attach works without it
+ * (the attach path hydrates on demand). A volume with no published version is a conflict.
+ */
+export const volumeServicePrefetchVolume = <ThrowOnError extends boolean = false>(options: Options<VolumeServicePrefetchVolumeData, ThrowOnError>): RequestResult<VolumeServicePrefetchVolumeResponses, VolumeServicePrefetchVolumeErrors, ThrowOnError> => (options.client ?? client).post<VolumeServicePrefetchVolumeResponses, VolumeServicePrefetchVolumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{volume_id}:prefetch',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Publish the pushed content as the volume's next version. The server validates the uploaded
+ * manifest, verifies every referenced blob is present with its declared size, and only then
+ * mints the version and moves the volume's current-version pointer — atomically, so a version
+ * is never observable half-published. Publishing content identical to the current version
+ * returns the current version instead of minting a duplicate, which also makes retrying a
+ * publish safe.
+ */
+export const volumeServicePublishVolumeVersion = <ThrowOnError extends boolean = false>(options: Options<VolumeServicePublishVolumeVersionData, ThrowOnError>): RequestResult<VolumeServicePublishVolumeVersionResponses, VolumeServicePublishVolumeVersionErrors, ThrowOnError> => (options.client ?? client).post<VolumeServicePublishVolumeVersionResponses, VolumeServicePublishVolumeVersionErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{volume_id}:publish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Exchange a batch of blob digests for upload decisions: blobs already in the volume store are
+ * reported present (content is deduplicated by digest — a retry or a re-push of unchanged data
+ * uploads nothing), the rest get short-lived upload URLs.
+ */
+export const volumeServiceRequestVolumeBlobUploads = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceRequestVolumeBlobUploadsData, ThrowOnError>): RequestResult<VolumeServiceRequestVolumeBlobUploadsResponses, VolumeServiceRequestVolumeBlobUploadsErrors, ThrowOnError> => (options.client ?? client).post<VolumeServiceRequestVolumeBlobUploadsResponses, VolumeServiceRequestVolumeBlobUploadsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{volume_id}:request-blob-uploads',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Start pushing a new version to a volume: returns a push handle and a short-lived URL to
+ * upload the manifest (the file listing) to. Content bytes never ride this API — they go
+ * directly to the volume store through the URLs the push RPCs hand out.
+ *
+ * The push flow: StartVolumePush → upload the manifest → RequestVolumeBlobUploads (in batches)
+ * → upload the missing blobs → PublishVolumeVersion. An abandoned push needs no cleanup; its
+ * staged manifest expires on its own.
+ */
+export const volumeServiceStartVolumePush = <ThrowOnError extends boolean = false>(options: Options<VolumeServiceStartVolumePushData, ThrowOnError>): RequestResult<VolumeServiceStartVolumePushResponses, VolumeServiceStartVolumePushErrors, ThrowOnError> => (options.client ?? client).post<VolumeServiceStartVolumePushResponses, VolumeServiceStartVolumePushErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/volumes/{volume_id}:start-push',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -659,8 +976,65 @@ export const usageServiceGetUsageSnapshot = <ThrowOnError extends boolean = fals
  * Acts as both a health probe and an identity sanity-check, and is the endpoint the generated
  * OpenAPI, SDKs, and CLI consume.
  */
-export const identityServiceWhoAmI = <ThrowOnError extends boolean = false>(options?: Options<IdentityServiceWhoAmIData, ThrowOnError>): RequestResult<IdentityServiceWhoAmIResponses, unknown, ThrowOnError> => (options?.client ?? client).get<IdentityServiceWhoAmIResponses, unknown, ThrowOnError>({
+export const identityServiceWhoAmI = <ThrowOnError extends boolean = false>(options?: Options<IdentityServiceWhoAmIData, ThrowOnError>): RequestResult<IdentityServiceWhoAmIResponses, IdentityServiceWhoAmIErrors, ThrowOnError> => (options?.client ?? client).get<IdentityServiceWhoAmIResponses, IdentityServiceWhoAmIErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/whoami',
     ...options
+});
+
+/**
+ * List the caller's tenant's registered workloads.
+ */
+export const workloadServiceListWorkloads = <ThrowOnError extends boolean = false>(options?: Options<WorkloadServiceListWorkloadsData, ThrowOnError>): RequestResult<WorkloadServiceListWorkloadsResponses, WorkloadServiceListWorkloadsErrors, ThrowOnError> => (options?.client ?? client).get<WorkloadServiceListWorkloadsResponses, WorkloadServiceListWorkloadsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workloads',
+    ...options
+});
+
+/**
+ * Register a workload in the caller's tenant. The name must be unique within the tenant; the new
+ * workload starts with the default launch ACL (any tenant member may launch).
+ */
+export const workloadServiceCreateWorkload = <ThrowOnError extends boolean = false>(options: Options<WorkloadServiceCreateWorkloadData, ThrowOnError>): RequestResult<WorkloadServiceCreateWorkloadResponses, WorkloadServiceCreateWorkloadErrors, ThrowOnError> => (options.client ?? client).post<WorkloadServiceCreateWorkloadResponses, WorkloadServiceCreateWorkloadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workloads',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a registered workload and its launch ACL. Requires an owner or admin in the tenant.
+ * A workload with live sandboxes still operating under its identity is a conflict — stop them
+ * first. Past runs attributed to the workload keep their recorded principal id; once the name is
+ * gone that id renders raw, so prefer keeping workloads that own meaningful history.
+ */
+export const workloadServiceDeleteWorkload = <ThrowOnError extends boolean = false>(options: Options<WorkloadServiceDeleteWorkloadData, ThrowOnError>): RequestResult<WorkloadServiceDeleteWorkloadResponses, WorkloadServiceDeleteWorkloadErrors, ThrowOnError> => (options.client ?? client).delete<WorkloadServiceDeleteWorkloadResponses, WorkloadServiceDeleteWorkloadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workloads/{name}',
+    ...options
+});
+
+/**
+ * Get one registered workload by name, including its launch ACL.
+ */
+export const workloadServiceGetWorkload = <ThrowOnError extends boolean = false>(options: Options<WorkloadServiceGetWorkloadData, ThrowOnError>): RequestResult<WorkloadServiceGetWorkloadResponses, WorkloadServiceGetWorkloadErrors, ThrowOnError> => (options.client ?? client).get<WorkloadServiceGetWorkloadResponses, WorkloadServiceGetWorkloadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workloads/{name}',
+    ...options
+});
+
+/**
+ * Replace a workload's launch ACL. Requires an owner or admin in the tenant.
+ */
+export const workloadServiceSetWorkloadLaunchAcl = <ThrowOnError extends boolean = false>(options: Options<WorkloadServiceSetWorkloadLaunchAclData, ThrowOnError>): RequestResult<WorkloadServiceSetWorkloadLaunchAclResponses, WorkloadServiceSetWorkloadLaunchAclErrors, ThrowOnError> => (options.client ?? client).put<WorkloadServiceSetWorkloadLaunchAclResponses, WorkloadServiceSetWorkloadLaunchAclErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workloads/{name}/launch-acl',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });

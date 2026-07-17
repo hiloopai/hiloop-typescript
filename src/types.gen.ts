@@ -4,55 +4,27 @@ export type ClientOptions = {
     baseUrl: `${string}://gen` | (string & {});
 };
 
-/**
- * A registered agent identity, scoped to the caller's tenant.
- */
-export type Agent = {
+export type AcquireLeaseRequest = {
     /**
-     * The agent's stable id.
+     * The project to acquire the lease in.
      */
-    id?: string;
+    project_id?: string;
     /**
-     * The agent's registered name — unique within the tenant, and how the agent is displayed in
-     * attribution everywhere. Lowercase letters, digits, `.`, `_`, and `-`; must start and end with
-     * a letter or digit; at most 100 characters.
+     * The lease name to acquire — at most 100 characters after trimming.
      */
     name?: string;
     /**
-     * A free-text description of what the agent is for. May be empty.
+     * How long the lease is held before it expires, in seconds (1 to 86400). Renew before expiry to
+     * keep holding it.
      */
-    description?: string;
-    /**
-     * Who may launch as this agent.
-     */
-    launchAcl?: AgentLaunchAcl;
-    /**
-     * Stable id of the principal that registered the agent, when recorded.
-     */
-    createdBy?: string;
-    /**
-     * When the agent was registered (RFC 3339).
-     */
-    createdAt?: string;
-    /**
-     * When the agent's registration or ACL was last changed (RFC 3339).
-     */
-    updatedAt?: string;
+    ttl_secs?: string;
 };
 
-/**
- * A per-agent launch ACL: which principals may launch a run or sandbox as the agent.
- */
-export type AgentLaunchAcl = {
+export type AcquireLeaseResponse = {
     /**
-     * The launch policy: open to all tenant members, or restricted to the listed users.
+     * The acquired lease. Its id is the handle for renew and release.
      */
-    policy?: 'AGENT_LAUNCH_POLICY_UNSPECIFIED' | 'AGENT_LAUNCH_POLICY_MEMBERS' | 'AGENT_LAUNCH_POLICY_RESTRICTED';
-    /**
-     * The user ids allowed to launch as this agent. Meaningful only when the policy is
-     * AGENT_LAUNCH_POLICY_RESTRICTED; empty otherwise.
-     */
-    userIds?: Array<string>;
+    lease?: Lease;
 };
 
 /**
@@ -64,37 +36,45 @@ export type AnnotateRangeRequest = {
     /**
      * The run (session) the annotation belongs to.
      */
-    runId?: string;
+    run_id?: string;
     /**
      * The registered annotation-schema name the payload validates against (the event `name`).
      */
-    schemaName?: string;
+    schema_name?: string;
     /**
      * Inclusive start of the annotated window, in wall-clock nanoseconds. Mutually exclusive with the
      * event-pair form.
      */
-    rangeStartNs?: string;
+    range_start_ns?: string;
     /**
      * Inclusive end of the annotated window, in wall-clock nanoseconds. Mutually exclusive with the
      * event-pair form.
      */
-    rangeEndNs?: string;
+    range_end_ns?: string;
     /**
      * The annotation payload as a JSON object string; validated against `schema_name`'s registered
      * JSON Schema at ingest. Reserved `hiloop.annotation.*` keys are platform-owned and excluded.
      */
-    payloadJson?: string;
+    payload_json?: string;
     /**
      * The `event_id` whose recorded timestamp starts the annotated window. Both event endpoints must
      * exist in `run_id`; the window bounds are materialized from their timestamps. Set together with
      * `range_end_event_id`, and not alongside the nanosecond bounds.
      */
-    rangeStartEventId?: string;
+    range_start_event_id?: string;
     /**
      * The `event_id` whose recorded timestamp ends the annotated window. Set together with
      * `range_start_event_id`, and not alongside the nanosecond bounds.
      */
-    rangeEndEventId?: string;
+    range_end_event_id?: string;
+    /**
+     * Optional caller-minted `event_id` for the annotation event (a 26-character ULID). Supplying one
+     * makes retries safe: re-sending the request with the same `event_id` returns the existing
+     * annotation instead of writing a duplicate, so an ambiguous failure (a 5xx or a lost response)
+     * can be retried blindly. The id names this logical annotation — never reuse it for different
+     * content. Omitted, the server mints a fresh id per call and a retry writes a new annotation.
+     */
+    event_id?: string;
 };
 
 /**
@@ -105,33 +85,42 @@ export type AnnotateRequest = {
     /**
      * The run (session) the annotation belongs to. Exactly one of `run_id` or `project_id` is set.
      */
-    runId?: string;
+    run_id?: string;
     /**
      * The registered annotation-schema name the payload validates against (the event `name`).
      */
-    schemaName?: string;
+    schema_name?: string;
     /**
      * The `event_id` of the single event this annotation is about. Only valid with `run_id`; empty
      * annotates the run (or project) itself.
      */
-    targetEventId?: string;
+    target_event_id?: string;
     /**
      * The annotation payload as a JSON object string; validated against `schema_name`'s registered
      * JSON Schema at ingest. Reserved `hiloop.annotation.*` keys are platform-owned and excluded.
      */
-    payloadJson?: string;
+    payload_json?: string;
     /**
      * The project a run-less annotation belongs to. Exactly one of `run_id` or `project_id` is set;
      * a project-scoped annotation carries no run lineage and no target event.
      */
-    projectId?: string;
+    project_id?: string;
+    /**
+     * Optional caller-minted `event_id` for the annotation event (a 26-character ULID). Supplying one
+     * makes retries safe: re-sending the request with the same `event_id` returns the existing
+     * annotation instead of writing a duplicate, so an ambiguous failure (a 5xx or a lost response)
+     * can be retried blindly. The id names this logical annotation — never reuse it for different
+     * content. Omitted, the server mints a fresh id per call and a retry writes a new annotation.
+     */
+    event_id?: string;
 };
 
 export type AnnotateResponse = {
     /**
-     * The minted, stable `event_id` of the annotation event (the dedup/lookup key).
+     * The stable `event_id` of the annotation event (the dedup/lookup key): the caller-minted id when
+     * the request carried one, otherwise the freshly server-minted one.
      */
-    eventId?: string;
+    event_id?: string;
 };
 
 /**
@@ -145,7 +134,7 @@ export type AnnotationSchema = {
     /**
      * The tenant the config belongs to (derived from the caller's scope, echoed for convenience).
      */
-    tenantId?: string;
+    tenant_id?: string;
     /**
      * The schema name — unique per tenant across versions (the registered name an annotation names).
      */
@@ -161,20 +150,20 @@ export type AnnotationSchema = {
     /**
      * The JSON Schema document (draft 2020-12) as a JSON string.
      */
-    jsonSchema?: string;
+    json_schema?: string;
     /**
      * When the config was archived (RFC 3339), or empty if it is still live.
      */
-    archivedAt?: string;
+    archived_at?: string;
     /**
      * When the config version was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * The fields this schema promotes from the payload into typed columns, each with its server-assigned
      * slot. Empty when the schema promotes nothing.
      */
-    promotedFields?: Array<PromotedField>;
+    promoted_fields?: Array<PromotedField>;
 };
 
 export type ArchiveAnnotationSchemaRequest = {
@@ -197,12 +186,68 @@ export type ArchiveAnnotationSchemaResponse = {
 
 export type Artifact = {
     id?: string;
-    tenantId?: string;
+    tenant_id?: string;
     kind?: string;
-    mediaType?: string;
-    sizeBytes?: string;
-    digestAlgorithm?: string;
+    media_type?: string;
+    size_bytes?: string;
+    digest_algorithm?: string;
     digest?: string;
+    /**
+     * When the artifact was created (RFC 3339).
+     */
+    created_at?: string;
+};
+
+export type AttachVolumeRequest = {
+    /**
+     * The volume to attach, by id, within the caller's tenant.
+     */
+    volume_id?: string;
+    /**
+     * The sandbox to mount the volume into. It must share the volume's project.
+     */
+    sandbox_id?: string;
+    /**
+     * The absolute path inside the sandbox to mount the volume at.
+     */
+    target_path?: string;
+};
+
+export type AttachVolumeResponse = {
+    /**
+     * The created attachment, pinned to the volume's current version.
+     */
+    attachment?: VolumeAttachment;
+};
+
+/**
+ * One binding's effective-policy change under a proposed baseline. `before` is its effective policy
+ * under the current baseline; `after` is what it would become under the proposed one. `added`/
+ * `removed` are the destinations that would become reachable / unreachable for a principal matching
+ * the selector. The synthetic selector "baseline" reports the change to the default class (the
+ * principals that match no binding).
+ */
+export type BindingImpact = {
+    /**
+     * The binding's selector, or "baseline" for the default class.
+     */
+    selector?: string;
+    /**
+     * The binding's effective policy under the current tenant baseline.
+     */
+    before?: EgressPolicy;
+    /**
+     * The binding's effective policy under the proposed tenant baseline.
+     */
+    after?: EgressPolicy;
+    /**
+     * Destinations that become reachable for this selector under the proposed baseline.
+     */
+    added?: Array<string>;
+    /**
+     * Destinations that become unreachable for this selector under the proposed baseline.
+     */
+    removed?: Array<string>;
 };
 
 export type BranchDiffRequest = {
@@ -217,6 +262,11 @@ export type BranchDiffResponse = {
     rows?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * The diff's declared column names, in projection order. Present even when a column is NULL in
+     * every row (per-row nulls are omitted).
+     */
+    columns?: Array<string>;
 };
 
 /**
@@ -233,11 +283,11 @@ export type BranchDiffSpec = {
     /**
      * The run whose unique events to return (the "A" branch). Required.
      */
-    runIdA?: string;
+    run_id_a?: string;
     /**
      * The run to subtract (the "B" branch). Required.
      */
-    runIdB?: string;
+    run_id_b?: string;
 };
 
 /**
@@ -247,7 +297,7 @@ export type BranchHlc = {
     /**
      * Wall-clock component in nanoseconds since the Unix epoch.
      */
-    wallNs?: string;
+    wall_ns?: string;
     /**
      * Logical tiebreak for events sharing a wall-clock reading.
      */
@@ -255,27 +305,48 @@ export type BranchHlc = {
 };
 
 export type BuildArtifactImage = {
-    artifactRef?: string;
+    artifact_ref?: string;
 };
 
 export type Capability = {
     key?: string;
     support?: string;
     maturity?: string;
+    /**
+     * GPU product inventory and the maximum co-located count for the serving lane. Present only for
+     * the gpu capability when support is emulated or native.
+     */
+    gpu?: GpuCapability;
 };
 
 export type CapabilityRequirement = {
     key?: string;
-    minimumSupport?: string;
-    minimumMaturity?: string;
+    minimum_support?: string;
+    minimum_maturity?: string;
 };
 
 export type CaptureSpec = {
     /**
-     * REST-safe capture policy. Use CAPTURE_POLICY_DISABLED to run the sandbox with no capture
-     * instrumentation; omitted or CAPTURE_POLICY_UNSPECIFIED defaults to enabled.
+     * REST-safe capture policy. Omitted or CAPTURE_POLICY_UNSPECIFIED defaults to disabled. Enabling
+     * capture requires a runtime lane with native capture support.
      */
     policy?: 'CAPTURE_POLICY_UNSPECIFIED' | 'CAPTURE_POLICY_ENABLED' | 'CAPTURE_POLICY_DISABLED';
+};
+
+/**
+ * One destination the tenant baseline ceiling removed from a matched binding. A binding may only
+ * narrow the baseline, so any destination it names that the baseline forbids is dropped from the
+ * effective policy — surfaced here so an operator can see what a binding asked for but could not get.
+ */
+export type ClampedEntry = {
+    /**
+     * The destination (a domain or a CIDR) that was removed.
+     */
+    entry?: string;
+    /**
+     * Why it was removed (e.g. it is outside the baseline allowlist, or the baseline denies it).
+     */
+    reason?: string;
 };
 
 export type CommandSpec = {
@@ -284,11 +355,11 @@ export type CommandSpec = {
     env?: {
         [key: string]: string;
     };
-    workingDir?: string;
+    working_dir?: string;
     /**
      * Zero uses the server default command timeout.
      */
-    timeoutSecs?: string;
+    timeout_secs?: string;
 };
 
 export type CompleteRunRequest = {
@@ -309,23 +380,66 @@ export type CompleteRunResponse = {
     run?: Run;
 };
 
-export type CreateAgentRequest = {
+export type CreateFeedbackRequest = {
     /**
-     * The agent name to register — unique within the tenant. Lowercase letters, digits, `.`, `_`,
-     * and `-`; must start and end with a letter or digit; at most 100 characters.
+     * A short summary of the report. Required; at most 300 characters.
      */
-    name?: string;
+    title?: string;
     /**
-     * A free-text description of what the agent is for. Optional.
+     * The product surface the report is about. Required; one of `cli`, `api`, `web`, `sandbox`,
+     * `telemetry`, `annotations`, `docs`, or `other`.
      */
-    description?: string;
+    surface?: string;
+    /**
+     * How severe the problem is. Optional; one of `critical`, `high`, `medium`, or `low`. Leave it
+     * empty for general feedback that is not a bug.
+     */
+    severity?: string;
+    /**
+     * Free-form feedback text. Optional; at most 10,000 characters.
+     */
+    body?: string;
+    /**
+     * What was expected to happen. Optional; at most 10,000 characters.
+     */
+    expected?: string;
+    /**
+     * What actually happened. Optional; at most 10,000 characters.
+     */
+    actual?: string;
+    /**
+     * Steps to reproduce the problem. Optional; at most 10,000 characters.
+     */
+    repro?: string;
+    /**
+     * Correlation keys — run, event, or artifact ids — linking the report to recorded telemetry.
+     * Optional; at most 50 entries, each at most 256 characters.
+     */
+    evidence?: Array<string>;
+    /**
+     * A stable, content-derived deduplication key (for example `<surface>/<short-slug>`). Enforced:
+     * a submission whose fingerprint already exists returns the original report's id instead of
+     * storing (and surfacing) a duplicate, which makes retrying a lost response safe. When omitted,
+     * the server derives one from the report's content, so re-sending an identical report also
+     * converges. Optional; at most 300 characters.
+     */
+    fingerprint?: string;
+    /**
+     * The hiloop client version that produced the report. Optional; at most 100 characters.
+     */
+    hiloop_version?: string;
 };
 
-export type CreateAgentResponse = {
+export type CreateFeedbackResponse = {
     /**
-     * The registered agent, carrying the default launch ACL (any tenant member may launch).
+     * The stored report's id.
      */
-    agent?: Agent;
+    id?: string;
+    /**
+     * Whether the report was surfaced to the team's review channel. The report is stored either way,
+     * so a `false` here never means the feedback was lost.
+     */
+    relayed?: boolean;
 };
 
 export type CreateProjectRequest = {
@@ -337,6 +451,16 @@ export type CreateProjectRequest = {
      * The human-readable project name.
      */
     name?: string;
+    /**
+     * An optional user-assigned free-text description (at most 4 KiB). Empty leaves the project
+     * undescribed.
+     */
+    description?: string;
+    /**
+     * An optional display configuration (at most one rule per schema). Empty leaves the project
+     * unconfigured.
+     */
+    display?: Array<ProjectDisplayRule>;
 };
 
 export type CreateProjectResponse = {
@@ -347,25 +471,33 @@ export type CreateProjectResponse = {
 };
 
 export type CreateSandboxRequest = {
-    projectId?: string;
+    project_id?: string;
     /**
      * An optional display name for the sandbox. When empty the server generates one. Names are not
-     * unique; the id returned in the response is the canonical handle.
+     * unique; the id returned in the response is the canonical handle. The run created with the
+     * sandbox takes this name as its label, so naming the sandbox names its run tree's root.
      */
     name?: string;
+    /**
+     * Required explicit deployment profile or exact OCI environment selection.
+     */
     image?: SandboxImage;
     resources?: ResourceSpec;
-    requestedCapabilities?: Array<CapabilityRequirement>;
+    requested_capabilities?: Array<CapabilityRequirement>;
     labels?: {
         [key: string]: string;
     };
+    /**
+     * Activity-capture policy. Disabled by default. Enabling capture requires a runtime lane with
+     * native capture support.
+     */
     capture?: CaptureSpec;
     /**
      * Outbound network policy. Omitted leaves egress unbounded (default-allow).
      */
     egress?: EgressPolicy;
     /**
-     * Secret bindings injected into matching outbound requests. Empty injects nothing.
+     * Declared secret bindings. Non-empty requests require native injection and currently fail closed.
      */
     secrets?: Array<SecretBinding>;
     /**
@@ -378,19 +510,48 @@ export type CreateSandboxRequest = {
     description?: string;
     /**
      * One-shot mode: the command this sandbox exists to run. When set, the command starts as the
-     * sandbox's purpose execution once the sandbox is running, records under the sandbox's run with
-     * capture as usual, and the sandbox stops (state preserved, resumable) when the command exits.
-     * The command's exit code lands on the execution; the run ends succeeded on exit 0 and failed
-     * otherwise. The command is not bounded by operation deadlines — only by lifecycle.lease_secs (the
+     * sandbox's purpose execution once the sandbox is running, records its execution result under the
+     * sandbox's run, and the sandbox stops when the command exits. The sandbox and execution records
+     * are retained. A versioned BranchFS workspace is sealed for exact
+     * filesystem restoration under a new runtime generation; ephemeral scratch may not survive.
+     * Filesystem continuity never implies process or memory continuity. The command's exit code
+     * lands on the execution; the run ends succeeded on exit 0 and
+     * failed otherwise. The command is not bounded by operation deadlines — only by lifecycle.lease_secs (the
      * sandbox keepalive cap, defaulting to 86400s/24h for one-shot) — so command.timeout_secs must be
-     * zero. Omitted creates a plain interactive sandbox.
+     * zero. Omitted creates a sandbox without a purpose command; attached terminal access, when the
+     * selected profile advertises it, uses managed SSH through the session gateway.
      */
     command?: CommandSpec;
     /**
-     * One-shot mode only: delete the sandbox on command exit instead of stopping it. The run and its
-     * captured events persist either way.
+     * One-shot mode only: delete the sandbox on command exit instead of stopping it. The run and
+     * execution records persist either way.
      */
-    deleteOnExit?: boolean;
+    delete_on_exit?: boolean;
+    /**
+     * Optional registered workload name to run the sandbox as. When set, the sandbox is
+     * workload-classed: its work is attributed to that workload, its managed credential is bound to the
+     * workload on the caller's behalf, and any identity-bound egress policy for that workload applies
+     * (the caller must hold launch rights on it and the name must be registered). When empty, the
+     * sandbox executes as the caller's own identity. The executing identity is always declared here,
+     * never inferred.
+     */
+    execute_as_workload?: string;
+    /**
+     * Retired volume-compatibility field. Clean sandbox-cell deployments reject non-empty volume
+     * mounts; attach an exact BranchFS workspace revision instead.
+     */
+    volume_mounts?: Array<VolumeMount>;
+    /**
+     * Network dataplane mode for the sandbox. Omitted or NETWORK_MODE_UNSPECIFIED keeps the
+     * default (NETWORK_MODE_NONE).
+     */
+    network_mode?: 'NETWORK_MODE_UNSPECIFIED' | 'NETWORK_MODE_NONE' | 'NETWORK_MODE_SANDBOX';
+    /**
+     * Optional writable versioned BranchFS workspace. The revision is immutable and pinned at
+     * admission; deleting the sandbox seals its terminal contents and returns the next immutable
+     * change in SandboxDeleteResult. Retired volume mounts cannot be combined with this field.
+     */
+    workspace?: WorkspaceRevisionMount;
 };
 
 export type CreateSandboxResponse = {
@@ -398,7 +559,7 @@ export type CreateSandboxResponse = {
     operation?: Operation;
     /**
      * The purpose execution minted for a one-shot create (a request that carried a command). Absent
-     * for plain creates. Stream it with StreamExecution; its exit code lands here when observed.
+     * for plain creates. Inspect it through GetExecution; buffered output is stored as artifacts.
      */
     execution?: Execution;
 };
@@ -409,9 +570,10 @@ export type CreateSandboxSecretRequest = {
      */
     name?: string;
     /**
-     * The credential kind.
+     * The credential kind: `api_key`, `bearer`, `basic`, or `custom`. Empty defaults to `custom`;
+     * any other value is rejected.
      */
-    kind?: 'SECRET_KIND_UNSPECIFIED' | 'SECRET_KIND_API_KEY' | 'SECRET_KIND_BEARER' | 'SECRET_KIND_BASIC' | 'SECRET_KIND_CUSTOM';
+    kind?: string;
     /**
      * The secret value. WRITE-ONLY: stored encrypted and never returned by this API again; the proxy
      * resolves it at request time.
@@ -421,11 +583,11 @@ export type CreateSandboxSecretRequest = {
      * The outbound host to inject the value into (optional). Must be a bare DNS hostname, e.g.
      * `api.openai.com` — not a URL; stored in canonical lowercase form.
      */
-    destHost?: string;
+    dest_host?: string;
     /**
      * The header to inject the value as (optional; defaults by kind).
      */
-    destHeader?: string;
+    dest_header?: string;
     /**
      * The auth scheme prefix (optional; e.g. `Bearer`).
      */
@@ -439,19 +601,26 @@ export type CreateSandboxSecretResponse = {
     secret?: SandboxSecret;
 };
 
+/**
+ * Retired snapshot compatibility request. Clean sandbox-cell deployments return unsupported; use
+ * a BranchFS workspace plus stop/resume for filesystem continuity.
+ */
 export type CreateSnapshotRequest = {
-    sandboxId?: string;
+    sandbox_id?: string;
+    /**
+     * Requested snapshot semantics. Omitted requests the `filesystem` baseline capture.
+     */
     contents?: string;
-    allowFallback?: boolean;
-    retentionClass?: string;
-    ttlSecs?: string;
-    legalHold?: boolean;
+    allow_fallback?: boolean;
+    retention_class?: string;
+    ttl_secs?: string;
+    legal_hold?: boolean;
     /**
      * Optional path to a stable file whose bytes should be recorded at capture time and verified after
      * every restore of this snapshot. Callers should quiesce writes to this path before requesting the
      * snapshot.
      */
-    verificationProbePath?: string;
+    verification_probe_path?: string;
     /**
      * Optional user-assigned snapshot name. Names are not enforced unique; where a name is unique
      * within its project, the snapshot is addressable by it wherever a snapshot id is accepted.
@@ -465,6 +634,53 @@ export type CreateSnapshotRequest = {
 
 export type CreateSnapshotResponse = {
     operation?: Operation;
+};
+
+export type CreateVolumeRequest = {
+    /**
+     * The project the volume belongs to.
+     */
+    project_id?: string;
+    /**
+     * The volume name — unique within the project (letters, digits, dots, dashes, underscores; at
+     * most 100 characters).
+     */
+    name?: string;
+    /**
+     * An optional user-assigned free-text description (at most 4 KiB). Empty leaves the volume
+     * undescribed.
+     */
+    description?: string;
+    /**
+     * Storage quota in bytes (required). A quota, not an allocation; at most 2 TiB per volume.
+     */
+    quota_bytes?: string;
+};
+
+export type CreateVolumeResponse = {
+    /**
+     * The created volume.
+     */
+    volume?: Volume;
+};
+
+export type CreateWorkloadRequest = {
+    /**
+     * The workload name to register — unique within the tenant. Lowercase letters, digits, `.`, `_`,
+     * and `-`; must start and end with a letter or digit; at most 100 characters.
+     */
+    name?: string;
+    /**
+     * A free-text description of what the workload is for. Optional.
+     */
+    description?: string;
+};
+
+export type CreateWorkloadResponse = {
+    /**
+     * The registered workload, carrying the default launch ACL (any tenant member may launch).
+     */
+    workload?: Workload;
 };
 
 /**
@@ -492,15 +708,51 @@ export type DataView = {
     /**
      * Monotonic per-edit version; the store bumps it on each upsert.
      */
-    specVersion?: string;
+    spec_version?: string;
 };
 
 export type DeleteDataViewResponse = {
     [key: string]: unknown;
 };
 
-export type DeleteProjectResponse = {
+export type DeleteEgressPolicyBindingResponse = {
     [key: string]: unknown;
+};
+
+/**
+ * The delete's effect report: how many of each dependent resource the call actually removed. All
+ * counts are zero for a non-cascading delete (it only ever removes a project with no dependents).
+ */
+export type DeleteProjectResponse = {
+    /**
+     * The number of runs deleted.
+     */
+    runs_deleted?: string;
+    /**
+     * The number of sandboxes whose records were removed (each had already been deleted, so no
+     * compute was torn down by this call).
+     */
+    sandboxes_deleted?: string;
+    /**
+     * The number of snapshots deleted.
+     */
+    snapshots_deleted?: string;
+    /**
+     * The number of volumes deleted.
+     */
+    volumes_deleted?: string;
+    /**
+     * The number of command executions deleted.
+     */
+    executions_deleted?: string;
+    /**
+     * The number of project-scoped secrets deleted.
+     */
+    secrets_deleted?: string;
+    /**
+     * The number of project-scoped API keys deleted (keys scoped to the whole tenant are untouched).
+     */
+    api_keys_deleted?: string;
 };
 
 export type DeleteSandboxResponse = {
@@ -510,6 +762,25 @@ export type DeleteSandboxResponse = {
 export type DeleteSnapshotResponse = {
     snapshot?: Snapshot;
     operation?: Operation;
+};
+
+export type DeleteVolumeResponse = {
+    [key: string]: unknown;
+};
+
+export type DeleteWorkloadResponse = {
+    [key: string]: unknown;
+};
+
+export type DetachVolumeRequest = {
+    /**
+     * The attachment id from AttachVolume (or a create-time attach).
+     */
+    attachment_id?: string;
+};
+
+export type DetachVolumeResponse = {
+    [key: string]: unknown;
 };
 
 /**
@@ -532,8 +803,87 @@ export type EgressPolicy = {
     cidrs?: Array<string>;
 };
 
+/**
+ * An identity-bound egress policy binding: an egress policy attached to an identity selector, so a
+ * tenant can give a different outbound-network policy to a class of principals (e.g. autonomous
+ * workloads) than to others. A binding never widens the tenant baseline; it is one input the
+ * effective policy is resolved from.
+ */
+export type EgressPolicyBinding = {
+    /**
+     * The identity selector this binding applies to. One of:
+     * kind:workload | kind:user | kind:service_account   (an identity class)
+     * role:owner | role:admin | role:member              (a membership role)
+     * workload:NAME                                       (one registered workload, by name)
+     * user:ID | key:ID                                    (one specific principal, by id)
+     */
+    selector?: string;
+    /**
+     * The outbound network policy (mode + domain/CIDR lists) bound to the selector.
+     */
+    policy?: EgressPolicy;
+    /**
+     * The enforcement override for this class. EGRESS_ENFORCEMENT_UNSPECIFIED means no override — the
+     * tenant default applies; BLOCK or WARN overrides it for principals this selector matches.
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+    /**
+     * The user id that created the binding, when recorded. Empty for a service-credential caller.
+     */
+    created_by?: string;
+    /**
+     * When the binding was created (RFC 3339).
+     */
+    created_at?: string;
+    /**
+     * When the binding was last set (RFC 3339).
+     */
+    updated_at?: string;
+};
+
+/**
+ * How many identities a selector covers, for the "who does this apply to" display. The count is the
+ * exact size of the covered set; the sample is a small, illustrative subset (workload names, member
+ * emails, or key names, depending on the selector), never the full list.
+ */
+export type EgressPopulation = {
+    /**
+     * A human-readable summary (e.g. "3 registered workloads", "the admin \"a@example.com\"").
+     */
+    description?: string;
+    /**
+     * The exact number of identities the selector covers (JSON-encoded as a string, per proto3 JSON).
+     */
+    count?: string;
+    /**
+     * A small illustrative sample of the covered identities (may be empty; never the full set).
+     */
+    sample?: Array<string>;
+};
+
+/**
+ * The report of a succeeded command execution.
+ */
+export type ExecuteResult = {
+    /**
+     * The execution row the command ran as.
+     */
+    execution_id?: string;
+    /**
+     * The command's observed exit code.
+     */
+    exit_code?: string;
+    stdout_artifact_id?: string;
+    stderr_artifact_id?: string;
+    /**
+     * Whether the captured stream was truncated at the runtime output limit.
+     */
+    stdout_truncated?: boolean;
+    stderr_truncated?: boolean;
+};
+
 export type ExecuteSandboxRequest = {
-    sandboxId?: string;
+    sandbox_id?: string;
     command?: CommandSpec;
     stdin?: string;
 };
@@ -545,16 +895,16 @@ export type ExecuteSandboxResponse = {
 
 export type Execution = {
     id?: string;
-    tenantId?: string;
-    sandboxId?: string;
+    tenant_id?: string;
+    sandbox_id?: string;
     state?: string;
     /**
      * Process exit code. Absent until the process exit is observed; a failed execution whose exit was
      * never seen carries no exit code.
      */
-    exitCode?: string;
-    stdoutArtifactId?: string;
-    stderrArtifactId?: string;
+    exit_code?: string;
+    stdout_artifact_id?: string;
+    stderr_artifact_id?: string;
     /**
      * Why the execution failed. Present only on failed executions.
      */
@@ -575,9 +925,22 @@ export type ExecutionError = {
     message?: string;
 };
 
+export type ExposePortRequest = {
+    sandbox_id?: string;
+    port?: number;
+    /**
+     * Defaults to token authentication. Public mode is reserved and rejected in v1.
+     */
+    auth_mode?: 'PORT_EXPOSURE_AUTH_MODE_UNSPECIFIED' | 'PORT_EXPOSURE_AUTH_MODE_TOKEN' | 'PORT_EXPOSURE_AUTH_MODE_PUBLIC';
+};
+
+export type ExposePortResponse = {
+    exposure?: MintedPortExposure;
+};
+
 export type FileFromArtifactRequest = {
-    sandboxId?: string;
-    artifactId?: string;
+    sandbox_id?: string;
+    artifact_id?: string;
     path?: string;
 };
 
@@ -585,50 +948,114 @@ export type FileFromArtifactResponse = {
     operation?: Operation;
 };
 
-export type FileToArtifactRequest = {
-    sandboxId?: string;
+/**
+ * The report of a succeeded file-from-artifact import.
+ */
+export type FileFromArtifactResult = {
+    /**
+     * The artifact whose bytes were materialized.
+     */
+    artifact_id?: string;
+    /**
+     * The sandbox path the bytes were written to.
+     */
     path?: string;
-    mediaType?: string;
+};
+
+export type FileToArtifactRequest = {
+    sandbox_id?: string;
+    path?: string;
+    media_type?: string;
 };
 
 export type FileToArtifactResponse = {
     operation?: Operation;
 };
 
+/**
+ * The report of a succeeded file-to-artifact export.
+ */
+export type FileToArtifactResult = {
+    /**
+     * The artifact the file's bytes were archived into.
+     */
+    artifact_id?: string;
+    /**
+     * The sandbox path that was exported.
+     */
+    path?: string;
+    media_type?: string;
+    size_bytes?: string;
+};
+
+/**
+ * Retained wire type for retired fork compatibility RPCs. Clean sandbox-cell deployments do not
+ * create or return fork records.
+ */
 export type Fork = {
     id?: string;
-    tenantId?: string;
-    sourceSandboxId?: string;
-    childSandboxId?: string;
+    tenant_id?: string;
+    source_sandbox_id?: string;
+    child_sandbox_id?: string;
     implementation?: string;
-    effectiveSemanticsJson?: string;
-    intermediateSnapshotId?: string;
-    operationId?: string;
+    effective_semantics_json?: string;
+    intermediate_snapshot_id?: string;
+    operation_id?: string;
     /**
      * The child run this fork created.
      */
-    childRunId?: string;
+    child_run_id?: string;
+};
+
+/**
+ * Retired fork-compatibility result. Clean sandbox-cell deployments do not produce it.
+ */
+export type ForkResult = {
+    fork_id?: string;
+    source_sandbox_id?: string;
+    child_sandbox_id?: string;
+    /**
+     * The child run the fork minted.
+     */
+    child_run_id?: string;
+    /**
+     * The continuity implementation that served the fork, in the public vocabulary.
+     */
+    implementation?: string;
+    /**
+     * Which dimensions of the source's state the child actually continued.
+     */
+    filesystem_continuity?: boolean;
+    memory_continuity?: boolean;
+    process_continuity?: boolean;
+    observed_state?: string;
+    readiness?: string;
+    /**
+     * Human-readable degradation notes recorded by the fork (for example a fallback the request
+     * allowed).
+     */
+    warnings?: Array<string>;
 };
 
 export type ForkRunRequest = {
     /**
      * The run to fork from. Required.
      */
-    parentRunId?: string;
+    parent_run_id?: string;
     /**
      * The parent event id to fork at — the divergence point on the parent's timeline. Empty forks at
      * the parent's current head.
      */
-    branchEventId?: string;
+    branch_event_id?: string;
     /**
      * The parent branch-point wall-clock time in nanoseconds that pairs with branch_event_id. Zero
      * when forking at the head.
      */
-    branchHlcWallNs?: string;
+    branch_hlc_wall_ns?: string;
     /**
      * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns.
      */
-    branchHlcLogical?: string;
+    branch_hlc_logical?: string;
     /**
      * An optional human-readable label for the child run.
      */
@@ -642,9 +1069,12 @@ export type ForkRunResponse = {
     run?: Run;
 };
 
+/**
+ * Retired fork compatibility request. Clean sandbox-cell deployments return unsupported.
+ */
 export type ForkSandboxRequest = {
-    sourceSandboxId?: string;
-    projectId?: string;
+    source_sandbox_id?: string;
+    project_id?: string;
     /**
      * An optional display name for the child sandbox. When empty the server names it: a labeled fork
      * of a named source gets `<source-name>-<label>`, anything else gets a generated name. Names are
@@ -653,15 +1083,15 @@ export type ForkSandboxRequest = {
     name?: string;
     image?: SandboxImage;
     resources?: ResourceSpec;
-    requestedCapabilities?: Array<CapabilityRequirement>;
+    requested_capabilities?: Array<CapabilityRequirement>;
     labels?: {
         [key: string]: string;
     };
     continuity?: string;
-    allowFallback?: boolean;
+    allow_fallback?: boolean;
     /**
-     * Activity-capture policy for the child sandbox. Enabled by default; set
-     * policy=CAPTURE_POLICY_DISABLED to fork onto an image without the capture toolchain.
+     * Activity-capture policy for the child sandbox. Disabled by default. Enabling capture requires
+     * a runtime lane with native capture support.
      */
     capture?: CaptureSpec;
     /**
@@ -669,27 +1099,30 @@ export type ForkSandboxRequest = {
      */
     egress?: EgressPolicy;
     /**
-     * Secret bindings for the child sandbox. Resolved per child; never inherited from the snapshot.
+     * Secret bindings for the child sandbox, merged by name into the bindings inherited from the
+     * source sandbox: an entry with a new name is added, an entry whose name matches an inherited
+     * binding replaces it. With inherit_secrets set to false this list is the child's entire binding
+     * set. Secret values are resolved per child at request time; they are never carried in the fork.
      */
     secrets?: Array<SecretBinding>;
     /**
      * The run being forked from. The fork mints a child run beneath it.
      */
-    parentRunId?: string;
+    parent_run_id?: string;
     /**
      * The parent event id the child forks at — the divergence point on the parent's timeline. Empty
      * forks at the parent's current head.
      */
-    branchEventId?: string;
+    branch_event_id?: string;
     /**
      * The parent branch-point wall-clock time in nanoseconds that pairs with branch_event_id. Zero
      * when forking at the head.
      */
-    branchHlcWallNs?: string;
+    branch_hlc_wall_ns?: string;
     /**
      * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns.
      */
-    branchHlcLogical?: string;
+    branch_hlc_logical?: string;
     /**
      * An optional human-readable label for the child run the fork mints. When empty, the server
      * assigns a friendly fallback name.
@@ -699,18 +1132,30 @@ export type ForkSandboxRequest = {
      * Runtime lease policy for the child sandbox. Omitted uses the server default.
      */
     lifecycle?: LifecycleSpec;
+    /**
+     * Optional registered workload name to narrow the fork to. A fork otherwise inherits the parent's
+     * executing identity — a workload's whole subtree stays workload-classed and cannot shed its class
+     * by forking. Declaring a workload here may only narrow a non-workload-classed parent (the caller
+     * must hold launch rights and the name must be registered); declaring one on an
+     * already-workload-classed fork is rejected. Empty inherits the parent's executing identity.
+     */
+    execute_as_workload?: string;
+    /**
+     * Whether the child inherits the source sandbox's secret bindings. Defaults to true: the child
+     * starts with every binding the source has, with any secrets entries merged in by name. Set
+     * false to give the child exactly the secrets list — possibly none.
+     */
+    inherit_secrets?: boolean;
 };
 
 export type ForkSandboxResponse = {
     sandbox?: Sandbox;
     operation?: Operation;
-};
-
-export type GetAgentResponse = {
     /**
-     * The registered agent.
+     * Token-mode exposure intent inherited from the source, each with a newly minted child token.
+     * Empty on an idempotent replay because plaintext tokens are never stored.
      */
-    agent?: Agent;
+    inherited_exposures?: Array<MintedPortExposure>;
 };
 
 export type GetAnnotationSchemaResponse = {
@@ -760,7 +1205,7 @@ export type GetRunTreeResponse = {
     /**
      * The token to pass as page_token to fetch the next page. Empty when there are no more results.
      */
-    nextPageToken?: string;
+    next_page_token?: string;
 };
 
 export type GetSandboxResponse = {
@@ -775,19 +1220,19 @@ export type GetServiceConfigResponse = {
     /**
      * Client-visible telemetry gRPC endpoint.
      */
-    telemetryEndpoint?: string;
+    telemetry_endpoint?: string;
     /**
      * Client-visible sandbox-secret broker resolve URL.
      */
-    secretBrokerUrl?: string;
+    secret_broker_url?: string;
     /**
      * API URL used to start the browser login flow.
      */
-    loginUrl?: string;
+    login_url?: string;
     /**
      * Web console URL used to activate an RFC 8628 device-code login.
      */
-    deviceActivationUrl?: string;
+    device_activation_url?: string;
 };
 
 export type GetSnapshotResponse = {
@@ -816,11 +1261,53 @@ export type GetUsageSnapshotResponse = {
     snapshot?: UsageSnapshot;
 };
 
+export type GetVolumeResponse = {
+    /**
+     * The requested volume.
+     */
+    volume?: Volume;
+};
+
+export type GetWorkloadResponse = {
+    /**
+     * The registered workload.
+     */
+    workload?: Workload;
+};
+
+export type GpuCapability = {
+    /**
+     * Product models the lane can serve, using the same vocabulary as GpuSpec.models.
+     */
+    models?: Array<string>;
+    /**
+     * Maximum number of one model that the lane can allocate to one sandbox.
+     */
+    max_count?: number;
+};
+
 /**
- * Signal a running execution.
+ * Requested sandbox resources. A sizing field left unset (or 0) resolves to the deployment's
+ * default sizing for the selected image or runtime profile. An explicitly-set value is honored as
+ * requested, or the create fails when no node can satisfy it — it is never silently resized.
+ */
+export type GpuSpec = {
+    /**
+     * Number of accelerators. Zero means no accelerator request.
+     */
+    count?: number;
+    /**
+     * Acceptable product models in preference order. Empty accepts any advertised model.
+     */
+    models?: Array<string>;
+};
+
+/**
+ * Retired provider-interactive compatibility request. Clean sandbox-cell deployments return
+ * unsupported.
  */
 export type KillExecutionRequest = {
-    executionId?: string;
+    execution_id?: string;
     /**
      * Signal to deliver. TERMINATE is used when unspecified.
      */
@@ -832,10 +1319,47 @@ export type KillExecutionResponse = {
 };
 
 /**
+ * One acquisition generation of a project-scoped lease.
+ */
+export type Lease = {
+    /**
+     * The lease id — minted fresh on every successful acquire. Renew and release address this id, so
+     * it acts as the holder's handle for the current acquisition generation.
+     */
+    id?: string;
+    /**
+     * The project the lease belongs to.
+     */
+    project_id?: string;
+    /**
+     * The lease name — unique within the project among live leases.
+     */
+    name?: string;
+    /**
+     * Stable id of the principal that acquired the lease — the API key (or user) that performed the
+     * acquire, recorded server-side, never client-supplied. Resolve it to a display name via the
+     * principals listing.
+     */
+    holder?: string;
+    /**
+     * When the lease was acquired (RFC 3339).
+     */
+    acquired_at?: string;
+    /**
+     * When the lease was last renewed (RFC 3339), or empty if it has never been renewed.
+     */
+    renewed_at?: string;
+    /**
+     * When the lease expires (RFC 3339). Renewing extends this; once it lapses the lease is expired
+     * and the name is free to acquire.
+     */
+    expires_at?: string;
+};
+
+/**
  * Sandbox lifecycle policy: two independent clocks, matching how the completion sweep and the
  * lifetime reaper enforce them. This intentionally exposes only the two expiry controls needed by
- * public callers; process defaults, mounts, environment, and user remain server-managed in the first
- * runtime slice.
+ * public callers; process defaults, environment, and user remain server-managed.
  */
 export type LifecycleSpec = {
     /**
@@ -845,20 +1369,13 @@ export type LifecycleSpec = {
      * values must be between 60 and 86400 (24h) inclusive; zero/omitted uses the pattern's server
      * default.
      */
-    leaseSecs?: string;
+    lease_secs?: string;
     /**
      * Idle timeout in seconds: how long the sandbox may go without activity before the lifetime reaper
      * stops it. Nonzero values must be between 60 and 86400 inclusive; zero/omitted uses the server
      * default (1800s/30min).
      */
-    idleTimeoutSecs?: string;
-};
-
-export type ListAgentsResponse = {
-    /**
-     * The tenant's registered agents, by name.
-     */
-    agents?: Array<Agent>;
+    idle_timeout_secs?: string;
 };
 
 export type ListAnnotationSchemasResponse = {
@@ -875,12 +1392,40 @@ export type ListAnnotationsResponse = {
      * (`event_id`, `run_id` — absent on project-scoped rows — `project_id`, `lineage_path`, the
      * schema `name`, `ts_wall_ns`, `principal`), its target (`target_event_id`, or the range bounds
      * `range_start_ns`/`range_end_ns` plus `range_start_event_id`/`range_end_event_id` when the range
-     * was event-bounded), and the schema-validated payload under `payload`. Encoded canonically:
-     * snake_case keys, 64-bit integers as decimal strings, absent fields omitted.
+     * was event-bounded), and the schema-validated payload as a raw JSON object string under
+     * `payload_json` — the exact bytes that were annotated (the write-side `payload_json`), so
+     * payload values of every JSON type, including 64-bit integers, read back unchanged. Row fields
+     * are encoded canonically: snake_case keys, 64-bit integers as decimal strings, absent fields
+     * omitted.
      */
     annotations?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * Stored rows this listing could not decode (a legacy or corrupt storage shape), one entry per
+     * skipped row. The readable annotations above still serve in full; a listing that omits rows
+     * says so here rather than failing outright or dropping them silently. Empty on a healthy store.
+     */
+    skipped?: Array<SkippedAnnotation>;
+    /**
+     * How many stored versions the default latest-wins view hid because a newer write shares their
+     * supersession key. Zero when nothing was superseded, and always zero with `history` (which
+     * returns every version). A non-zero count means acked writes are stored but not shown here —
+     * list with `history` to read them all.
+     */
+    superseded_count?: string;
+};
+
+export type ListArtifactsResponse = {
+    /**
+     * The artifacts on this page, newest first. Metadata only — an artifact's payload rides
+     * `GET /v1/artifacts/{id}:payload`.
+     */
+    artifacts?: Array<Artifact>;
+    /**
+     * The token to pass as page_token to fetch the next page. Empty when there are no more results.
+     */
+    next_page_token?: string;
 };
 
 export type ListDataViewsResponse = {
@@ -888,6 +1433,17 @@ export type ListDataViewsResponse = {
      * The tenant's structured data views.
      */
     views?: Array<DataView>;
+};
+
+export type ListEgressPolicyBindingsResponse = {
+    /**
+     * The tenant's egress-policy bindings, by selector.
+     */
+    bindings?: Array<EgressPolicyBinding>;
+};
+
+export type ListExposedPortsResponse = {
+    exposures?: Array<PortExposure>;
 };
 
 export type ListProjectsResponse = {
@@ -898,7 +1454,7 @@ export type ListProjectsResponse = {
     /**
      * The token to pass as page_token to fetch the next page. Empty when there are no more results.
      */
-    nextPageToken?: string;
+    next_page_token?: string;
 };
 
 export type ListRunsResponse = {
@@ -909,7 +1465,7 @@ export type ListRunsResponse = {
     /**
      * The token to pass as page_token to fetch the next page. Empty when there are no more results.
      */
-    nextPageToken?: string;
+    next_page_token?: string;
 };
 
 export type ListRuntimeCapabilitiesResponse = {
@@ -924,7 +1480,7 @@ export type ListSandboxSecretsResponse = {
     /**
      * The token to pass as page_token to fetch the next page. Empty when there are no more results.
      */
-    nextPageToken?: string;
+    next_page_token?: string;
 };
 
 export type ListSandboxesResponse = {
@@ -935,11 +1491,45 @@ export type ListSandboxesResponse = {
     /**
      * The token to pass as page_token to fetch the next page. Empty when there are no more results.
      */
-    nextPageToken?: string;
+    next_page_token?: string;
 };
 
 export type ListSnapshotsResponse = {
     snapshots?: Array<Snapshot>;
+};
+
+export type ListVolumesResponse = {
+    /**
+     * The volumes on this page, newest first.
+     */
+    volumes?: Array<Volume>;
+    /**
+     * The token to pass as page_token to fetch the next page. Empty when there are no more results.
+     */
+    next_page_token?: string;
+};
+
+export type ListWorkloadsResponse = {
+    /**
+     * The tenant's registered workloads, by name.
+     */
+    workloads?: Array<Workload>;
+};
+
+/**
+ * A newly activated exposure and its one-time credential.
+ */
+export type MintedPortExposure = {
+    exposure?: PortExposure;
+    /**
+     * Returned only by the call that minted this token. Empty on an identity-idempotent replay and
+     * never returned by list.
+     */
+    token?: string;
+    /**
+     * True when this call activated the exposure; false when it found the same identity active.
+     */
+    created?: boolean;
 };
 
 export type OciImage = {
@@ -949,13 +1539,129 @@ export type OciImage = {
 
 export type Operation = {
     id?: string;
-    tenantId?: string;
-    resourceType?: string;
-    resourceId?: string;
+    tenant_id?: string;
+    resource_type?: string;
+    resource_id?: string;
     kind?: string;
     state?: string;
-    resultJson?: string;
-    errorJson?: string;
+    /**
+     * What the operation produced, present once it succeeds on kinds that carry a report. The
+     * result variant matches the operation's kind.
+     */
+    result?: OperationResult;
+    /**
+     * Why the operation ended without succeeding. Present on failed operations (and on cancelled
+     * operations whose cancellation recorded a cause).
+     */
+    error?: OperationError;
+};
+
+/**
+ * One failed, retried attempt's cause on an operation that later ended without succeeding.
+ */
+export type OperationAttemptError = {
+    /**
+     * Stable machine-readable failure class of the attempt.
+     */
+    code?: string;
+    /**
+     * Human-readable description of the attempt's failure.
+     */
+    message?: string;
+    /**
+     * Which attempt failed with this cause (1-based).
+     */
+    attempt?: string;
+};
+
+/**
+ * Why an operation failed, when it did.
+ */
+export type OperationError = {
+    /**
+     * Stable machine-readable failure class (for example runtime_unavailable or
+     * operation_conflict).
+     */
+    code?: string;
+    /**
+     * Human-readable description of the failure.
+     */
+    message?: string;
+    /**
+     * The final retried attempt's failure before the operation crossed its deadline: retries leave
+     * an operation pending, so the terminal deadline error alone cannot say what kept failing.
+     * Present only on deadline-exceeded operations that recorded at least one failed attempt.
+     */
+    last_attempt?: OperationAttemptError;
+};
+
+/**
+ * The typed report of a succeeded operation. The set variant matches the operation's kind; kinds
+ * whose success carries no report (for example a sandbox create or scratch-workspace delete)
+ * settle with no result.
+ */
+export type OperationResult = {
+    stop?: StopResult;
+    resume?: ResumeResult;
+    execute?: ExecuteResult;
+    snapshot?: SnapshotResult;
+    snapshot_delete?: SnapshotDeleteResult;
+    restore?: RestoreResult;
+    fork?: ForkResult;
+    file_to_artifact?: FileToArtifactResult;
+    file_from_artifact?: FileFromArtifactResult;
+    sandbox_delete?: SandboxDeleteResult;
+};
+
+/**
+ * Public-safe metadata for one exposed sandbox port. Tokens and their stored digests never appear
+ * on list/read surfaces.
+ */
+export type PortExposure = {
+    sandbox_id?: string;
+    port?: number;
+    auth_mode?: 'PORT_EXPOSURE_AUTH_MODE_UNSPECIFIED' | 'PORT_EXPOSURE_AUTH_MODE_TOKEN' | 'PORT_EXPOSURE_AUTH_MODE_PUBLIC';
+    url?: string;
+    /**
+     * When this token generation was created (RFC 3339).
+     */
+    created_at?: string;
+};
+
+export type PrefetchVolumeRequest = {
+    /**
+     * The volume whose content to pre-warm, by id, within the caller's tenant.
+     */
+    volume_id?: string;
+    /**
+     * The version to pre-warm (`blake3:<hex>`). Empty pre-warms the volume's current (latest
+     * committed) version.
+     */
+    version_digest?: string;
+};
+
+export type PrefetchVolumeResponse = {
+    [key: string]: unknown;
+};
+
+export type PreviewBaselineImpactRequest = {
+    /**
+     * The proposed tenant baseline policy to evaluate against every existing binding.
+     */
+    baseline?: EgressPolicy;
+    /**
+     * The proposed default enforcement disposition (informational; does not affect the destination
+     * diff).
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+};
+
+export type PreviewBaselineImpactResponse = {
+    /**
+     * One entry per selector whose effective policy would change under the proposed baseline (selectors
+     * with no change are omitted). Empty when the proposed baseline changes nothing.
+     */
+    changes?: Array<BindingImpact>;
 };
 
 /**
@@ -965,32 +1671,32 @@ export type Operation = {
 export type Principal = {
     /**
      * The kind of principal: "user" (a human identity), "service_account" (a machine credential
-     * not bound to a user), or "agent" (a credential bound to a registered agent identity).
+     * not bound to a user), or "workload" (a credential bound to a registered workload identity).
      */
     kind?: string;
     /**
      * The principal's stable id: the user's id for a user, the API key's id for a service account
-     * or an agent.
+     * or a workload.
      */
     id?: string;
     /**
-     * The user's primary email. Empty for a service-account or agent principal.
+     * The user's primary email. Empty for a service-account or workload principal.
      */
     email?: string;
     /**
      * The presented API key's id. Empty for a browser-session login (no key is involved).
      */
-    keyId?: string;
+    key_id?: string;
     /**
      * The presented API key's name — how this principal is displayed in listings and attribution.
      * Empty for a browser-session login.
      */
-    keyName?: string;
+    key_name?: string;
     /**
-     * The bound agent's registered name — how an agent principal is displayed in listings and
-     * attribution. Empty unless the presented credential is bound to a registered agent.
+     * The bound workload's registered name — how a workload principal is displayed in listings and
+     * attribution. Empty unless the presented credential is bound to a registered workload.
      */
-    agentName?: string;
+    workload_name?: string;
 };
 
 /**
@@ -1004,7 +1710,7 @@ export type Project = {
     /**
      * The tenant the project belongs to (derived from the caller's scope, echoed for convenience).
      */
-    tenantId?: string;
+    tenant_id?: string;
     /**
      * The project slug — unique within the tenant.
      */
@@ -1016,7 +1722,7 @@ export type Project = {
     /**
      * When the project was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * Optimistic-concurrency version, bumped on every update. Echo it back as the `If-Match` request header to make a later update conditional — if the project changed meanwhile the server rejects the update with error code `precondition_failed` instead of overwriting.
      */
@@ -1024,11 +1730,46 @@ export type Project = {
     /**
      * The total number of runs in the project, computed server-side across all of the project's runs (not just one page).
      */
-    runCount?: string;
+    run_count?: string;
     /**
      * When the most recent run in the project was created (RFC 3339), or empty when the project has no runs yet.
      */
-    lastRunAt?: string;
+    last_run_at?: string;
+    /**
+     * User-assigned free-text description (at most 4 KiB). Empty when unset.
+     */
+    description?: string;
+    /**
+     * Stable id of the principal that created the project — the API key (or user) that performed the
+     * create, recorded server-side, never client-supplied. Resolve it to a display name via the
+     * principals listing. Empty for projects created before attribution was recorded.
+     */
+    created_by?: string;
+    /**
+     * When the project was last updated (RFC 3339). Equal to created_at until the first update.
+     */
+    updated_at?: string;
+    /**
+     * The project's display configuration: for each annotation schema, the ordered fields that
+     * surfaces (run trees, consoles) show by default. Empty when unconfigured.
+     */
+    display?: Array<ProjectDisplayRule>;
+};
+
+/**
+ * One project display rule: for annotations of one schema, the ordered fields that surfaces show by
+ * default (for example schema `experiment.v1` with fields `metrics.val_bpb`, `status`).
+ */
+export type ProjectDisplayRule = {
+    /**
+     * The annotation-schema name the rule applies to. Never empty; a project's display configuration
+     * carries at most one rule per schema.
+     */
+    schema?: string;
+    /**
+     * The ordered annotation fields to display. Never empty; each entry is a non-blank field name.
+     */
+    fields?: Array<string>;
 };
 
 /**
@@ -1066,10 +1807,46 @@ export type PromotedField = {
 };
 
 /**
- * Opaque image reference interpreted by the selected runtime adapter.
+ * A proposed (unsaved) binding policy to preview at a selector's tier, for the rule editor's live
+ * "if I save this rule, what's the effective result?" preview. It is an EgressPolicy plus an optional
+ * enforcement override, matching a stored binding.
+ */
+export type ProposedEgressPolicy = {
+    /**
+     * The proposed outbound network policy for the selector.
+     */
+    policy?: EgressPolicy;
+    /**
+     * The proposed enforcement override. EGRESS_ENFORCEMENT_UNSPECIFIED inherits the tenant default,
+     * exactly as a stored binding's optional override does.
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+};
+
+/**
+ * Explicit deployment-defined runtime profile reference. It is never a provider-default sentinel.
  */
 export type ProviderNativeImage = {
     reference?: string;
+};
+
+export type PublishVolumeVersionRequest = {
+    /**
+     * The volume to publish the version on.
+     */
+    volume_id?: string;
+    /**
+     * The push handle from StartVolumePush, naming the uploaded manifest.
+     */
+    push_id?: string;
+};
+
+export type PublishVolumeVersionResponse = {
+    /**
+     * The published version, now the volume's current version. Sandboxes that attached earlier keep
+     * the version they pinned at attach time.
+     */
+    version?: VolumeVersion;
 };
 
 /**
@@ -1103,6 +1880,37 @@ export type QueryResponse = {
     rows?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * The result set's declared column names, in projection order. Present even when a column is
+     * NULL in every row (per-row nulls are omitted), so a selected-but-empty column stays visible.
+     */
+    columns?: Array<string>;
+};
+
+/**
+ * One workspace limit: the stable metric name, the configured cap, and — where the platform tracks
+ * an instantaneous value — the usage observed against it right now.
+ */
+export type QuotaLimit = {
+    /**
+     * The stable limit name (e.g. `sandboxes.active`, `snapshots.bytes`) — the same vocabulary a
+     * limit rejection carries in its error `details.quota.metric`.
+     */
+    metric?: string;
+    /**
+     * The configured cap for this workspace.
+     */
+    limit?: string;
+    /**
+     * The usage observed against the cap right now. Omitted for per-minute rate limits, which have
+     * no instantaneous occupancy.
+     */
+    current?: string;
+    /**
+     * Capacity reserved by accepted but not-yet-settled work. Omitted for metrics without a
+     * reservation phase.
+     */
+    reserved?: string;
 };
 
 export type RegisterAnnotationSchemaRequest = {
@@ -1114,7 +1922,7 @@ export type RegisterAnnotationSchemaRequest = {
     /**
      * The JSON Schema document (draft 2020-12) as a JSON string. Must be a JSON object.
      */
-    jsonSchema?: string;
+    json_schema?: string;
     /**
      * An optional human-readable description for this version.
      */
@@ -1124,7 +1932,7 @@ export type RegisterAnnotationSchemaRequest = {
      * field/type/identity/bloom; the server assigns each field's slot. Registration is rejected if more
      * fields of a type are promoted than the slot pool holds.
      */
-    promotedFields?: Array<PromotedField>;
+    promoted_fields?: Array<PromotedField>;
 };
 
 export type RegisterAnnotationSchemaResponse = {
@@ -1132,6 +1940,55 @@ export type RegisterAnnotationSchemaResponse = {
      * The registered config version.
      */
     schema?: AnnotationSchema;
+};
+
+export type ReleaseLeaseResponse = {
+    /**
+     * The released lease as it was at release time.
+     */
+    lease?: Lease;
+};
+
+export type RenewLeaseRequest = {
+    /**
+     * The lease id to renew (from the acquire response).
+     */
+    id?: string;
+    /**
+     * The new time-to-live in seconds (1 to 86400), measured from now — not added to the previous
+     * expiry.
+     */
+    ttl_secs?: string;
+};
+
+export type RenewLeaseResponse = {
+    /**
+     * The renewed lease with its extended expiry.
+     */
+    lease?: Lease;
+};
+
+export type RequestVolumeBlobUploadsRequest = {
+    /**
+     * The volume the blobs are being pushed for.
+     */
+    volume_id?: string;
+    /**
+     * The blobs to upload, at most 512 per request. Repeat the call in batches for larger pushes;
+     * it is read-only on the volume itself, so batches may run concurrently.
+     */
+    blobs?: Array<VolumeBlobRef>;
+};
+
+export type RequestVolumeBlobUploadsResponse = {
+    /**
+     * One entry per distinct requested digest: either already present, or an upload URL.
+     */
+    uploads?: Array<VolumeBlobUpload>;
+    /**
+     * How long the returned upload URLs stay valid, in seconds.
+     */
+    expires_in_seconds?: number;
 };
 
 /**
@@ -1146,16 +2003,62 @@ export type ReservedResources = {
     /**
      * Total reserved memory in MiB.
      */
-    memoryMb?: string;
+    memory_mb?: string;
     /**
      * Total reserved root disk in MiB.
      */
-    diskMb?: string;
+    disk_mb?: string;
     /**
      * Total reserved accelerators (e.g. GPUs). Best-effort: counted only for sandboxes whose spec
      * requested an accelerator, so a tenant running no accelerator workloads reports zero.
      */
     gpus?: string;
+};
+
+export type ResolveEffectiveEgressRequest = {
+    /**
+     * The identity selector to resolve (see EgressPolicyBinding.selector for the grammar). Rejected as
+     * INVALID_ARGUMENT if it is not a well-formed selector.
+     */
+    selector?: string;
+    /**
+     * An optional proposed (unsaved) policy to preview at the selector's tier. When set, the effective
+     * result is resolved as if this were the binding for the selector (baseline narrowed by it), so the
+     * rule editor can preview a rule before saving. When omitted, the stored binding for the selector is
+     * resolved (the default read).
+     */
+    proposed?: ProposedEgressPolicy;
+};
+
+export type ResolveEffectiveEgressResponse = {
+    /**
+     * The effective outbound policy a principal matching the selector resolves to: the tenant baseline
+     * narrowed by the most-specific matching binding.
+     */
+    resolved?: EgressPolicy;
+    /**
+     * How a denial is enforced for the resolved class (the winning binding's override, else the tenant
+     * default).
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
+    /**
+     * The selector of the binding that won under most-specific-wins, or "baseline" when no binding
+     * matched and the tenant baseline applies.
+     */
+    winning_selector?: string;
+    /**
+     * The tenant baseline — the ceiling the resolved policy is capped by.
+     */
+    baseline?: EgressPolicy;
+    /**
+     * Destinations the baseline ceiling removed from the winning binding (empty when the baseline won,
+     * or when the winning binding named nothing outside the baseline).
+     */
+    clamped?: Array<ClampedEntry>;
+    /**
+     * How many identities the selector covers.
+     */
+    population?: EgressPopulation;
 };
 
 export type ResolveSandboxSecretRequest = {
@@ -1174,27 +2077,68 @@ export type ResolveSandboxSecretResponse = {
 };
 
 export type ResourceSpec = {
+    /**
+     * Virtual CPU count. Unset resolves to the deployment default.
+     */
     cpus?: number;
-    memoryMb?: string;
-    diskMb?: string;
+    /**
+     * Memory in MiB. Unset resolves to the deployment default.
+     */
+    memory_mb?: string;
+    /**
+     * Root disk in MiB. Unset resolves to the deployment default.
+     */
+    disk_mb?: string;
     architecture?: 'ARCHITECTURE_UNSPECIFIED' | 'ARCHITECTURE_X86_64' | 'ARCHITECTURE_AARCH64';
+    /**
+     * Accelerator request. Absent means no accelerator.
+     */
+    gpus?: GpuSpec;
 };
 
+/**
+ * Retired snapshot-restore compatibility result. Clean sandbox-cell deployments do not produce it.
+ */
+export type RestoreResult = {
+    /**
+     * The new sandbox the restore created.
+     */
+    sandbox_id?: string;
+    snapshot_id?: string;
+    generation?: string;
+    observed_state?: string;
+    readiness?: string;
+};
+
+/**
+ * Retired snapshot-restore compatibility request. Clean sandbox-cell deployments return
+ * unsupported; resume an exact sealed BranchFS workspace into a fresh runtime generation instead.
+ */
 export type RestoreSnapshotRequest = {
-    snapshotId?: string;
-    projectId?: string;
+    snapshot_id?: string;
+    project_id?: string;
     name?: string;
     image?: SandboxImage;
     resources?: ResourceSpec;
-    requestedCapabilities?: Array<CapabilityRequirement>;
+    requested_capabilities?: Array<CapabilityRequirement>;
     labels?: {
         [key: string]: string;
     };
-    contents?: string;
-    allowFallback?: boolean;
     /**
-     * Activity-capture policy for the restored sandbox. Enabled by default; set
-     * policy=CAPTURE_POLICY_DISABLED to restore onto an image without the capture toolchain.
+     * Required snapshot semantics for the restore. Omitted, the restore requires the snapshot's
+     * recorded effective semantics — restoring any snapshot with a minimal request is compatible by
+     * construction, like the omitted image and resources fields. An explicit value must match the
+     * snapshot's effective semantics exactly unless allow_fallback is set.
+     */
+    contents?: string;
+    /**
+     * Accept lower effective semantics than an explicit `contents` requirement. Has no effect when
+     * `contents` is omitted: the inherited requirement already matches the snapshot.
+     */
+    allow_fallback?: boolean;
+    /**
+     * Activity-capture policy for the restored sandbox. Disabled by default. Enabling capture
+     * requires a runtime lane with native capture support.
      */
     capture?: CaptureSpec;
     /**
@@ -1205,15 +2149,55 @@ export type RestoreSnapshotRequest = {
      * Secret bindings for the restored sandbox. Resolved per child; never inherited from the snapshot.
      */
     secrets?: Array<SecretBinding>;
+    /**
+     * Optional registered workload name to run the restored sandbox as. A restore declares its
+     * executing identity anew — a snapshot carries data, not authority — so nothing is inherited: when
+     * set, the restored sandbox is workload-classed (the caller must hold launch rights and the name
+     * must be registered); when empty, it executes as the restorer's own identity.
+     */
+    execute_as_workload?: string;
 };
 
 export type RestoreSnapshotResponse = {
     sandbox?: Sandbox;
     operation?: Operation;
+    /**
+     * Token-mode exposure intent inherited from the snapshot, each with a newly minted child token.
+     * Empty on an idempotent replay because plaintext tokens are never stored.
+     */
+    inherited_exposures?: Array<MintedPortExposure>;
+};
+
+/**
+ * What a succeeded resume observed about the sandbox it brought back.
+ */
+export type ResumeResult = {
+    /**
+     * True when the resume provisioned a fresh, empty workspace under a new generation (the
+     * explicit fresh_workspace opt-in) instead of restoring a sealed BranchFS filesystem.
+     */
+    fresh_workspace?: boolean;
+    /**
+     * The sandbox generation serving the resumed workload. Present when resume materialized a new
+     * runtime, whether from fresh scratch storage or an exact sealed BranchFS revision.
+     */
+    generation?: string;
+    /**
+     * The sandbox's observed state once the resume settled. A non-fresh resume may still report a
+     * new generation when it restored an exact sealed filesystem; process and memory state are not
+     * implied by this result.
+     */
+    observed_state?: string;
 };
 
 export type ResumeSandboxRequest = {
     id?: string;
+    /**
+     * Accept a fresh, empty workspace only when no sealed filesystem continuation exists (for
+     * example, an ephemeral scratch sandbox). Without this, such a resume fails instead of silently
+     * provisioning a blank workspace. Has no effect when an exact BranchFS continuation exists.
+     */
+    fresh_workspace?: boolean;
 };
 
 export type ResumeSandboxResponse = {
@@ -1257,11 +2241,11 @@ export type Run = {
     /**
      * The tenant the run belongs to (derived from the caller's scope, echoed for convenience).
      */
-    tenantId?: string;
+    tenant_id?: string;
     /**
      * The project the run belongs to.
      */
-    projectId?: string;
+    project_id?: string;
     /**
      * An optional human-readable label.
      */
@@ -1274,73 +2258,98 @@ export type Run = {
      * The stable id of the principal that created the run — the API key (or user) that performed the
      * start or fork, recorded server-side. Empty when unrecorded.
      */
-    createdBy?: string;
+    created_by?: string;
     /**
      * When the run started executing (RFC 3339), empty if it has not started.
      */
-    startedAt?: string;
+    started_at?: string;
     /**
      * When the run finished (RFC 3339), empty if it is still in flight.
      */
-    endedAt?: string;
+    ended_at?: string;
     /**
      * When the run record was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * The run this run forked from. Empty for a tree root.
      */
-    parentRunId?: string;
+    parent_run_id?: string;
     /**
      * The root of this run's tree (equal to id for a root). Lets the whole tree resolve in one
      * indexed lookup.
      */
-    rootRunId?: string;
+    root_run_id?: string;
     /**
      * The materialized path of run ids from the root to this run, as a dotted label (e.g.
      * "root_ulid.child_ulid"). Sorts in creation order and addresses the subtree by prefix.
      */
-    lineagePath?: string;
+    lineage_path?: string;
     /**
      * The parent event id this run forked at — the divergence point on the parent's timeline. Empty
      * for a tree root or a manually started new tree.
      */
-    branchEventId?: string;
+    branch_event_id?: string;
     /**
      * The parent branch-point wall-clock time in nanoseconds (the cursor coordinate the timeline
      * uses). Zero when there is no branch point.
      */
-    branchHlcWallNs?: string;
+    branch_hlc_wall_ns?: string;
     /**
      * The parent branch-point logical tiebreak that pairs with branch_hlc_wall_ns. Zero when there is
      * no branch point.
      */
-    branchHlcLogical?: string;
+    branch_hlc_logical?: string;
     /**
      * The sandbox executing (or last to execute) this run, when the run is sandbox-backed. Empty for
      * a run with no sandbox (e.g. a local wrapped run).
      */
-    sandboxId?: string;
+    sandbox_id?: string;
+    /**
+     * When the run last showed a liveness signal (RFC 3339): the time of its most recent telemetry
+     * event, or started_at for a run that has emitted no events yet. Derived at read time, and only
+     * for a `running` run that no sandbox executes — the runs whose liveness the platform cannot
+     * attest. Empty for every other run, and empty when the signal is temporarily unavailable.
+     */
+    last_activity_at?: string;
+    /**
+     * True when last_activity_at is older than the staleness window (15 minutes): the run still
+     * reads `running` — no terminal state is ever recorded on the creator's behalf — but its creator
+     * has gone quiet, so readers should render it as `running (stale)`. Always false when
+     * last_activity_at is empty.
+     */
+    stale?: boolean;
+    /**
+     * The stable id of the identity this run executes AS: the registered workload's id when the
+     * launch declared one, otherwise the launcher's own principal id (matching created_by). Forks
+     * inherit it from their parent. Empty on runs that predate executing-identity recording.
+     */
+    executing_principal?: string;
+    /**
+     * The executing identity's kind: `user`, `service_account`, or `workload`. Empty on runs that
+     * predate executing-identity recording.
+     */
+    executing_kind?: string;
 };
 
 export type Sandbox = {
     id?: string;
-    tenantId?: string;
-    projectId?: string;
+    tenant_id?: string;
+    project_id?: string;
     /**
      * The sandbox's display name. Every sandbox has one — caller-assigned at create, otherwise
      * generated by the server. Names are not unique; the id is the canonical handle.
      */
     name?: string;
-    desiredState?: string;
-    observedState?: string;
-    activeGeneration?: string;
+    desired_state?: string;
+    observed_state?: string;
+    active_generation?: string;
     version?: string;
     /**
      * The run this sandbox is (or was) executing. Present for project-backed sandboxes; project-less
      * sandboxes have no run.
      */
-    runId?: string;
+    run_id?: string;
     /**
      * User-assigned free-text description. Empty when unset.
      */
@@ -1349,19 +2358,52 @@ export type Sandbox = {
      * Stable id of the principal that created the sandbox — the API key (or user) that performed the
      * create, recorded server-side. Empty when unrecorded.
      */
-    createdBy?: string;
+    created_by?: string;
     /**
      * When the sandbox was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * When the sandbox record was last updated (RFC 3339). Equal to created_at until the first update.
      */
-    updatedAt?: string;
+    updated_at?: string;
     /**
-     * Accelerators requested by the sandbox's spec. Zero when none were requested.
+     * Why the sandbox failed. Present only when a failure is recorded (a failed sandbox always
+     * carries one).
      */
-    gpus?: string;
+    failure?: SandboxFailure;
+};
+
+/**
+ * Public-safe versioning evidence from deleting a sandbox backed by a versioned BranchFS
+ * workspace. Cell-local routes, prepared references, backend receipt IDs, nodes, paths, sockets,
+ * epochs, and writer fences never cross this boundary. Scratch-workspace deletes have no result.
+ */
+export type SandboxDeleteResult = {
+    /**
+     * Always true for this result variant; allows additive clients to distinguish it explicitly.
+     */
+    versioned_workspace?: boolean;
+    /**
+     * Durable BranchFS repository whose writer epoch was sealed.
+     */
+    repository_id?: string;
+    /**
+     * Immutable change from which the deleted sandbox workspace began.
+     */
+    base_change_id?: string;
+    /**
+     * Newly sealed immutable change containing the sandbox's terminal workspace contents.
+     */
+    sealed_change_id?: string;
+    /**
+     * Exact acknowledged terminal workspace WAL sequence.
+     */
+    checkpoint_sequence?: string;
+    /**
+     * Lowercase-hex hash of the exact acknowledged terminal WAL prefix.
+     */
+    checkpoint_prefix_hash?: string;
 };
 
 /**
@@ -1372,51 +2414,67 @@ export type SandboxDescribe = {
     /**
      * The container image reference the sandbox's spec pinned, when it names one.
      */
-    imageReference?: string;
+    image_reference?: string;
     /**
      * The image content digest, when known.
      */
-    imageDigest?: string;
+    image_digest?: string;
     /**
      * The resources the sandbox's spec requested.
      */
-    requestedResources?: ResourceSpec;
-    /**
-     * Accelerator count the sandbox's spec requested. Zero when none.
-     */
-    requestedGpus?: string;
-    /**
-     * Requested accelerator model (e.g. "b200"). Empty when no accelerator was requested.
-     */
-    acceleratorModel?: string;
+    requested_resources?: ResourceSpec;
     /**
      * When the current observed state began (RFC 3339): the completion time of the last succeeded
      * state-changing operation, or the creation time before any state change.
      */
-    stateSince?: string;
+    state_since?: string;
     /**
      * When the sandbox's keepalive lease expires (RFC 3339). Empty when the sandbox has no idle
      * timeout.
      */
-    leaseExpiresAt?: string;
+    lease_expires_at?: string;
     /**
      * The lineage path of the sandbox's run (dotted run ids, root first). Empty without a run.
      */
-    lineagePath?: string;
+    lineage_path?: string;
     /**
      * The parent event the sandbox's run branched at. Empty for a tree root or no run.
      */
-    branchEventId?: string;
+    branch_event_id?: string;
     /**
      * The sandbox's most recent operations, newest first (capped by the server).
      */
-    recentOperations?: Array<SandboxOperationSummary>;
+    recent_operations?: Array<SandboxOperationSummary>;
+    /**
+     * Accelerator model selected from requested_resources.gpus.models at admission. Empty when the
+     * sandbox requested no accelerator.
+     */
+    resolved_accelerator_model?: string;
 };
 
+/**
+ * Why a sandbox is in the failed observed state.
+ */
+export type SandboxFailure = {
+    /**
+     * Stable machine-readable failure class (for example runtime_unavailable,
+     * operation_deadline_exceeded, or workspace_lost).
+     */
+    code?: string;
+    /**
+     * Human-readable description of the failure.
+     */
+    message?: string;
+};
+
+/**
+ * Explicit immutable environment selection. A create must name a deployment profile or exact OCI
+ * environment; omitting the image does not select a provider default.
+ */
 export type SandboxImage = {
     oci?: OciImage;
-    buildArtifact?: BuildArtifactImage;
-    providerNative?: ProviderNativeImage;
+    build_artifact?: BuildArtifactImage;
+    provider_native?: ProviderNativeImage;
 };
 
 /**
@@ -1429,12 +2487,18 @@ export type SandboxOperationSummary = {
     /**
      * When the operation was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * When the operation last transitioned (RFC 3339). Equal to created_at until the first
      * transition; the completion time once the operation is terminal.
      */
-    updatedAt?: string;
+    updated_at?: string;
+    /**
+     * Why the operation ended without succeeding, so one sandbox read explains its failed
+     * operations. Present on failed operations (and on cancelled operations whose cancellation
+     * recorded a cause); matches the error on GetOperation.
+     */
+    error?: OperationError;
 };
 
 /**
@@ -1450,17 +2514,18 @@ export type SandboxSecret = {
      */
     name?: string;
     /**
-     * The credential kind.
+     * What kind of credential the secret holds for future cell-owned injection: `api_key`, `bearer`,
+     * `basic`, or `custom`.
      */
-    kind?: 'SECRET_KIND_UNSPECIFIED' | 'SECRET_KIND_API_KEY' | 'SECRET_KIND_BEARER' | 'SECRET_KIND_BASIC' | 'SECRET_KIND_CUSTOM';
+    kind?: string;
     /**
-     * The outbound host the value is injected into, when bound to one (empty for an unbound secret).
+     * Intended outbound host for future native injection (empty for an unbound secret).
      */
-    destHost?: string;
+    dest_host?: string;
     /**
-     * The header the value is injected as, when applicable (empty when the kind implies it).
+     * Intended header for future native injection (empty when the kind implies it).
      */
-    destHeader?: string;
+    dest_header?: string;
     /**
      * The auth scheme prefix (e.g. `Bearer`), when applicable.
      */
@@ -1468,23 +2533,23 @@ export type SandboxSecret = {
     /**
      * The current version number. Incremented on each rotation; 0 before the first value is set.
      */
-    currentVersion?: string;
+    current_version?: string;
     /**
      * When the secret was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * When the secret was last rotated, if ever (RFC 3339).
      */
-    rotatedAt?: string;
+    rotated_at?: string;
     /**
      * When the secret expires, if an expiry is set (RFC 3339).
      */
-    expiresAt?: string;
+    expires_at?: string;
     /**
      * When the secret was revoked, if it has been (RFC 3339). A revoked secret resolves to nothing.
      */
-    revokedAt?: string;
+    revoked_at?: string;
 };
 
 /**
@@ -1494,7 +2559,7 @@ export type SandboxStateCount = {
     /**
      * The sandbox observed state (e.g. running, ready, paused, provisioning).
      */
-    observedState?: string;
+    observed_state?: string;
     /**
      * How many non-deleted sandboxes are in this state.
      */
@@ -1502,9 +2567,9 @@ export type SandboxStateCount = {
 };
 
 /**
- * Binds a stored sandbox secret to a placeholder the agent sees and the outbound target the value is
- * injected into. The agent only ever observes the placeholder; the real value is injected in flight
- * and never written into the sandbox environment, disk, snapshot, or captured telemetry.
+ * Declares a stored sandbox secret and its intended outbound target. A non-empty binding requires
+ * native secret_injection at admission. Current production cells do not advertise that capability,
+ * so the request fails closed until lease-bound cell hydration is available.
  */
 export type SecretBinding = {
     /**
@@ -1512,40 +2577,41 @@ export type SecretBinding = {
      */
     name?: string;
     /**
-     * Placeholder environment variable the agent sees in place of the value.
+     * Reserved placeholder environment-variable name for a runtime with native injection.
      */
     env?: string;
     /**
-     * Outbound target the resolved value is injected into (e.g. a host or header).
+     * Intended outbound target for a runtime with native injection (e.g. a host or header).
      */
     bind?: string;
     /**
      * Safe model classification to attach to brokered telemetry.
      */
-    genAiModel?: string;
+    gen_ai_model?: string;
     /**
      * Safe tool-call classification to attach to brokered telemetry.
      */
-    toolCall?: string;
+    tool_call?: string;
     /**
      * Digest of a redacted brokered payload artifact.
      */
-    redactedPayloadDigest?: string;
+    redacted_payload_digest?: string;
     /**
      * Media type of a redacted brokered payload artifact.
      */
-    redactedPayloadMediaType?: string;
+    redacted_payload_media_type?: string;
     /**
      * Size of a redacted brokered payload artifact.
      */
-    redactedPayloadSizeBytes?: string;
+    redacted_payload_size_bytes?: string;
 };
 
 /**
- * Deliver more input to a running execution: either standard input bytes or a control signal.
+ * Retired provider-interactive compatibility request. Clean sandbox-cell deployments return
+ * unsupported.
  */
 export type SendExecutionInputRequest = {
-    executionId?: string;
+    execution_id?: string;
     /**
      * Bytes appended to the process's standard input.
      */
@@ -1560,23 +2626,35 @@ export type SendExecutionInputResponse = {
     [key: string]: unknown;
 };
 
-export type SetAgentLaunchAclRequest = {
+export type SetEgressPolicyBindingRequest = {
     /**
-     * The registered agent name.
+     * The identity selector to bind (see EgressPolicyBinding.selector for the grammar). Rejected as
+     * INVALID_ARGUMENT if it is not a well-formed selector.
      */
-    name?: string;
+    selector?: string;
     /**
-     * The launch ACL to set, replacing the agent's current one. A RESTRICTED policy must list at
-     * least one user; a MEMBERS policy must not list any.
+     * The outbound network policy to bind to the selector.
      */
-    acl?: AgentLaunchAcl;
+    policy?: EgressPolicy;
+    /**
+     * The enforcement override to set for this class, or EGRESS_ENFORCEMENT_UNSPECIFIED for no
+     * override (the tenant default applies).
+     */
+    enforcement?: 'EGRESS_ENFORCEMENT_UNSPECIFIED' | 'EGRESS_ENFORCEMENT_BLOCK' | 'EGRESS_ENFORCEMENT_WARN';
 };
 
-export type SetAgentLaunchAclResponse = {
+export type SetEgressPolicyBindingResponse = {
     /**
-     * The agent with its updated launch ACL.
+     * The stored binding.
      */
-    agent?: Agent;
+    binding?: EgressPolicyBinding;
+    /**
+     * Destinations the stored binding names that the tenant baseline ceiling removes from its
+     * effective policy. The binding is stored verbatim, but a clamped destination never takes
+     * effect, so it is reported in the write response itself — no separate resolve read is needed
+     * to learn that an entry cannot take effect. Empty when every entry survives the baseline.
+     */
+    clamped?: Array<ClampedEntry>;
 };
 
 export type SetTenantEgressPolicyRequest = {
@@ -1595,20 +2673,67 @@ export type SetTenantEgressPolicyResponse = {
      * The stored baseline policy.
      */
     policy?: TenantEgressPolicy;
+    /**
+     * How the new baseline changed the effective policy of the default class and every existing
+     * binding, relative to the baseline it replaced — one entry per selector whose effective policy
+     * changed (the same report PreviewBaselineImpact computes for a proposal). A baseline write
+     * silently re-clamps every existing binding, so the change it caused is reported in the write
+     * response itself. Empty when the new baseline changes no effective policy.
+     */
+    changes?: Array<BindingImpact>;
 };
 
+export type SetWorkloadLaunchAclRequest = {
+    /**
+     * The registered workload name.
+     */
+    name?: string;
+    /**
+     * The launch ACL to set, replacing the workload's current one. A RESTRICTED policy must list at
+     * least one launcher; a MEMBERS policy must not list any.
+     */
+    acl?: WorkloadLaunchAcl;
+};
+
+export type SetWorkloadLaunchAclResponse = {
+    /**
+     * The workload with its updated launch ACL.
+     */
+    workload?: Workload;
+};
+
+/**
+ * A stored annotation row a listing skipped because it could not be decoded, with the row's stored
+ * event id and the decode failure. Skipped rows are surfaced, never silently dropped: the listing
+ * stays available while naming exactly what it could not serve.
+ */
+export type SkippedAnnotation = {
+    /**
+     * The stored `event_id` of the row that failed to decode.
+     */
+    event_id?: string;
+    /**
+     * Why the row could not be decoded.
+     */
+    reason?: string;
+};
+
+/**
+ * Retained wire type for retired snapshot compatibility RPCs. Use a BranchFS workspace revision
+ * plus stop/resume for filesystem continuity on clean sandbox-cell deployments.
+ */
 export type Snapshot = {
     id?: string;
-    tenantId?: string;
-    projectId?: string;
+    tenant_id?: string;
+    project_id?: string;
     /**
      * The sandbox whose state the snapshot captured.
      */
-    sourceSandboxId?: string;
-    requestedSemanticsJson?: string;
-    effectiveSemanticsJson?: string;
-    sizeBytes?: string;
-    legalHold?: boolean;
+    source_sandbox_id?: string;
+    requested_semantics_json?: string;
+    effective_semantics_json?: string;
+    size_bytes?: string;
+    legal_hold?: boolean;
     /**
      * Lifecycle state: pending, ready, or failed.
      */
@@ -1621,21 +2746,21 @@ export type Snapshot = {
     /**
      * The run the source sandbox was executing at capture. Empty when the source had no run.
      */
-    sourceRunId?: string;
+    source_run_id?: string;
     /**
      * The latest ingested event on the source run's timeline at capture — the branch anchor a
      * restore's child run derives from. Correlational ("state as of this point on the timeline"),
      * never a transactional cut; empty when no event linkage was known.
      */
-    branchEventId?: string;
+    branch_event_id?: string;
     /**
      * The branch anchor's clock coordinate. Present exactly when branch_event_id is set.
      */
-    branchHlc?: BranchHlc;
+    branch_hlc?: BranchHlc;
     /**
      * When the snapshot's bytes were frozen (RFC 3339). Empty until captured.
      */
-    capturedAt?: string;
+    captured_at?: string;
     /**
      * User-assigned name. Empty when unset.
      */
@@ -1648,22 +2773,48 @@ export type Snapshot = {
      * Stable id of the principal that requested the snapshot (the forking principal for fork-minted
      * snapshots). Empty when unrecorded.
      */
-    createdBy?: string;
+    created_by?: string;
     /**
      * When the snapshot record was created (RFC 3339).
      */
-    createdAt?: string;
+    created_at?: string;
     /**
      * When the snapshot record was last updated (RFC 3339).
      */
-    updatedAt?: string;
+    updated_at?: string;
+    /**
+     * Off-node durability of the snapshot bytes: local (a node-local copy only; does not survive
+     * node loss) or replicated (an off-node copy exists). Resolved live at read time and never
+     * overstated: a snapshot whose replication cannot be confirmed reports local.
+     */
+    durability?: string;
 };
 
 /**
- * Start an interactive command execution that can be streamed and driven over time.
+ * Retired snapshot-delete compatibility result. Clean sandbox-cell deployments do not produce it.
+ */
+export type SnapshotDeleteResult = {
+    snapshot_id?: string;
+};
+
+/**
+ * Retired snapshot-compatibility result. Clean sandbox-cell deployments do not produce it.
+ */
+export type SnapshotResult = {
+    snapshot_id?: string;
+    sandbox_id?: string;
+    /**
+     * The snapshot's lifecycle state at operation completion: pending, ready, or failed.
+     */
+    state?: string;
+};
+
+/**
+ * Retired provider-interactive compatibility request. Clean sandbox-cell deployments return
+ * unsupported; use ExecuteSandbox for durable shared-queue commands or managed SSH for a terminal.
  */
 export type StartExecutionRequest = {
-    sandboxId?: string;
+    sandbox_id?: string;
     command?: CommandSpec;
     /**
      * Optional bytes written to the process's standard input at start.
@@ -1677,8 +2828,8 @@ export type StartExecutionRequest = {
 
 export type StartExecutionResponse = {
     /**
-     * The durable execution row for the process the in-sandbox control agent spawned. Stream its output
-     * with StreamExecution, drive it with SendExecutionInput, and stop it with KillExecution.
+     * Returned only by a legacy provider-interactive implementation. Clean sandbox-cell deployments
+     * return unsupported instead.
      */
     execution?: Execution;
 };
@@ -1687,15 +2838,22 @@ export type StartRunRequest = {
     /**
      * The project the new run belongs to.
      */
-    projectId?: string;
+    project_id?: string;
     /**
      * Optional parent run to continue the tree from. Empty starts a new tree root.
      */
-    parentRunId?: string;
+    parent_run_id?: string;
     /**
      * An optional human-readable label.
      */
     label?: string;
+    /**
+     * Optional registered workload name to run as. When set, the run is attributed to that workload
+     * (the caller must hold launch rights on it and the name must be registered); when empty, the run
+     * executes as the caller's own identity. The executing identity is always declared here, never
+     * inferred from the command.
+     */
+    execute_as_workload?: string;
 };
 
 export type StartRunResponse = {
@@ -1703,6 +2861,52 @@ export type StartRunResponse = {
      * The newly started run, with its lineage fields resolved.
      */
     run?: Run;
+};
+
+export type StartVolumePushRequest = {
+    /**
+     * The volume to push a new version to.
+     */
+    volume_id?: string;
+};
+
+export type StartVolumePushResponse = {
+    /**
+     * The push handle. Pass it to PublishVolumeVersion once the manifest and all content blobs are
+     * uploaded.
+     */
+    push_id?: string;
+    /**
+     * Short-lived pre-authorized URL to PUT the manifest (the JSON file listing: per file its path,
+     * mode, size, content digest, and chunk list) to. The URL is bound to this push's staging
+     * location; the request needs no additional credentials.
+     */
+    manifest_upload_url?: string;
+    /**
+     * How long the upload URL stays valid, in seconds.
+     */
+    expires_in_seconds?: number;
+    /**
+     * The largest manifest the server accepts for this push, in bytes.
+     */
+    max_manifest_bytes?: string;
+};
+
+/**
+ * What a succeeded stop observed about the sandbox it brought to rest.
+ */
+export type StopResult = {
+    /**
+     * Whether ResumeSandbox can preserve the sandbox filesystem through a sealed BranchFS revision.
+     * The clean cell path restores that revision under a fresh runtime generation; it never implies
+     * that process or memory state survived.
+     */
+    resumable?: boolean;
+    /**
+     * Human-readable continuity detail or recovery warning. A BranchFS teardown-stop uses this to
+     * state explicitly that filesystem bytes were sealed but process and memory state were not.
+     */
+    warning?: string;
 };
 
 export type StopSandboxRequest = {
@@ -1729,7 +2933,7 @@ export type TenantEgressPolicy = {
      * When the policy was last set (RFC 3339). Empty when the tenant has never set a policy (the
      * implicit default baseline applies).
      */
-    updatedAt?: string;
+    updated_at?: string;
 };
 
 /**
@@ -1746,15 +2950,41 @@ export type TenantRef = {
     slug?: string;
 };
 
+export type UnexposePortRequest = {
+    sandbox_id?: string;
+    port?: number;
+};
+
+export type UnexposePortResponse = {
+    /**
+     * True when this call revoked an active exposure; false when it was already absent/revoked.
+     */
+    revoked?: boolean;
+};
+
 export type UpdateProjectRequest = {
     /**
      * The project id to update.
      */
     id?: string;
     /**
-     * The new human-readable name. The slug is immutable.
+     * The new human-readable name (the slug is immutable). Omitted leaves the name unchanged.
      */
     name?: string;
+    /**
+     * The new free-text description (at most 4 KiB). An empty value clears it; omitted leaves it
+     * unchanged.
+     */
+    description?: string;
+    /**
+     * Replaces the project's whole display configuration when non-empty (at most one rule per
+     * schema); empty leaves it unchanged. To remove the configuration entirely, set clear_display.
+     */
+    display?: Array<ProjectDisplayRule>;
+    /**
+     * Clears the display configuration back to unconfigured. Cannot be combined with display rules.
+     */
+    clear_display?: boolean;
 };
 
 export type UpdateProjectResponse = {
@@ -1772,23 +3002,23 @@ export type UsageSeriesPoint = {
     /**
      * Bucket start (RFC 3339, UTC). Buckets are contiguous and `bucket_seconds` wide.
      */
-    bucketStart?: string;
+    bucket_start?: string;
     /**
      * Time-weighted average reserved virtual CPUs during the bucket.
      */
-    reservedCpus?: string;
+    reserved_cpus?: string;
     /**
      * Time-weighted average reserved memory (MiB) during the bucket.
      */
-    reservedMemoryMb?: string;
+    reserved_memory_mb?: string;
     /**
      * Time-weighted average reserved accelerators during the bucket.
      */
-    reservedGpus?: string;
+    reserved_gpus?: string;
     /**
      * Time-weighted average reserved root disk (MiB) during the bucket.
      */
-    reservedDiskMb?: string;
+    reserved_disk_mb?: string;
 };
 
 /**
@@ -1798,25 +3028,209 @@ export type UsageSnapshot = {
     /**
      * The tenant the snapshot covers (derived from the caller's scope, echoed for convenience).
      */
-    tenantId?: string;
+    tenant_id?: string;
     /**
      * The number of active (non-deleted, non-terminal) sandboxes.
      */
-    activeSandboxCount?: string;
+    active_sandbox_count?: string;
     /**
      * The per-observed-state breakdown of non-deleted sandboxes, including terminal states, so the
      * caller can render the full distribution. Ordered by observed state.
      */
-    sandboxStateCounts?: Array<SandboxStateCount>;
+    sandbox_state_counts?: Array<SandboxStateCount>;
     /**
      * Resources reserved by the tenant's in-use sandboxes right now.
      */
     reserved?: ReservedResources;
     /**
-     * The tenant's configured resource quota — the denominator for utilization. A configured display
-     * quota (a plan limit), not measured provider capacity; managed providers expose no fleet total.
+     * The workspace's configured limits, one row per quota metric, each with the usage observed
+     * against it where the platform tracks an instantaneous value. Always covers every limited
+     * metric, whatever the current usage.
      */
-    capacity?: ReservedResources;
+    limits?: Array<QuotaLimit>;
+};
+
+/**
+ * A volume record (the subset the API returns).
+ */
+export type Volume = {
+    /**
+     * The volume id.
+     */
+    id?: string;
+    /**
+     * The tenant the volume belongs to (derived from the caller's scope, echoed for convenience).
+     */
+    tenant_id?: string;
+    /**
+     * The project the volume belongs to.
+     */
+    project_id?: string;
+    /**
+     * The volume name — unique within its project. Sandboxes attach a volume by this name, so it is
+     * limited to letters, digits, dots, dashes, and underscores (at most 100 characters).
+     */
+    name?: string;
+    /**
+     * User-assigned free-text description (at most 4 KiB). Empty when unset.
+     */
+    description?: string;
+    /**
+     * Storage quota in bytes: the cap on the volume's total committed size. A quota, not an
+     * allocation — an empty volume consumes no storage.
+     */
+    quota_bytes?: string;
+    /**
+     * Digest of the volume's current (latest committed) version. Empty until the first push
+     * publishes a version.
+     */
+    current_version_digest?: string;
+    /**
+     * Stable id of the principal that created the volume — the API key (or user) that performed the
+     * create, recorded server-side. Resolve it to a display name via the principals listing.
+     */
+    created_by?: string;
+    /**
+     * When the volume was created (RFC 3339).
+     */
+    created_at?: string;
+    /**
+     * When the volume record was last updated (RFC 3339). Equal to created_at until the first
+     * update.
+     */
+    updated_at?: string;
+    /**
+     * Committed storage in bytes: the total size of the distinct content blobs referenced by the
+     * volume's versions. Content is stored deduplicated, so a blob shared by several versions
+     * counts once — this is what the volume's committed content occupies, not the sum of its
+     * versions' sizes. Zero for a volume with no committed versions.
+     */
+    used_bytes?: string;
+};
+
+/**
+ * A live volume attachment: a volume mounted into a sandbox at a path, pinned to the version the
+ * attach resolved. The record is the handle a later detach names.
+ */
+export type VolumeAttachment = {
+    /**
+     * The attachment id — the handle DetachVolume takes.
+     */
+    id?: string;
+    /**
+     * The attached volume.
+     */
+    volume_id?: string;
+    /**
+     * The sandbox the volume is mounted into.
+     */
+    sandbox_id?: string;
+    /**
+     * The version pinned at attach time (`blake3:<hex>`). A later publish never moves it.
+     */
+    version_digest?: string;
+    /**
+     * The absolute path the volume is mounted at inside the sandbox.
+     */
+    target_path?: string;
+    /**
+     * When the attachment was admitted (RFC 3339).
+     */
+    created_at?: string;
+};
+
+/**
+ * One content blob (a whole small file, or one chunk of a larger file) the client intends to
+ * upload, identified by its digest.
+ */
+export type VolumeBlobRef = {
+    /**
+     * The blob's content digest (`blake3:<hex>`).
+     */
+    digest?: string;
+    /**
+     * The blob's exact size in bytes. Verified against the stored object before a version
+     * referencing the blob can be published.
+     */
+    size_bytes?: string;
+};
+
+/**
+ * The upload decision for one requested blob.
+ */
+export type VolumeBlobUpload = {
+    /**
+     * The blob's content digest, echoed from the request.
+     */
+    digest?: string;
+    /**
+     * True when the blob already exists in the volume store — skip the upload; content is
+     * deduplicated by digest.
+     */
+    present?: boolean;
+    /**
+     * Short-lived pre-authorized URL to PUT the blob's bytes to. Empty when `present` is true. The
+     * URL is bound to the blob's content-addressed location; the request needs no additional
+     * credentials.
+     */
+    upload_url?: string;
+};
+
+/**
+ * Retained wire type for the retired volume-attachment compatibility field. Clean sandbox-cell
+ * deployments reject it; use WorkspaceRevisionMount.
+ */
+export type VolumeMount = {
+    /**
+     * The volume to attach: its name within the sandbox's project, or its id. Required.
+     */
+    volume?: string;
+    /**
+     * The absolute path inside the sandbox to mount the volume at. Required.
+     */
+    target_path?: string;
+    /**
+     * The access mode. Defaults to VOLUME_MODE_RO when unspecified. VOLUME_MODE_RW is reserved and
+     * not yet accepted.
+     */
+    mode?: 'VOLUME_MODE_UNSPECIFIED' | 'VOLUME_MODE_RO' | 'VOLUME_MODE_RW';
+};
+
+/**
+ * One immutable, committed volume version. The digest of the version's manifest (the canonical
+ * file listing) is the version's identity: identical content under the same parent always yields
+ * the same digest, and a version can never change after it is published.
+ */
+export type VolumeVersion = {
+    /**
+     * The volume this version belongs to.
+     */
+    volume_id?: string;
+    /**
+     * The version's identity: the digest of its manifest (`blake3:<hex>`).
+     */
+    version_digest?: string;
+    /**
+     * The digest of the version this one was published on top of. Empty for a volume's first
+     * version.
+     */
+    parent_version_digest?: string;
+    /**
+     * Total content size in bytes across all files in the version.
+     */
+    size_bytes?: string;
+    /**
+     * Number of files in the version.
+     */
+    file_count?: string;
+    /**
+     * Stable id of the principal that published the version, recorded server-side.
+     */
+    created_by?: string;
+    /**
+     * When the version was published (RFC 3339).
+     */
+    created_at?: string;
 };
 
 export type WhoAmIResponse = {
@@ -1830,79 +3244,150 @@ export type WhoAmIResponse = {
     tenant?: TenantRef;
 };
 
-export type AgentServiceListAgentsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/agents';
-};
-
-export type AgentServiceListAgentsResponses = {
+/**
+ * A registered workload identity, scoped to the caller's tenant.
+ */
+export type Workload = {
     /**
-     * OK
+     * The workload's stable id.
      */
-    200: ListAgentsResponse;
-};
-
-export type AgentServiceListAgentsResponse = AgentServiceListAgentsResponses[keyof AgentServiceListAgentsResponses];
-
-export type AgentServiceCreateAgentData = {
-    body: CreateAgentRequest;
-    path?: never;
-    query?: never;
-    url: '/v1/agents';
-};
-
-export type AgentServiceCreateAgentResponses = {
+    id?: string;
     /**
-     * OK
+     * The workload's registered name — unique within the tenant, and how the workload is displayed in
+     * attribution everywhere. Lowercase letters, digits, `.`, `_`, and `-`; must start and end with
+     * a letter or digit; at most 100 characters.
      */
-    200: CreateAgentResponse;
-};
-
-export type AgentServiceCreateAgentResponse = AgentServiceCreateAgentResponses[keyof AgentServiceCreateAgentResponses];
-
-export type AgentServiceGetAgentData = {
-    body?: never;
-    path: {
-        /**
-         * The registered agent name.
-         */
-        name: string;
-    };
-    query?: never;
-    url: '/v1/agents/{name}';
-};
-
-export type AgentServiceGetAgentResponses = {
+    name?: string;
     /**
-     * OK
+     * A free-text description of what the workload is for. May be empty.
      */
-    200: GetAgentResponse;
-};
-
-export type AgentServiceGetAgentResponse = AgentServiceGetAgentResponses[keyof AgentServiceGetAgentResponses];
-
-export type AgentServiceSetAgentLaunchAclData = {
-    body: SetAgentLaunchAclRequest;
-    path: {
-        /**
-         * The registered agent name.
-         */
-        name: string;
-    };
-    query?: never;
-    url: '/v1/agents/{name}/launch-acl';
-};
-
-export type AgentServiceSetAgentLaunchAclResponses = {
+    description?: string;
     /**
-     * OK
+     * Who may launch as this workload.
      */
-    200: SetAgentLaunchAclResponse;
+    launch_acl?: WorkloadLaunchAcl;
+    /**
+     * Stable id of the principal that registered the workload, when recorded.
+     */
+    created_by?: string;
+    /**
+     * When the workload was registered (RFC 3339).
+     */
+    created_at?: string;
+    /**
+     * When the workload's registration or ACL was last changed (RFC 3339).
+     */
+    updated_at?: string;
 };
 
-export type AgentServiceSetAgentLaunchAclResponse = AgentServiceSetAgentLaunchAclResponses[keyof AgentServiceSetAgentLaunchAclResponses];
+/**
+ * A per-workload launch ACL: which principals may launch a run or sandbox as the workload.
+ */
+export type WorkloadLaunchAcl = {
+    /**
+     * The launch policy: open to all tenant members, or restricted to the listed launchers.
+     */
+    policy?: 'WORKLOAD_LAUNCH_POLICY_UNSPECIFIED' | 'WORKLOAD_LAUNCH_POLICY_MEMBERS' | 'WORKLOAD_LAUNCH_POLICY_RESTRICTED';
+    /**
+     * The principals allowed to launch as this workload. Meaningful only when the policy is
+     * WORKLOAD_LAUNCH_POLICY_RESTRICTED; empty otherwise.
+     */
+    launchers?: Array<WorkloadLauncher>;
+};
+
+/**
+ * One launch-ACL entry: a principal allowed to launch as the workload.
+ */
+export type WorkloadLauncher = {
+    /**
+     * The kind of principal this entry names: `user` (a tenant member, named by user id — also the
+     * meaning of an unset kind) or `service_account` (a service-account API key, named by key id).
+     * Any other value is rejected.
+     */
+    kind?: string;
+    /**
+     * The principal's stable id: a user id for `user`, a service-account key id for
+     * `service_account`.
+     */
+    principal_id?: string;
+};
+
+/**
+ * One writable, copy-on-write BranchFS workspace mounted into a sandbox. The tenant comes only
+ * from the authenticated request scope and is never caller-supplied. Node paths, sockets, writer
+ * fences, and backend handles remain internal to the selected cell.
+ */
+export type WorkspaceRevisionMount = {
+    /**
+     * Exact immutable base: branchfs:v1:REPOSITORY_HEX:CHANGE_HEX, with respectively 32 and 64
+     * lowercase hexadecimal characters. Mutable names, branches, latest aliases, paths, URLs, and
+     * all-zero identities are rejected.
+     */
+    revision_ref?: string;
+    /**
+     * Absolute in-sandbox mount path. It must match the selected immutable runtime plan's workspace
+     * path (the standard CPU/GPU plans use /workspace).
+     */
+    target_path?: string;
+};
+
+/**
+ * The envelope every hiloop API error returns. Branch on the stable snake_case code, never on message or the HTTP status alone. Client errors (4xx) carry the specific code for the failure; server faults return the generic internal (or unavailable for a brief overload shed, with a Retry-After header) plus a request_id.
+ */
+export type ErrorBody = {
+    /**
+     * Stable machine-readable error code in snake_case — the field clients branch on. Examples: unauthenticated, permission_denied, not_found, invalid_argument, quota_exceeded, rate_limited, unavailable, internal.
+     */
+    code: string;
+    /**
+     * Human-readable description of the error. Informational only — never parse or match on it; its wording may change without notice.
+     */
+    message: string;
+    /**
+     * Structured machine-readable detail for errors that carry one (for example a quota rejection). Omitted for the rest.
+     */
+    details?: ErrorDetails;
+    /**
+     * Correlation id present on server faults (5xx) — quote it when contacting support to locate the failing request. Omitted on client errors.
+     */
+    request_id?: string;
+};
+
+/**
+ * Structured detail payloads an error may carry — one member per detail family, so clients can branch without parsing the message.
+ */
+export type ErrorDetails = {
+    /**
+     * Present on quota and rate-limit rejections (codes quota_exceeded and rate_limited).
+     */
+    quota?: QuotaDetails;
+};
+
+/**
+ * The named limit behind a quota or rate-limit rejection: which metric rejected the request, its configured limit, and where the caller stands against it.
+ */
+export type QuotaDetails = {
+    /**
+     * Stable name of the limit that rejected the request (for example sandboxes.active or sandbox.create.rate).
+     */
+    metric: string;
+    /**
+     * The configured limit that rejected the request.
+     */
+    limit: number;
+    /**
+     * The usage observed against the limit, when the metric counts occupancy. Omitted for rate limits, which have no meaningful instantaneous count.
+     */
+    current?: number;
+    /**
+     * Capacity already reserved by accepted but not-yet-settled work. Omitted when the quota has no reservation phase or the service cannot distinguish it from committed usage.
+     */
+    reserved?: number;
+    /**
+     * How long to wait before retrying, when the rejection is time-bounded (rate limits). Also rendered as a Retry-After header.
+     */
+    retry_after_seconds?: number;
+};
 
 export type AnnotationSchemaServiceListAnnotationSchemasData = {
     body?: never;
@@ -1912,10 +3397,23 @@ export type AnnotationSchemaServiceListAnnotationSchemasData = {
          * When true, return every version (live and archived) for the tenant; otherwise return only the
          * latest live version per name.
          */
-        includeArchived?: boolean;
+        include_archived?: boolean;
     };
     url: '/v1/annotation-schemas';
 };
+
+export type AnnotationSchemaServiceListAnnotationSchemasErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationSchemaServiceListAnnotationSchemasError = AnnotationSchemaServiceListAnnotationSchemasErrors[keyof AnnotationSchemaServiceListAnnotationSchemasErrors];
 
 export type AnnotationSchemaServiceListAnnotationSchemasResponses = {
     /**
@@ -1932,6 +3430,19 @@ export type AnnotationSchemaServiceRegisterAnnotationSchemaData = {
     query?: never;
     url: '/v1/annotation-schemas';
 };
+
+export type AnnotationSchemaServiceRegisterAnnotationSchemaErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationSchemaServiceRegisterAnnotationSchemaError = AnnotationSchemaServiceRegisterAnnotationSchemaErrors[keyof AnnotationSchemaServiceRegisterAnnotationSchemaErrors];
 
 export type AnnotationSchemaServiceRegisterAnnotationSchemaResponses = {
     /**
@@ -1959,6 +3470,19 @@ export type AnnotationSchemaServiceGetAnnotationSchemaData = {
     url: '/v1/annotation-schemas/{name}';
 };
 
+export type AnnotationSchemaServiceGetAnnotationSchemaErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationSchemaServiceGetAnnotationSchemaError = AnnotationSchemaServiceGetAnnotationSchemaErrors[keyof AnnotationSchemaServiceGetAnnotationSchemaErrors];
+
 export type AnnotationSchemaServiceGetAnnotationSchemaResponses = {
     /**
      * OK
@@ -1980,6 +3504,19 @@ export type AnnotationSchemaServiceArchiveAnnotationSchemaData = {
     url: '/v1/annotation-schemas/{name}:archive';
 };
 
+export type AnnotationSchemaServiceArchiveAnnotationSchemaErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationSchemaServiceArchiveAnnotationSchemaError = AnnotationSchemaServiceArchiveAnnotationSchemaErrors[keyof AnnotationSchemaServiceArchiveAnnotationSchemaErrors];
+
 export type AnnotationSchemaServiceArchiveAnnotationSchemaResponses = {
     /**
      * OK
@@ -1989,6 +3526,55 @@ export type AnnotationSchemaServiceArchiveAnnotationSchemaResponses = {
 
 export type AnnotationSchemaServiceArchiveAnnotationSchemaResponse = AnnotationSchemaServiceArchiveAnnotationSchemaResponses[keyof AnnotationSchemaServiceArchiveAnnotationSchemaResponses];
 
+export type RuntimeServiceListArtifactsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The maximum number of artifacts to return. The server caps and defaults this; 0 means "use the
+         * server default".
+         */
+        page_size?: number;
+        /**
+         * An opaque page token from a previous response's next_page_token. Empty for the first page.
+         */
+        page_token?: string;
+        /**
+         * Optional content-digest prefix filter (hexadecimal, case-insensitive; no algorithm prefix).
+         * Returns the artifacts whose digest starts with the prefix — the recovery path when only a
+         * digest is known. Empty returns all digests.
+         */
+        digest_prefix?: string;
+        /**
+         * Optional kind filter (e.g. file, stdout, stderr, tree). Empty returns all kinds.
+         */
+        kind?: string;
+    };
+    url: '/v1/artifacts';
+};
+
+export type RuntimeServiceListArtifactsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceListArtifactsError = RuntimeServiceListArtifactsErrors[keyof RuntimeServiceListArtifactsErrors];
+
+export type RuntimeServiceListArtifactsResponses = {
+    /**
+     * OK
+     */
+    200: ListArtifactsResponse;
+};
+
+export type RuntimeServiceListArtifactsResponse = RuntimeServiceListArtifactsResponses[keyof RuntimeServiceListArtifactsResponses];
+
 export type RuntimeServiceGetArtifactData = {
     body?: never;
     path: {
@@ -1997,6 +3583,19 @@ export type RuntimeServiceGetArtifactData = {
     query?: never;
     url: '/v1/artifacts/{id}';
 };
+
+export type RuntimeServiceGetArtifactErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetArtifactError = RuntimeServiceGetArtifactErrors[keyof RuntimeServiceGetArtifactErrors];
 
 export type RuntimeServiceGetArtifactResponses = {
     /**
@@ -2014,6 +3613,19 @@ export type MetaServiceGetServiceConfigData = {
     url: '/v1/config';
 };
 
+export type MetaServiceGetServiceConfigErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type MetaServiceGetServiceConfigError = MetaServiceGetServiceConfigErrors[keyof MetaServiceGetServiceConfigErrors];
+
 export type MetaServiceGetServiceConfigResponses = {
     /**
      * OK
@@ -2025,12 +3637,31 @@ export type MetaServiceGetServiceConfigResponse = MetaServiceGetServiceConfigRes
 
 export type RuntimeServiceSendExecutionInputData = {
     body: SendExecutionInputRequest;
+    headers?: {
+        /**
+         * Optional idempotency key for this input write. Input is consumed by the process and cannot be replayed: repeating the request with the same key is refused (input_not_replayable) instead of delivering the bytes twice — inspect the execution's output to see whether the first write arrived, then send new input under a fresh key. Omit it and each call delivers again.
+         */
+        'idempotency-key'?: string;
+    };
     path: {
-        executionId: string;
+        execution_id: string;
     };
     query?: never;
-    url: '/v1/executions/{executionId}:input';
+    url: '/v1/executions/{execution_id}:input';
 };
+
+export type RuntimeServiceSendExecutionInputErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceSendExecutionInputError = RuntimeServiceSendExecutionInputErrors[keyof RuntimeServiceSendExecutionInputErrors];
 
 export type RuntimeServiceSendExecutionInputResponses = {
     /**
@@ -2044,11 +3675,24 @@ export type RuntimeServiceSendExecutionInputResponse = RuntimeServiceSendExecuti
 export type RuntimeServiceKillExecutionData = {
     body: KillExecutionRequest;
     path: {
-        executionId: string;
+        execution_id: string;
     };
     query?: never;
-    url: '/v1/executions/{executionId}:kill';
+    url: '/v1/executions/{execution_id}:kill';
 };
+
+export type RuntimeServiceKillExecutionErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceKillExecutionError = RuntimeServiceKillExecutionErrors[keyof RuntimeServiceKillExecutionErrors];
 
 export type RuntimeServiceKillExecutionResponses = {
     /**
@@ -2068,6 +3712,19 @@ export type RuntimeServiceGetExecutionData = {
     url: '/v1/executions/{id}';
 };
 
+export type RuntimeServiceGetExecutionErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetExecutionError = RuntimeServiceGetExecutionErrors[keyof RuntimeServiceGetExecutionErrors];
+
 export type RuntimeServiceGetExecutionResponses = {
     /**
      * OK
@@ -2076,6 +3733,35 @@ export type RuntimeServiceGetExecutionResponses = {
 };
 
 export type RuntimeServiceGetExecutionResponse = RuntimeServiceGetExecutionResponses[keyof RuntimeServiceGetExecutionResponses];
+
+export type FeedbackServiceCreateFeedbackData = {
+    body: CreateFeedbackRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/feedback';
+};
+
+export type FeedbackServiceCreateFeedbackErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type FeedbackServiceCreateFeedbackError = FeedbackServiceCreateFeedbackErrors[keyof FeedbackServiceCreateFeedbackErrors];
+
+export type FeedbackServiceCreateFeedbackResponses = {
+    /**
+     * OK
+     */
+    200: CreateFeedbackResponse;
+};
+
+export type FeedbackServiceCreateFeedbackResponse = FeedbackServiceCreateFeedbackResponses[keyof FeedbackServiceCreateFeedbackResponses];
 
 export type RuntimeServiceGetForkData = {
     body?: never;
@@ -2086,6 +3772,19 @@ export type RuntimeServiceGetForkData = {
     url: '/v1/forks/{id}';
 };
 
+export type RuntimeServiceGetForkErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetForkError = RuntimeServiceGetForkErrors[keyof RuntimeServiceGetForkErrors];
+
 export type RuntimeServiceGetForkResponses = {
     /**
      * OK
@@ -2095,6 +3794,103 @@ export type RuntimeServiceGetForkResponses = {
 
 export type RuntimeServiceGetForkResponse = RuntimeServiceGetForkResponses[keyof RuntimeServiceGetForkResponses];
 
+export type LeaseServiceAcquireLeaseData = {
+    body: AcquireLeaseRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/leases';
+};
+
+export type LeaseServiceAcquireLeaseErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type LeaseServiceAcquireLeaseError = LeaseServiceAcquireLeaseErrors[keyof LeaseServiceAcquireLeaseErrors];
+
+export type LeaseServiceAcquireLeaseResponses = {
+    /**
+     * OK
+     */
+    200: AcquireLeaseResponse;
+};
+
+export type LeaseServiceAcquireLeaseResponse = LeaseServiceAcquireLeaseResponses[keyof LeaseServiceAcquireLeaseResponses];
+
+export type LeaseServiceReleaseLeaseData = {
+    body?: never;
+    path: {
+        /**
+         * The lease id to release (from the acquire response).
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/leases/{id}';
+};
+
+export type LeaseServiceReleaseLeaseErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type LeaseServiceReleaseLeaseError = LeaseServiceReleaseLeaseErrors[keyof LeaseServiceReleaseLeaseErrors];
+
+export type LeaseServiceReleaseLeaseResponses = {
+    /**
+     * OK
+     */
+    200: ReleaseLeaseResponse;
+};
+
+export type LeaseServiceReleaseLeaseResponse = LeaseServiceReleaseLeaseResponses[keyof LeaseServiceReleaseLeaseResponses];
+
+export type LeaseServiceRenewLeaseData = {
+    body: RenewLeaseRequest;
+    path: {
+        /**
+         * The lease id to renew (from the acquire response).
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/leases/{id}/renew';
+};
+
+export type LeaseServiceRenewLeaseErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type LeaseServiceRenewLeaseError = LeaseServiceRenewLeaseErrors[keyof LeaseServiceRenewLeaseErrors];
+
+export type LeaseServiceRenewLeaseResponses = {
+    /**
+     * OK
+     */
+    200: RenewLeaseResponse;
+};
+
+export type LeaseServiceRenewLeaseResponse = LeaseServiceRenewLeaseResponses[keyof LeaseServiceRenewLeaseResponses];
+
 export type RuntimeServiceGetOperationData = {
     body?: never;
     path: {
@@ -2103,6 +3899,19 @@ export type RuntimeServiceGetOperationData = {
     query?: never;
     url: '/v1/operations/{id}';
 };
+
+export type RuntimeServiceGetOperationErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetOperationError = RuntimeServiceGetOperationErrors[keyof RuntimeServiceGetOperationErrors];
 
 export type RuntimeServiceGetOperationResponses = {
     /**
@@ -2121,14 +3930,27 @@ export type ProjectServiceListProjectsData = {
          * The maximum number of projects to return. The server caps and defaults this; 0 means "use the
          * server default".
          */
-        pageSize?: number;
+        page_size?: number;
         /**
          * An opaque page token from a previous response's next_page_token. Empty for the first page.
          */
-        pageToken?: string;
+        page_token?: string;
     };
     url: '/v1/projects';
 };
+
+export type ProjectServiceListProjectsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type ProjectServiceListProjectsError = ProjectServiceListProjectsErrors[keyof ProjectServiceListProjectsErrors];
 
 export type ProjectServiceListProjectsResponses = {
     /**
@@ -2145,6 +3967,19 @@ export type ProjectServiceCreateProjectData = {
     query?: never;
     url: '/v1/projects';
 };
+
+export type ProjectServiceCreateProjectErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type ProjectServiceCreateProjectError = ProjectServiceCreateProjectErrors[keyof ProjectServiceCreateProjectErrors];
 
 export type ProjectServiceCreateProjectResponses = {
     /**
@@ -2165,12 +4000,25 @@ export type ProjectServiceDeleteProjectData = {
     };
     query?: {
         /**
-         * When true, also delete the project's runs, snapshots, deleted sandboxes, and other resources; otherwise a project with resources returns a conflict. A cascade requires every sandbox in the project to be deleted first — while one is not, the call returns a conflict with error code `sandboxes_not_deleted`.
+         * When true, also delete the project's runs, snapshots, deleted sandboxes, and other resources; otherwise a project with resources returns a conflict. A cascade requires every sandbox in the project to be deleted first — while one is not, the call returns a conflict with error code `sandboxes_not_deleted`. A cascade never deletes a snapshot under an active legal hold: while the project has one, the call returns a conflict with error code `snapshots_on_legal_hold` and deletes nothing — release the holds first, then retry.
          */
         cascade?: boolean;
     };
     url: '/v1/projects/{id}';
 };
+
+export type ProjectServiceDeleteProjectErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type ProjectServiceDeleteProjectError = ProjectServiceDeleteProjectErrors[keyof ProjectServiceDeleteProjectErrors];
 
 export type ProjectServiceDeleteProjectResponses = {
     /**
@@ -2193,6 +4041,19 @@ export type ProjectServiceGetProjectData = {
     url: '/v1/projects/{id}';
 };
 
+export type ProjectServiceGetProjectErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type ProjectServiceGetProjectError = ProjectServiceGetProjectErrors[keyof ProjectServiceGetProjectErrors];
+
 export type ProjectServiceGetProjectResponses = {
     /**
      * OK
@@ -2214,6 +4075,19 @@ export type ProjectServiceUpdateProjectData = {
     url: '/v1/projects/{id}';
 };
 
+export type ProjectServiceUpdateProjectErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type ProjectServiceUpdateProjectError = ProjectServiceUpdateProjectErrors[keyof ProjectServiceUpdateProjectErrors];
+
 export type ProjectServiceUpdateProjectResponses = {
     /**
      * OK
@@ -2231,11 +4105,11 @@ export type RunServiceListRunsData = {
          * The maximum number of runs to return. The server caps and defaults this; 0 means "use the server
          * default".
          */
-        pageSize?: number;
+        page_size?: number;
         /**
          * An opaque page token from a previous response's next_page_token. Empty for the first page.
          */
-        pageToken?: string;
+        page_token?: string;
         /**
          * Optional run status filter (pending, running, succeeded, failed, canceled). Empty returns all.
          */
@@ -2244,28 +4118,46 @@ export type RunServiceListRunsData = {
          * Optional creator filter: the stable principal id (API key or user) that created the run. Empty
          * returns runs from any creator.
          */
-        createdBy?: string;
+        created_by?: string;
         /**
          * Optional lower bound on created_at (RFC 3339, inclusive). Empty applies no lower bound.
          */
-        createdAfter?: string;
+        created_after?: string;
         /**
          * Optional upper bound on created_at (RFC 3339, exclusive). Empty applies no upper bound.
          */
-        createdBefore?: string;
+        created_before?: string;
         /**
          * Optional run-tree filter: restrict to the runs whose root_run_id matches. Empty returns runs
          * across every tree.
          */
-        rootRunId?: string;
+        root_run_id?: string;
         /**
          * Optional project filter: restrict to the runs belonging to this project. Empty returns runs
          * across every project.
          */
-        projectId?: string;
+        project_id?: string;
+        /**
+         * Optional executing-identity filter: the stable principal id the runs execute as — a registered
+         * workload's id to list that workload's runs. Empty applies no executing-identity filter.
+         */
+        executing_principal?: string;
     };
     url: '/v1/runs';
 };
+
+export type RunServiceListRunsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceListRunsError = RunServiceListRunsErrors[keyof RunServiceListRunsErrors];
 
 export type RunServiceListRunsResponses = {
     /**
@@ -2282,6 +4174,19 @@ export type RunServiceStartRunData = {
     query?: never;
     url: '/v1/runs';
 };
+
+export type RunServiceStartRunErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceStartRunError = RunServiceStartRunErrors[keyof RunServiceStartRunErrors];
 
 export type RunServiceStartRunResponses = {
     /**
@@ -2304,6 +4209,19 @@ export type RunServiceGetRunData = {
     url: '/v1/runs/{id}';
 };
 
+export type RunServiceGetRunErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceGetRunError = RunServiceGetRunErrors[keyof RunServiceGetRunErrors];
+
 export type RunServiceGetRunResponses = {
     /**
      * OK
@@ -2325,6 +4243,19 @@ export type RunServiceCompleteRunData = {
     url: '/v1/runs/{id}:complete';
 };
 
+export type RunServiceCompleteRunErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceCompleteRunError = RunServiceCompleteRunErrors[keyof RunServiceCompleteRunErrors];
+
 export type RunServiceCompleteRunResponses = {
     /**
      * OK
@@ -2340,11 +4271,24 @@ export type RunServiceForkRunData = {
         /**
          * The run to fork from. Required.
          */
-        parentRunId: string;
+        parent_run_id: string;
     };
     query?: never;
-    url: '/v1/runs/{parentRunId}:fork';
+    url: '/v1/runs/{parent_run_id}:fork';
 };
+
+export type RunServiceForkRunErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceForkRunError = RunServiceForkRunErrors[keyof RunServiceForkRunErrors];
 
 export type RunServiceForkRunResponses = {
     /**
@@ -2361,21 +4305,34 @@ export type RunServiceGetRunTreeData = {
         /**
          * The root run whose tree to return.
          */
-        rootRunId: string;
+        root_run_id: string;
     };
     query?: {
         /**
          * The maximum number of runs to return. The server caps and defaults this; 0 means "use the
          * server default". Pages follow lineage order, so a large tree streams depth-first across pages.
          */
-        pageSize?: number;
+        page_size?: number;
         /**
          * An opaque page token from a previous response's next_page_token. Empty for the first page.
          */
-        pageToken?: string;
+        page_token?: string;
     };
-    url: '/v1/runs/{rootRunId}/tree';
+    url: '/v1/runs/{root_run_id}/tree';
 };
+
+export type RunServiceGetRunTreeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RunServiceGetRunTreeError = RunServiceGetRunTreeErrors[keyof RunServiceGetRunTreeErrors];
 
 export type RunServiceGetRunTreeResponses = {
     /**
@@ -2392,6 +4349,19 @@ export type RuntimeServiceListRuntimeCapabilitiesData = {
     query?: never;
     url: '/v1/runtime/capabilities';
 };
+
+export type RuntimeServiceListRuntimeCapabilitiesErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceListRuntimeCapabilitiesError = RuntimeServiceListRuntimeCapabilitiesErrors[keyof RuntimeServiceListRuntimeCapabilitiesErrors];
 
 export type RuntimeServiceListRuntimeCapabilitiesResponses = {
     /**
@@ -2410,22 +4380,35 @@ export type RuntimeServiceListSandboxesData = {
          * The maximum number of sandboxes to return. The server caps and defaults this; 0 means "use the
          * server default".
          */
-        pageSize?: number;
+        page_size?: number;
         /**
          * An opaque page token from a previous response's next_page_token. Empty for the first page.
          */
-        pageToken?: string;
+        page_token?: string;
         /**
          * Optional project filter. Empty returns sandboxes across all of the caller's projects.
          */
-        projectId?: string;
+        project_id?: string;
         /**
          * Optional observed-state filter (e.g. running, paused, stopped). Empty returns all states.
          */
-        observedState?: string;
+        observed_state?: string;
     };
     url: '/v1/sandboxes';
 };
+
+export type RuntimeServiceListSandboxesErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceListSandboxesError = RuntimeServiceListSandboxesErrors[keyof RuntimeServiceListSandboxesErrors];
 
 export type RuntimeServiceListSandboxesResponses = {
     /**
@@ -2449,6 +4432,19 @@ export type RuntimeServiceCreateSandboxData = {
     url: '/v1/sandboxes';
 };
 
+export type RuntimeServiceCreateSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceCreateSandboxError = RuntimeServiceCreateSandboxErrors[keyof RuntimeServiceCreateSandboxErrors];
+
 export type RuntimeServiceCreateSandboxResponses = {
     /**
      * OK
@@ -2466,6 +4462,19 @@ export type RuntimeServiceDeleteSandboxData = {
     query?: never;
     url: '/v1/sandboxes/{id}';
 };
+
+export type RuntimeServiceDeleteSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceDeleteSandboxError = RuntimeServiceDeleteSandboxErrors[keyof RuntimeServiceDeleteSandboxErrors];
 
 export type RuntimeServiceDeleteSandboxResponses = {
     /**
@@ -2485,6 +4494,19 @@ export type RuntimeServiceGetSandboxData = {
     url: '/v1/sandboxes/{id}';
 };
 
+export type RuntimeServiceGetSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetSandboxError = RuntimeServiceGetSandboxErrors[keyof RuntimeServiceGetSandboxErrors];
+
 export type RuntimeServiceGetSandboxResponses = {
     /**
      * OK
@@ -2502,6 +4524,19 @@ export type RuntimeServiceResumeSandboxData = {
     query?: never;
     url: '/v1/sandboxes/{id}:resume';
 };
+
+export type RuntimeServiceResumeSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceResumeSandboxError = RuntimeServiceResumeSandboxErrors[keyof RuntimeServiceResumeSandboxErrors];
 
 export type RuntimeServiceResumeSandboxResponses = {
     /**
@@ -2521,6 +4556,19 @@ export type RuntimeServiceStopSandboxData = {
     url: '/v1/sandboxes/{id}:stop';
 };
 
+export type RuntimeServiceStopSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceStopSandboxError = RuntimeServiceStopSandboxErrors[keyof RuntimeServiceStopSandboxErrors];
+
 export type RuntimeServiceStopSandboxResponses = {
     /**
      * OK
@@ -2532,12 +4580,31 @@ export type RuntimeServiceStopSandboxResponse = RuntimeServiceStopSandboxRespons
 
 export type RuntimeServiceStartExecutionData = {
     body: StartExecutionRequest;
+    headers?: {
+        /**
+         * Optional idempotency key for this mutation. Supply one (the official SDKs generate it for you) to make a retry safe — repeating the request with the same key returns the original result instead of performing the action twice. Omit it and each call is treated as a new request.
+         */
+        'idempotency-key'?: string;
+    };
     path: {
-        sandboxId: string;
+        sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sandboxId}/executions';
+    url: '/v1/sandboxes/{sandbox_id}/executions';
 };
+
+export type RuntimeServiceStartExecutionErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceStartExecutionError = RuntimeServiceStartExecutionErrors[keyof RuntimeServiceStartExecutionErrors];
 
 export type RuntimeServiceStartExecutionResponses = {
     /**
@@ -2557,11 +4624,24 @@ export type RuntimeServiceFileFromArtifactData = {
         'idempotency-key'?: string;
     };
     path: {
-        sandboxId: string;
+        sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sandboxId}/files:from-artifact';
+    url: '/v1/sandboxes/{sandbox_id}/files:from-artifact';
 };
+
+export type RuntimeServiceFileFromArtifactErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceFileFromArtifactError = RuntimeServiceFileFromArtifactErrors[keyof RuntimeServiceFileFromArtifactErrors];
 
 export type RuntimeServiceFileFromArtifactResponses = {
     /**
@@ -2581,11 +4661,24 @@ export type RuntimeServiceFileToArtifactData = {
         'idempotency-key'?: string;
     };
     path: {
-        sandboxId: string;
+        sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sandboxId}/files:to-artifact';
+    url: '/v1/sandboxes/{sandbox_id}/files:to-artifact';
 };
+
+export type RuntimeServiceFileToArtifactErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceFileToArtifactError = RuntimeServiceFileToArtifactErrors[keyof RuntimeServiceFileToArtifactErrors];
 
 export type RuntimeServiceFileToArtifactResponses = {
     /**
@@ -2596,6 +4689,37 @@ export type RuntimeServiceFileToArtifactResponses = {
 
 export type RuntimeServiceFileToArtifactResponse = RuntimeServiceFileToArtifactResponses[keyof RuntimeServiceFileToArtifactResponses];
 
+export type RuntimeServiceListExposedPortsData = {
+    body?: never;
+    path: {
+        sandbox_id: string;
+    };
+    query?: never;
+    url: '/v1/sandboxes/{sandbox_id}/ports';
+};
+
+export type RuntimeServiceListExposedPortsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceListExposedPortsError = RuntimeServiceListExposedPortsErrors[keyof RuntimeServiceListExposedPortsErrors];
+
+export type RuntimeServiceListExposedPortsResponses = {
+    /**
+     * OK
+     */
+    200: ListExposedPortsResponse;
+};
+
+export type RuntimeServiceListExposedPortsResponse = RuntimeServiceListExposedPortsResponses[keyof RuntimeServiceListExposedPortsResponses];
+
 export type RuntimeServiceCreateSnapshotData = {
     body: CreateSnapshotRequest;
     headers?: {
@@ -2605,11 +4729,24 @@ export type RuntimeServiceCreateSnapshotData = {
         'idempotency-key'?: string;
     };
     path: {
-        sandboxId: string;
+        sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sandboxId}/snapshots';
+    url: '/v1/sandboxes/{sandbox_id}/snapshots';
 };
+
+export type RuntimeServiceCreateSnapshotErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceCreateSnapshotError = RuntimeServiceCreateSnapshotErrors[keyof RuntimeServiceCreateSnapshotErrors];
 
 export type RuntimeServiceCreateSnapshotResponses = {
     /**
@@ -2629,11 +4766,24 @@ export type RuntimeServiceExecuteSandboxData = {
         'idempotency-key'?: string;
     };
     path: {
-        sandboxId: string;
+        sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sandboxId}:execute';
+    url: '/v1/sandboxes/{sandbox_id}:execute';
 };
+
+export type RuntimeServiceExecuteSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceExecuteSandboxError = RuntimeServiceExecuteSandboxErrors[keyof RuntimeServiceExecuteSandboxErrors];
 
 export type RuntimeServiceExecuteSandboxResponses = {
     /**
@@ -2644,6 +4794,68 @@ export type RuntimeServiceExecuteSandboxResponses = {
 
 export type RuntimeServiceExecuteSandboxResponse = RuntimeServiceExecuteSandboxResponses[keyof RuntimeServiceExecuteSandboxResponses];
 
+export type RuntimeServiceExposePortData = {
+    body: ExposePortRequest;
+    path: {
+        sandbox_id: string;
+    };
+    query?: never;
+    url: '/v1/sandboxes/{sandbox_id}:expose';
+};
+
+export type RuntimeServiceExposePortErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceExposePortError = RuntimeServiceExposePortErrors[keyof RuntimeServiceExposePortErrors];
+
+export type RuntimeServiceExposePortResponses = {
+    /**
+     * OK
+     */
+    200: ExposePortResponse;
+};
+
+export type RuntimeServiceExposePortResponse = RuntimeServiceExposePortResponses[keyof RuntimeServiceExposePortResponses];
+
+export type RuntimeServiceUnexposePortData = {
+    body: UnexposePortRequest;
+    path: {
+        sandbox_id: string;
+    };
+    query?: never;
+    url: '/v1/sandboxes/{sandbox_id}:unexpose';
+};
+
+export type RuntimeServiceUnexposePortErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceUnexposePortError = RuntimeServiceUnexposePortErrors[keyof RuntimeServiceUnexposePortErrors];
+
+export type RuntimeServiceUnexposePortResponses = {
+    /**
+     * OK
+     */
+    200: UnexposePortResponse;
+};
+
+export type RuntimeServiceUnexposePortResponse = RuntimeServiceUnexposePortResponses[keyof RuntimeServiceUnexposePortResponses];
+
 export type RuntimeServiceForkSandboxData = {
     body: ForkSandboxRequest;
     headers?: {
@@ -2653,11 +4865,24 @@ export type RuntimeServiceForkSandboxData = {
         'idempotency-key'?: string;
     };
     path: {
-        sourceSandboxId: string;
+        source_sandbox_id: string;
     };
     query?: never;
-    url: '/v1/sandboxes/{sourceSandboxId}:fork';
+    url: '/v1/sandboxes/{source_sandbox_id}:fork';
 };
+
+export type RuntimeServiceForkSandboxErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceForkSandboxError = RuntimeServiceForkSandboxErrors[keyof RuntimeServiceForkSandboxErrors];
 
 export type RuntimeServiceForkSandboxResponses = {
     /**
@@ -2676,14 +4901,27 @@ export type SecretServiceListSandboxSecretsData = {
          * The maximum number of secrets to return. The server caps and defaults this; 0 means "use the
          * server default".
          */
-        pageSize?: number;
+        page_size?: number;
         /**
          * An opaque page token from a previous response's next_page_token. Empty for the first page.
          */
-        pageToken?: string;
+        page_token?: string;
     };
     url: '/v1/secrets';
 };
+
+export type SecretServiceListSandboxSecretsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type SecretServiceListSandboxSecretsError = SecretServiceListSandboxSecretsErrors[keyof SecretServiceListSandboxSecretsErrors];
 
 export type SecretServiceListSandboxSecretsResponses = {
     /**
@@ -2701,6 +4939,19 @@ export type SecretServiceCreateSandboxSecretData = {
     url: '/v1/secrets';
 };
 
+export type SecretServiceCreateSandboxSecretErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type SecretServiceCreateSandboxSecretError = SecretServiceCreateSandboxSecretErrors[keyof SecretServiceCreateSandboxSecretErrors];
+
 export type SecretServiceCreateSandboxSecretResponses = {
     /**
      * OK
@@ -2716,6 +4967,19 @@ export type SecretServiceResolveSandboxSecretData = {
     query?: never;
     url: '/v1/secrets/resolve';
 };
+
+export type SecretServiceResolveSandboxSecretErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type SecretServiceResolveSandboxSecretError = SecretServiceResolveSandboxSecretErrors[keyof SecretServiceResolveSandboxSecretErrors];
 
 export type SecretServiceResolveSandboxSecretResponses = {
     /**
@@ -2738,6 +5002,19 @@ export type SecretServiceRevokeSandboxSecretData = {
     url: '/v1/secrets/{id}';
 };
 
+export type SecretServiceRevokeSandboxSecretErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type SecretServiceRevokeSandboxSecretError = SecretServiceRevokeSandboxSecretErrors[keyof SecretServiceRevokeSandboxSecretErrors];
+
 export type SecretServiceRevokeSandboxSecretResponses = {
     /**
      * OK
@@ -2759,6 +5036,19 @@ export type SecretServiceRotateSandboxSecretData = {
     url: '/v1/secrets/{id}/rotate';
 };
 
+export type SecretServiceRotateSandboxSecretErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type SecretServiceRotateSandboxSecretError = SecretServiceRotateSandboxSecretErrors[keyof SecretServiceRotateSandboxSecretErrors];
+
 export type SecretServiceRotateSandboxSecretResponses = {
     /**
      * OK
@@ -2772,15 +5062,15 @@ export type RuntimeServiceListSnapshotsData = {
     body?: never;
     path?: never;
     query: {
-        projectId: string;
+        project_id: string;
         /**
          * Only snapshots captured from this source sandbox. Empty matches any.
          */
-        sandboxId?: string;
+        sandbox_id?: string;
         /**
          * Only snapshots anchored to this source run. Empty matches any.
          */
-        runId?: string;
+        run_id?: string;
         /**
          * Only snapshots with this origin: user, fork, or recovery. Empty matches any.
          */
@@ -2792,6 +5082,19 @@ export type RuntimeServiceListSnapshotsData = {
     };
     url: '/v1/snapshots';
 };
+
+export type RuntimeServiceListSnapshotsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceListSnapshotsError = RuntimeServiceListSnapshotsErrors[keyof RuntimeServiceListSnapshotsErrors];
 
 export type RuntimeServiceListSnapshotsResponses = {
     /**
@@ -2811,6 +5114,19 @@ export type RuntimeServiceDeleteSnapshotData = {
     url: '/v1/snapshots/{id}';
 };
 
+export type RuntimeServiceDeleteSnapshotErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceDeleteSnapshotError = RuntimeServiceDeleteSnapshotErrors[keyof RuntimeServiceDeleteSnapshotErrors];
+
 export type RuntimeServiceDeleteSnapshotResponses = {
     /**
      * OK
@@ -2828,6 +5144,19 @@ export type RuntimeServiceGetSnapshotData = {
     query?: never;
     url: '/v1/snapshots/{id}';
 };
+
+export type RuntimeServiceGetSnapshotErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceGetSnapshotError = RuntimeServiceGetSnapshotErrors[keyof RuntimeServiceGetSnapshotErrors];
 
 export type RuntimeServiceGetSnapshotResponses = {
     /**
@@ -2847,11 +5176,24 @@ export type RuntimeServiceRestoreSnapshotData = {
         'idempotency-key'?: string;
     };
     path: {
-        snapshotId: string;
+        snapshot_id: string;
     };
     query?: never;
-    url: '/v1/snapshots/{snapshotId}:restore';
+    url: '/v1/snapshots/{snapshot_id}:restore';
 };
+
+export type RuntimeServiceRestoreSnapshotErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type RuntimeServiceRestoreSnapshotError = RuntimeServiceRestoreSnapshotErrors[keyof RuntimeServiceRestoreSnapshotErrors];
 
 export type RuntimeServiceRestoreSnapshotResponses = {
     /**
@@ -2869,7 +5211,7 @@ export type AnnotationServiceListAnnotationsData = {
         /**
          * The run whose annotations to list. Exactly one of `run_id` or `project_id` is set.
          */
-        runId?: string;
+        run_id?: string;
         /**
          * Widen a run listing to the run's whole lineage subtree — the annotations of the run and every
          * descendant, each row still anchored at its own run. Without it the listing is the run's own
@@ -2880,7 +5222,7 @@ export type AnnotationServiceListAnnotationsData = {
          * Restrict to one registered annotation-schema name. Naming the schema also applies its declared
          * identity fields to the latest-wins key; without it the dedup uses the default key.
          */
-        schemaName?: string;
+        schema_name?: string;
         /**
          * Return every stored version (newest first) instead of only the current one per supersession
          * key. Nothing is ever mutated or hidden — history is always available.
@@ -2889,10 +5231,23 @@ export type AnnotationServiceListAnnotationsData = {
         /**
          * The project whose run-less annotations to list. Exactly one of `run_id` or `project_id` is set.
          */
-        projectId?: string;
+        project_id?: string;
     };
     url: '/v1/telemetry/annotations';
 };
+
+export type AnnotationServiceListAnnotationsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationServiceListAnnotationsError = AnnotationServiceListAnnotationsErrors[keyof AnnotationServiceListAnnotationsErrors];
 
 export type AnnotationServiceListAnnotationsResponses = {
     /**
@@ -2910,6 +5265,19 @@ export type AnnotationServiceAnnotateData = {
     url: '/v1/telemetry/annotations';
 };
 
+export type AnnotationServiceAnnotateErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationServiceAnnotateError = AnnotationServiceAnnotateErrors[keyof AnnotationServiceAnnotateErrors];
+
 export type AnnotationServiceAnnotateResponses = {
     /**
      * OK
@@ -2925,6 +5293,19 @@ export type AnnotationServiceAnnotateRangeData = {
     query?: never;
     url: '/v1/telemetry/annotations:range';
 };
+
+export type AnnotationServiceAnnotateRangeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type AnnotationServiceAnnotateRangeError = AnnotationServiceAnnotateRangeErrors[keyof AnnotationServiceAnnotateRangeErrors];
 
 export type AnnotationServiceAnnotateRangeResponses = {
     /**
@@ -2942,6 +5323,19 @@ export type TelemetryQueryServiceBranchDiffData = {
     url: '/v1/telemetry/branch-diff';
 };
 
+export type TelemetryQueryServiceBranchDiffErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type TelemetryQueryServiceBranchDiffError = TelemetryQueryServiceBranchDiffErrors[keyof TelemetryQueryServiceBranchDiffErrors];
+
 export type TelemetryQueryServiceBranchDiffResponses = {
     /**
      * OK
@@ -2957,6 +5351,19 @@ export type TelemetryViewServiceListDataViewsData = {
     query?: never;
     url: '/v1/telemetry/data-views';
 };
+
+export type TelemetryViewServiceListDataViewsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type TelemetryViewServiceListDataViewsError = TelemetryViewServiceListDataViewsErrors[keyof TelemetryViewServiceListDataViewsErrors];
 
 export type TelemetryViewServiceListDataViewsResponses = {
     /**
@@ -2979,6 +5386,19 @@ export type TelemetryViewServiceDeleteDataViewData = {
     url: '/v1/telemetry/data-views/{name}';
 };
 
+export type TelemetryViewServiceDeleteDataViewErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type TelemetryViewServiceDeleteDataViewError = TelemetryViewServiceDeleteDataViewErrors[keyof TelemetryViewServiceDeleteDataViewErrors];
+
 export type TelemetryViewServiceDeleteDataViewResponses = {
     /**
      * OK
@@ -2999,6 +5419,19 @@ export type TelemetryViewServicePutDataViewData = {
     query?: never;
     url: '/v1/telemetry/data-views/{name}';
 };
+
+export type TelemetryViewServicePutDataViewErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type TelemetryViewServicePutDataViewError = TelemetryViewServicePutDataViewErrors[keyof TelemetryViewServicePutDataViewErrors];
 
 export type TelemetryViewServicePutDataViewResponses = {
     /**
@@ -3021,6 +5454,19 @@ export type TelemetryViewServiceRunDataViewData = {
     url: '/v1/telemetry/data-views/{name}:run';
 };
 
+export type TelemetryViewServiceRunDataViewErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type TelemetryViewServiceRunDataViewError = TelemetryViewServiceRunDataViewErrors[keyof TelemetryViewServiceRunDataViewErrors];
+
 export type TelemetryViewServiceRunDataViewResponses = {
     /**
      * OK
@@ -3036,6 +5482,19 @@ export type EgressPolicyServiceGetTenantEgressPolicyData = {
     query?: never;
     url: '/v1/tenant/egress-policy';
 };
+
+export type EgressPolicyServiceGetTenantEgressPolicyErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceGetTenantEgressPolicyError = EgressPolicyServiceGetTenantEgressPolicyErrors[keyof EgressPolicyServiceGetTenantEgressPolicyErrors];
 
 export type EgressPolicyServiceGetTenantEgressPolicyResponses = {
     /**
@@ -3053,6 +5512,19 @@ export type EgressPolicyServiceSetTenantEgressPolicyData = {
     url: '/v1/tenant/egress-policy';
 };
 
+export type EgressPolicyServiceSetTenantEgressPolicyErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceSetTenantEgressPolicyError = EgressPolicyServiceSetTenantEgressPolicyErrors[keyof EgressPolicyServiceSetTenantEgressPolicyErrors];
+
 export type EgressPolicyServiceSetTenantEgressPolicyResponses = {
     /**
      * OK
@@ -3062,6 +5534,156 @@ export type EgressPolicyServiceSetTenantEgressPolicyResponses = {
 
 export type EgressPolicyServiceSetTenantEgressPolicyResponse = EgressPolicyServiceSetTenantEgressPolicyResponses[keyof EgressPolicyServiceSetTenantEgressPolicyResponses];
 
+export type EgressPolicyServicePreviewBaselineImpactData = {
+    body: PreviewBaselineImpactRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/tenant/egress-policy/baseline-impact';
+};
+
+export type EgressPolicyServicePreviewBaselineImpactErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServicePreviewBaselineImpactError = EgressPolicyServicePreviewBaselineImpactErrors[keyof EgressPolicyServicePreviewBaselineImpactErrors];
+
+export type EgressPolicyServicePreviewBaselineImpactResponses = {
+    /**
+     * OK
+     */
+    200: PreviewBaselineImpactResponse;
+};
+
+export type EgressPolicyServicePreviewBaselineImpactResponse = EgressPolicyServicePreviewBaselineImpactResponses[keyof EgressPolicyServicePreviewBaselineImpactResponses];
+
+export type EgressPolicyServiceDeleteEgressPolicyBindingData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The selector of the binding to delete. NOT_FOUND if no binding with this selector exists.
+         */
+        selector?: string;
+    };
+    url: '/v1/tenant/egress-policy/bindings';
+};
+
+export type EgressPolicyServiceDeleteEgressPolicyBindingErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceDeleteEgressPolicyBindingError = EgressPolicyServiceDeleteEgressPolicyBindingErrors[keyof EgressPolicyServiceDeleteEgressPolicyBindingErrors];
+
+export type EgressPolicyServiceDeleteEgressPolicyBindingResponses = {
+    /**
+     * OK
+     */
+    200: DeleteEgressPolicyBindingResponse;
+};
+
+export type EgressPolicyServiceDeleteEgressPolicyBindingResponse = EgressPolicyServiceDeleteEgressPolicyBindingResponses[keyof EgressPolicyServiceDeleteEgressPolicyBindingResponses];
+
+export type EgressPolicyServiceListEgressPolicyBindingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/tenant/egress-policy/bindings';
+};
+
+export type EgressPolicyServiceListEgressPolicyBindingsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceListEgressPolicyBindingsError = EgressPolicyServiceListEgressPolicyBindingsErrors[keyof EgressPolicyServiceListEgressPolicyBindingsErrors];
+
+export type EgressPolicyServiceListEgressPolicyBindingsResponses = {
+    /**
+     * OK
+     */
+    200: ListEgressPolicyBindingsResponse;
+};
+
+export type EgressPolicyServiceListEgressPolicyBindingsResponse = EgressPolicyServiceListEgressPolicyBindingsResponses[keyof EgressPolicyServiceListEgressPolicyBindingsResponses];
+
+export type EgressPolicyServiceSetEgressPolicyBindingData = {
+    body: SetEgressPolicyBindingRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/tenant/egress-policy/bindings';
+};
+
+export type EgressPolicyServiceSetEgressPolicyBindingErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceSetEgressPolicyBindingError = EgressPolicyServiceSetEgressPolicyBindingErrors[keyof EgressPolicyServiceSetEgressPolicyBindingErrors];
+
+export type EgressPolicyServiceSetEgressPolicyBindingResponses = {
+    /**
+     * OK
+     */
+    200: SetEgressPolicyBindingResponse;
+};
+
+export type EgressPolicyServiceSetEgressPolicyBindingResponse = EgressPolicyServiceSetEgressPolicyBindingResponses[keyof EgressPolicyServiceSetEgressPolicyBindingResponses];
+
+export type EgressPolicyServiceResolveEffectiveEgressData = {
+    body: ResolveEffectiveEgressRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/tenant/egress-policy/effective';
+};
+
+export type EgressPolicyServiceResolveEffectiveEgressErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type EgressPolicyServiceResolveEffectiveEgressError = EgressPolicyServiceResolveEffectiveEgressErrors[keyof EgressPolicyServiceResolveEffectiveEgressErrors];
+
+export type EgressPolicyServiceResolveEffectiveEgressResponses = {
+    /**
+     * OK
+     */
+    200: ResolveEffectiveEgressResponse;
+};
+
+export type EgressPolicyServiceResolveEffectiveEgressResponse = EgressPolicyServiceResolveEffectiveEgressResponses[keyof EgressPolicyServiceResolveEffectiveEgressResponses];
+
 export type UsageServiceGetUsageSeriesData = {
     body?: never;
     path?: never;
@@ -3069,24 +5691,37 @@ export type UsageServiceGetUsageSeriesData = {
         /**
          * Optional project filter. Empty aggregates across all of the caller's projects.
          */
-        projectId?: string;
+        project_id?: string;
         /**
          * Window start (RFC 3339). Empty defaults to 24 hours before the end.
          */
-        startTime?: string;
+        start_time?: string;
         /**
          * Window end (RFC 3339). Empty defaults to now.
          */
-        endTime?: string;
+        end_time?: string;
         /**
          * Bucket width in seconds. 0 defaults to 3600 (one hour); the server clamps to [60, 86400]. At most
          * 5000 buckets are returned; for a window that would exceed that, the server keeps the most recent
          * 5000 buckets (widen the bucket for a longer window).
          */
-        bucketSeconds?: string;
+        bucket_seconds?: string;
     };
     url: '/v1/usage/series';
 };
+
+export type UsageServiceGetUsageSeriesErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type UsageServiceGetUsageSeriesError = UsageServiceGetUsageSeriesErrors[keyof UsageServiceGetUsageSeriesErrors];
 
 export type UsageServiceGetUsageSeriesResponses = {
     /**
@@ -3104,10 +5739,23 @@ export type UsageServiceGetUsageSnapshotData = {
         /**
          * Optional project filter. Empty aggregates across all of the caller's projects.
          */
-        projectId?: string;
+        project_id?: string;
     };
     url: '/v1/usage/snapshot';
 };
+
+export type UsageServiceGetUsageSnapshotErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type UsageServiceGetUsageSnapshotError = UsageServiceGetUsageSnapshotErrors[keyof UsageServiceGetUsageSnapshotErrors];
 
 export type UsageServiceGetUsageSnapshotResponses = {
     /**
@@ -3118,12 +5766,369 @@ export type UsageServiceGetUsageSnapshotResponses = {
 
 export type UsageServiceGetUsageSnapshotResponse = UsageServiceGetUsageSnapshotResponses[keyof UsageServiceGetUsageSnapshotResponses];
 
+export type VolumeServiceListVolumesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The maximum number of volumes to return. The server caps and defaults this; 0 means "use the
+         * server default".
+         */
+        page_size?: number;
+        /**
+         * An opaque page token from a previous response's next_page_token. Empty for the first page.
+         */
+        page_token?: string;
+        /**
+         * Optional project filter. Empty returns volumes across all of the caller's projects.
+         */
+        project_id?: string;
+    };
+    url: '/v1/volumes';
+};
+
+export type VolumeServiceListVolumesErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceListVolumesError = VolumeServiceListVolumesErrors[keyof VolumeServiceListVolumesErrors];
+
+export type VolumeServiceListVolumesResponses = {
+    /**
+     * OK
+     */
+    200: ListVolumesResponse;
+};
+
+export type VolumeServiceListVolumesResponse = VolumeServiceListVolumesResponses[keyof VolumeServiceListVolumesResponses];
+
+export type VolumeServiceCreateVolumeData = {
+    body: CreateVolumeRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/volumes';
+};
+
+export type VolumeServiceCreateVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceCreateVolumeError = VolumeServiceCreateVolumeErrors[keyof VolumeServiceCreateVolumeErrors];
+
+export type VolumeServiceCreateVolumeResponses = {
+    /**
+     * OK
+     */
+    200: CreateVolumeResponse;
+};
+
+export type VolumeServiceCreateVolumeResponse = VolumeServiceCreateVolumeResponses[keyof VolumeServiceCreateVolumeResponses];
+
+export type VolumeServiceDetachVolumeData = {
+    body: DetachVolumeRequest;
+    path: {
+        /**
+         * The attachment id from AttachVolume (or a create-time attach).
+         */
+        attachment_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/attachments/{attachment_id}:detach';
+};
+
+export type VolumeServiceDetachVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceDetachVolumeError = VolumeServiceDetachVolumeErrors[keyof VolumeServiceDetachVolumeErrors];
+
+export type VolumeServiceDetachVolumeResponses = {
+    /**
+     * OK
+     */
+    200: DetachVolumeResponse;
+};
+
+export type VolumeServiceDetachVolumeResponse = VolumeServiceDetachVolumeResponses[keyof VolumeServiceDetachVolumeResponses];
+
+export type VolumeServiceDeleteVolumeData = {
+    body?: never;
+    path: {
+        /**
+         * The volume id to delete.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{id}';
+};
+
+export type VolumeServiceDeleteVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceDeleteVolumeError = VolumeServiceDeleteVolumeErrors[keyof VolumeServiceDeleteVolumeErrors];
+
+export type VolumeServiceDeleteVolumeResponses = {
+    /**
+     * OK
+     */
+    200: DeleteVolumeResponse;
+};
+
+export type VolumeServiceDeleteVolumeResponse = VolumeServiceDeleteVolumeResponses[keyof VolumeServiceDeleteVolumeResponses];
+
+export type VolumeServiceGetVolumeData = {
+    body?: never;
+    path: {
+        /**
+         * The volume id to fetch.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{id}';
+};
+
+export type VolumeServiceGetVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceGetVolumeError = VolumeServiceGetVolumeErrors[keyof VolumeServiceGetVolumeErrors];
+
+export type VolumeServiceGetVolumeResponses = {
+    /**
+     * OK
+     */
+    200: GetVolumeResponse;
+};
+
+export type VolumeServiceGetVolumeResponse = VolumeServiceGetVolumeResponses[keyof VolumeServiceGetVolumeResponses];
+
+export type VolumeServiceAttachVolumeData = {
+    body: AttachVolumeRequest;
+    path: {
+        /**
+         * The volume to attach, by id, within the caller's tenant.
+         */
+        volume_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{volume_id}:attach';
+};
+
+export type VolumeServiceAttachVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceAttachVolumeError = VolumeServiceAttachVolumeErrors[keyof VolumeServiceAttachVolumeErrors];
+
+export type VolumeServiceAttachVolumeResponses = {
+    /**
+     * OK
+     */
+    200: AttachVolumeResponse;
+};
+
+export type VolumeServiceAttachVolumeResponse = VolumeServiceAttachVolumeResponses[keyof VolumeServiceAttachVolumeResponses];
+
+export type VolumeServicePrefetchVolumeData = {
+    body: PrefetchVolumeRequest;
+    path: {
+        /**
+         * The volume whose content to pre-warm, by id, within the caller's tenant.
+         */
+        volume_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{volume_id}:prefetch';
+};
+
+export type VolumeServicePrefetchVolumeErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServicePrefetchVolumeError = VolumeServicePrefetchVolumeErrors[keyof VolumeServicePrefetchVolumeErrors];
+
+export type VolumeServicePrefetchVolumeResponses = {
+    /**
+     * OK
+     */
+    200: PrefetchVolumeResponse;
+};
+
+export type VolumeServicePrefetchVolumeResponse = VolumeServicePrefetchVolumeResponses[keyof VolumeServicePrefetchVolumeResponses];
+
+export type VolumeServicePublishVolumeVersionData = {
+    body: PublishVolumeVersionRequest;
+    path: {
+        /**
+         * The volume to publish the version on.
+         */
+        volume_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{volume_id}:publish';
+};
+
+export type VolumeServicePublishVolumeVersionErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServicePublishVolumeVersionError = VolumeServicePublishVolumeVersionErrors[keyof VolumeServicePublishVolumeVersionErrors];
+
+export type VolumeServicePublishVolumeVersionResponses = {
+    /**
+     * OK
+     */
+    200: PublishVolumeVersionResponse;
+};
+
+export type VolumeServicePublishVolumeVersionResponse = VolumeServicePublishVolumeVersionResponses[keyof VolumeServicePublishVolumeVersionResponses];
+
+export type VolumeServiceRequestVolumeBlobUploadsData = {
+    body: RequestVolumeBlobUploadsRequest;
+    path: {
+        /**
+         * The volume the blobs are being pushed for.
+         */
+        volume_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{volume_id}:request-blob-uploads';
+};
+
+export type VolumeServiceRequestVolumeBlobUploadsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceRequestVolumeBlobUploadsError = VolumeServiceRequestVolumeBlobUploadsErrors[keyof VolumeServiceRequestVolumeBlobUploadsErrors];
+
+export type VolumeServiceRequestVolumeBlobUploadsResponses = {
+    /**
+     * OK
+     */
+    200: RequestVolumeBlobUploadsResponse;
+};
+
+export type VolumeServiceRequestVolumeBlobUploadsResponse = VolumeServiceRequestVolumeBlobUploadsResponses[keyof VolumeServiceRequestVolumeBlobUploadsResponses];
+
+export type VolumeServiceStartVolumePushData = {
+    body: StartVolumePushRequest;
+    path: {
+        /**
+         * The volume to push a new version to.
+         */
+        volume_id: string;
+    };
+    query?: never;
+    url: '/v1/volumes/{volume_id}:start-push';
+};
+
+export type VolumeServiceStartVolumePushErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type VolumeServiceStartVolumePushError = VolumeServiceStartVolumePushErrors[keyof VolumeServiceStartVolumePushErrors];
+
+export type VolumeServiceStartVolumePushResponses = {
+    /**
+     * OK
+     */
+    200: StartVolumePushResponse;
+};
+
+export type VolumeServiceStartVolumePushResponse = VolumeServiceStartVolumePushResponses[keyof VolumeServiceStartVolumePushResponses];
+
 export type IdentityServiceWhoAmIData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/v1/whoami';
 };
+
+export type IdentityServiceWhoAmIErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type IdentityServiceWhoAmIError = IdentityServiceWhoAmIErrors[keyof IdentityServiceWhoAmIErrors];
 
 export type IdentityServiceWhoAmIResponses = {
     /**
@@ -3133,3 +6138,163 @@ export type IdentityServiceWhoAmIResponses = {
 };
 
 export type IdentityServiceWhoAmIResponse = IdentityServiceWhoAmIResponses[keyof IdentityServiceWhoAmIResponses];
+
+export type WorkloadServiceListWorkloadsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/workloads';
+};
+
+export type WorkloadServiceListWorkloadsErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type WorkloadServiceListWorkloadsError = WorkloadServiceListWorkloadsErrors[keyof WorkloadServiceListWorkloadsErrors];
+
+export type WorkloadServiceListWorkloadsResponses = {
+    /**
+     * OK
+     */
+    200: ListWorkloadsResponse;
+};
+
+export type WorkloadServiceListWorkloadsResponse = WorkloadServiceListWorkloadsResponses[keyof WorkloadServiceListWorkloadsResponses];
+
+export type WorkloadServiceCreateWorkloadData = {
+    body: CreateWorkloadRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/workloads';
+};
+
+export type WorkloadServiceCreateWorkloadErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type WorkloadServiceCreateWorkloadError = WorkloadServiceCreateWorkloadErrors[keyof WorkloadServiceCreateWorkloadErrors];
+
+export type WorkloadServiceCreateWorkloadResponses = {
+    /**
+     * OK
+     */
+    200: CreateWorkloadResponse;
+};
+
+export type WorkloadServiceCreateWorkloadResponse = WorkloadServiceCreateWorkloadResponses[keyof WorkloadServiceCreateWorkloadResponses];
+
+export type WorkloadServiceDeleteWorkloadData = {
+    body?: never;
+    path: {
+        /**
+         * The registered workload name to delete.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/workloads/{name}';
+};
+
+export type WorkloadServiceDeleteWorkloadErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type WorkloadServiceDeleteWorkloadError = WorkloadServiceDeleteWorkloadErrors[keyof WorkloadServiceDeleteWorkloadErrors];
+
+export type WorkloadServiceDeleteWorkloadResponses = {
+    /**
+     * OK
+     */
+    200: DeleteWorkloadResponse;
+};
+
+export type WorkloadServiceDeleteWorkloadResponse = WorkloadServiceDeleteWorkloadResponses[keyof WorkloadServiceDeleteWorkloadResponses];
+
+export type WorkloadServiceGetWorkloadData = {
+    body?: never;
+    path: {
+        /**
+         * The registered workload name.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/workloads/{name}';
+};
+
+export type WorkloadServiceGetWorkloadErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type WorkloadServiceGetWorkloadError = WorkloadServiceGetWorkloadErrors[keyof WorkloadServiceGetWorkloadErrors];
+
+export type WorkloadServiceGetWorkloadResponses = {
+    /**
+     * OK
+     */
+    200: GetWorkloadResponse;
+};
+
+export type WorkloadServiceGetWorkloadResponse = WorkloadServiceGetWorkloadResponses[keyof WorkloadServiceGetWorkloadResponses];
+
+export type WorkloadServiceSetWorkloadLaunchAclData = {
+    body: SetWorkloadLaunchAclRequest;
+    path: {
+        /**
+         * The registered workload name.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/workloads/{name}/launch-acl';
+};
+
+export type WorkloadServiceSetWorkloadLaunchAclErrors = {
+    /**
+     * The request was rejected by a per-tenant limit. The body code distinguishes quota_exceeded (an occupancy or storage limit is full — retry after capacity frees) from rate_limited (requests are arriving too fast — retry after the delay), and details.quota names the limit. A rejection from the edge's coarse pre-credential throttle may arrive with an empty body.
+     */
+    429: ErrorBody;
+    /**
+     * An error. Every hiloop API error uses the same envelope — branch on its stable code field, not the message text. A rejection at the platform edge before a body exists (for example a denied credential) may arrive with an empty body.
+     */
+    default: ErrorBody;
+};
+
+export type WorkloadServiceSetWorkloadLaunchAclError = WorkloadServiceSetWorkloadLaunchAclErrors[keyof WorkloadServiceSetWorkloadLaunchAclErrors];
+
+export type WorkloadServiceSetWorkloadLaunchAclResponses = {
+    /**
+     * OK
+     */
+    200: SetWorkloadLaunchAclResponse;
+};
+
+export type WorkloadServiceSetWorkloadLaunchAclResponse = WorkloadServiceSetWorkloadLaunchAclResponses[keyof WorkloadServiceSetWorkloadLaunchAclResponses];
